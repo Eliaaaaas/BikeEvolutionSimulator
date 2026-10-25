@@ -198,7 +198,8 @@ test("large balances and training are finite and bounded", function()
  local n = modules.Numbers
  equal(n.multiply(1e300, 1e300), 1e300); equal(n.add(1e300, 1e300), 1e300)
  equal(n.multiply(0, 1e300), 0)
- equal(Rules.trainingGain(1e300, 1e300), 1e300)
+ equal(Rules.trainingGain(Config.Numbers.MaxRebirths, 1e300), 1e300)
+ assert(not pcall(Rules.trainingGain, 1e300, 1))
  assert(not pcall(n.multiply, 0/0, 1)); assert(not pcall(n.add, math.huge, 1))
  local data = Profile.new(); data.Energy = Catalog.Treadmills[40].EnergyRequirement
  assert(Profile.validate(data)); assert(Rules.canUseTreadmill(40, data.Energy, 0, {1,8}))
@@ -254,4 +255,61 @@ test("recovery never retries a stolen lease", function()
  function() return 1000 end,function() error("unexpected retry") end,function() end)
  assert(not ok);equal(reason,"SessionLost");equal(store.records.p.Lock.Id,"b")
 end)
-print(string.format("%d tests passed", passed))
+test("one numeric authority and exact rebirth boundary roundtrips", function()
+ local n = modules.Numbers
+ equal(Config.Numbers.MaxBalance, n.Max); equal(Config.Numbers.MaxRebirths, n.MaxRebirths)
+ local store,backend=fixture()
+ for i,value in ipairs({0,1,1e9,n.MaxRebirths-1,n.MaxRebirths}) do
+  local a=backend("boundary-a"..i); local data=a:load(tostring(i));data.Rebirths=value
+  assert(Profile.validate(data)); assert(n.validRebirth(value))
+  assert(a:save(tostring(i),data,true))
+  equal(backend("boundary-b"..i):load(tostring(i)).Rebirths,value)
+  assert(Rules.trainingGain(value) < math.huge)
+  assert(Rules.rebirthRequirement(value) < math.huge)
+ end
+ local result=Rules.rebirth(Rules.rebirthRequirement(n.MaxRebirths-1),n.MaxRebirths-1)
+ equal(result.Rebirths,n.MaxRebirths)
+ local data=Profile.new();data.Rebirths=result.Rebirths;assert(Profile.validate(data))
+ equal(Rules.rebirth(1e300,n.MaxRebirths),nil)
+end)
+test("invalid rebirth values rejected by profile and every rule entry", function()
+ for _,value in ipairs({-1,0.5,modules.Numbers.MaxRebirths+1,1e300,math.huge,0/0}) do
+  local data=Profile.new();data.Rebirths=value
+  assert(not Profile.validate(data));assert(not modules.Numbers.validRebirth(value))
+  assert(not pcall(Rules.trainingGain,value));assert(not pcall(Rules.rebirthRequirement,value))
+  equal(Rules.rebirth(1e300,value),nil)
+  assert(not Rules.canUseTreadmill(1,0,value,{1}))
+ end
+end)
+test("release acknowledgement survives an entire failed retry batch", function()
+ local store,backend=fixture();local a=backend("a");local data=a:load("p");data.Cash=710
+ local original=store.UpdateAsync;local remaining=3
+ function store:UpdateAsync(key,callback)
+  local result=original(self,key,callback)
+  if remaining>0 then remaining-=1;error("committed but acknowledgement lost") end
+  return result
+ end
+ assert(not a:save("p",data,true));equal(store.records.p.Data.Cash,710)
+ assert(a:save("p",data,true));equal(store.records.p.Data.Cash,710)
+ equal(backend("rejoin"):load("p").Cash,710)
+end)
+test("rejoin after lost release cannot be overwritten by old retry", function()
+ local store,backend=fixture();local a=backend("a");local data=a:load("p");data.Cash=710
+ local original=store.UpdateAsync;local remaining=3
+ function store:UpdateAsync(key,callback)
+  local result=original(self,key,callback)
+  if remaining>0 then remaining-=1;error("lost acknowledgement") end
+  return result
+ end
+ assert(not a:save("p",data,true))
+ local b=backend("b");local fresh=b:load("p");fresh.Cash=999;assert(b:save("p",fresh,false))
+ assert(not a:save("p",data,true));equal(store.records.p.Data.Cash,999);equal(store.records.p.Lock.Id,"b")
+end)
+test("disconnect recovery observes a shutdown deadline set during retry", function()
+ local store,backend,setTime=fixture();local a=backend("a");local data=a:load("p")
+ local now,deadline=1000,math.huge;store.failures=100
+ local ok,reason=modules.SavePolicy.flush({Data=data,Backend=a,Expires=1180},"p",true,function() return deadline end,
+  function() return now end,function() deadline=1003;now+=2;setTime(now) end,function() end)
+ assert(not ok);equal(reason,"DeadlineExceeded");equal(now,1004)
+end)
+print(string.format("%d rule/persistence tests passed", passed))

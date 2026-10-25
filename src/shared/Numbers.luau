@@ -1,8 +1,12 @@
 --!strict
 local Numbers = {}
 Numbers.Max = 1e300
+Numbers.MaxRebirths = 9007199254740991 -- largest consecutive safe integer (2^53 - 1)
 function Numbers.valid(value: number): boolean
  return value == value and value >= 0 and value <= Numbers.Max
+end
+function Numbers.validRebirth(value: number): boolean
+ return Numbers.valid(value) and value <= Numbers.MaxRebirths and value % 1 == 0
 end
 function Numbers.multiply(a: number, b: number): number
  assert(Numbers.valid(a) and Numbers.valid(b), "Invalid numeric operand")

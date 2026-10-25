@@ -4,7 +4,7 @@ local Persistence: any = {}
 Persistence.__index = Persistence
 function Persistence.new(store: any, profile: any, settings: any, sessionId: string, clock: () -> number, waitRetry: (number) -> (), log: ((any) -> ())?): any
  return setmetatable({ store = store, profile = profile, settings = settings,
-  sessionId = sessionId, clock = clock, waitRetry = waitRetry, log = log or function() end, sequence = 0 }, Persistence)
+  sessionId = sessionId, clock = clock, waitRetry = waitRetry, log = log or function() end, sequence = 0, releases = {} }, Persistence)
 end
 function Persistence.update(self: any, key: string, transform: (any) -> any): (boolean, any)
  local lastError
@@ -36,8 +36,10 @@ end
 function Persistence.save(self: any, key: string, data: any, release: boolean): (boolean, string?, number?)
  if not self.profile.validate(data) then return false, "InvalidProfile", nil end
  self.sequence += 1
- local writeId = self.sessionId .. ":" .. tostring(self.sequence)
- local snapshot = self.profile.copy(data)
+ local pending = if release then self.releases[key] else nil
+ local writeId = if pending then pending.WriteId else self.sessionId .. ":" .. tostring(self.sequence)
+ local snapshot = if pending then pending.Data else self.profile.copy(data)
+ if release then self.releases[key] = { WriteId = writeId, Data = snapshot } end
  local ok, result = self:update(key, function(old: any): any
   -- A committed release whose response was lost is safe to acknowledge again.
   if release and type(old) == "table" and old.WriteId == writeId and old.Lock == nil then return old end
@@ -46,6 +48,7 @@ function Persistence.save(self: any, key: string, data: any, release: boolean): 
   return { Data = snapshot, WriteId = writeId, Lock = if release then nil else { Id = self.sessionId, Expires = self.clock() + self.settings.LeaseSeconds } }
  end)
  if not ok then return false, "DataStoreUnavailable", nil end
+ if release then self.releases[key] = nil end
  if result == nil then return false, "SessionLost", nil end
  return true, nil, if release then 0 else result.Lock.Expires
 end

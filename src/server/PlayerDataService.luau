@@ -29,7 +29,7 @@ local function save(player: Player, release: boolean)
  if session.Saving then return end
  if sessions[player] ~= session then return end
  session.Saving = true
- local ok, reason = SavePolicy.flush(session, key(player), release, shutdownDeadline, os.time,
+ local ok, reason = SavePolicy.flush(session, key(player), release, function() return shutdownDeadline end, os.time,
   function() task.wait(2) end, log)
  session.Saving = false
  if ok and release or not ok and reason ~= "DataStoreUnavailable" then
@@ -60,7 +60,7 @@ function Service.start()
   end
   if closing or player.Parent ~= Players then
    local orphan = { Data = data, Expires = expires, Backend = backend }
-   SavePolicy.flush(orphan, key(player), true, shutdownDeadline, os.time, function() task.wait(2) end, log)
+   SavePolicy.flush(orphan, key(player), true, function() return shutdownDeadline end, os.time, function() task.wait(2) end, log)
    loading -= 1
    return
   end

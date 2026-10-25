@@ -1,5 +1,6 @@
 --!strict
 local Config = require(script.Parent.Config)
+local Numbers = require(script.Parent.Numbers)
 local Profile = {}
 export type Snapshot = { Energy: number, Cash: number, Rebirths: number }
 export type Pet = { SpeciesId: number, Variant: string }
@@ -26,7 +27,7 @@ function Profile.new(): Data
 end
 function Profile.validate(data: any): boolean
  if type(data) ~= "table" or data.SchemaVersion ~= Config.Data.SchemaVersion then return false end
- if not numberIn(data.Energy, Config.Numbers.MaxBalance, false) or not numberIn(data.Cash, Config.Numbers.MaxBalance, false) or not numberIn(data.Rebirths, Config.Numbers.MaxRebirths, true) then return false end
+ if not numberIn(data.Energy, Config.Numbers.MaxBalance, false) or not numberIn(data.Cash, Config.Numbers.MaxBalance, false) or (type(data.Rebirths) ~= "number" or not Numbers.validRebirth(data.Rebirths)) then return false end
  if not arrayValid(data.OwnedWorlds, 8, function(id: any) return numberIn(id, 8, true) and id >= 1 end) then return false end
  if not arrayValid(data.OwnedVehicles, 40, function(id: any) return numberIn(id, 40, true) and id >= 1 end) then return false end
  if not table.find(data.OwnedWorlds, 1) or not table.find(data.OwnedVehicles, 1) or type(data.Pets) ~= "table" then return false end
