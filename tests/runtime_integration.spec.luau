@@ -46,6 +46,7 @@ test("real bootstraps publish readiness, create remotes and connect actual UI",f
  assert(e.Data.status(e.Player)=="StudioPreviewReady" and e.StoreCalls==0)
  assert(e.UI and e.UI.Gui and e.UI.Gui.Parent==e.Player.PlayerGui and e.UI.Snapshot.Energy==0)
  assert(e.Rep.BikeRemotes.GetSnapshot.OnServerInvoke)
+ assert(string.find(e.Player.PlayerGui.BikeDiagnostics:FindFirstChildOfClass("TextLabel").Text,"Spielerdaten und Remotes bereit",1,true))
  for _,name in ipairs({"Action","ActionResult","SnapshotChanged","Feedback"}) do assert(e.Rep.BikeRemotes:FindFirstChild(name):IsA("RemoteEvent")) end
  e.UI.Buttons.Garage.Activated:Fire();assert(e.UI.Viewport and e.UI.Viewport.Frame.CurrentCamera)
  assert(#e.UI.Viewport.Frame:FindFirstChildOfClass("WorldModel"):GetChildren()==1)

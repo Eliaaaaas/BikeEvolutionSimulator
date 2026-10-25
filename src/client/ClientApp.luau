@@ -53,9 +53,12 @@ local function render(data:any):boolean
  if not merged then return false end
  data=merged
  requestId=math.max(requestId,data.LastRequestId or 0)
- local progress=Presentation.training(data).Ratio
- if snapshot and progress>=1 and lastProgress<1 then audio.play("Unlock") end
- lastProgress=progress;snapshot=data;ui.update(data);return true
+ local first=snapshot==nil
+ local ratio=Presentation.training(data).Ratio
+ if snapshot and ratio>=1 and lastProgress<1 then audio.play("Unlock") end
+ lastProgress=ratio;snapshot=data;ui.update(data)
+ if first then progress("Spielerdaten und Remotes bereit") end
+ return true
 end
 local snapshotEvent=remotes:WaitForChild("SnapshotChanged") :: RemoteEvent
 snapshotEvent.OnClientEvent:Connect(render)
@@ -86,7 +89,7 @@ task.spawn(function()
  while not snapshot do
   local ok,response=pcall(function() return snapshotRemote:InvokeServer({Version=1}) end)
   if ok and type(response)=="table" and response.Ok then
-   if render(response.Data) then progress("Spielerdaten und Remotes bereit") end
+   render(response.Data)
   elseif not snapshot then
    ui.message("Ladeprofil: "..(if ok and type(response)=="table" then tostring(response.Error) else "Server nicht erreichbar"))
   end
