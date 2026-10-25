@@ -36,7 +36,7 @@ end
 -- No world argument: vehicle ownership is independent of world progress.
 function Rules.canBuyVehicle(cash: number, vehicleId: number, owned: {number}): boolean
  return vehicleId % 1 == 0 and vehicleId >= 1 and vehicleId <= Config.Rules.VehicleCount
-  and not table.find(owned, vehicleId) and cash >= Config.Economy.VehicleBaseCash * (vehicleId - 1)
+  and not table.find(owned, vehicleId) and cash >= Catalog.Vehicles[vehicleId].CashCost
 end
 function Rules.fusion(pets: {[string]: {SpeciesId: number, Variant: string}}, ids: {string}): { SpeciesId: number, Variant: string }?
  if #ids == 0 then return nil end

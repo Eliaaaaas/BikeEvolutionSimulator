@@ -1,7 +1,7 @@
 --!strict
 local Numbers = require(script.Parent.Numbers)
 local Config = {
- Data = { Store = "BikeEvolution_Player_v1", SchemaVersion = 1, AutosaveSeconds = 60,
+ Data = { Store = "BikeEvolution_Player_v1", SchemaVersion = 2, AutosaveSeconds = 60,
   LeaseSeconds = 180, Attempts = 3, MaxPets = 500 },
  Rules = { WorldCount = 8, VehicleCount = 40, TreadmillCount = 40, TreadmillsPerWorld = 5,
   EggCount = 24, PetSpeciesCount = 96, EquipSlots = 3, BaseTraining = 1,

@@ -22,7 +22,7 @@ test("progress and rebirth preview use current thresholds and permanent bonus",f
  s.Energy=0;assert(not modules.Presentation.rebirth(s).Allowed)
 end)
 test("starting Mountainbike stays free and owned in schema v1",function()
- local data=modules.Profile.new();assert(data.SchemaVersion==1 and table.find(data.OwnedVehicles,1))
+ local data=modules.Profile.new();assert(data.SchemaVersion==modules.Config.Data.SchemaVersion and table.find(data.OwnedVehicles,1))
  assert(modules.Catalog.Vehicles[1].Name=="Mountainbike" and modules.Catalog.Vehicles[1].CashCost==0)
 end)
 test("800-stud guide is finite, smooth and outside the main island",function()
@@ -104,6 +104,6 @@ test("all session toggles change immediately without touching a profile",functio
   assert(modules.ClientState.setting(state,name,false));assert(state[name]==false)
   assert(modules.ClientState.setting(state,name,true));assert(state[name]==true)
  end
- assert(profile.Energy==0 and profile.Rebirths==0 and profile.SchemaVersion==1)
+ assert(profile.Energy==0 and profile.Rebirths==0 and profile.SchemaVersion==modules.Config.Data.SchemaVersion)
 end)
 print(string.format("%d Phase 2.1 tests passed",count))

@@ -21,13 +21,15 @@ function Persistence.load(self: any, key: string): (any, string?, number?)
  local ok, record = self:update(key, function(old: any): any
   if old == nil then old = { Data = self.profile.new() } end
   -- Reject corrupt/future schemas; never silently replace existing data with defaults.
-  if type(old) ~= "table" or not self.profile.validate(old.Data) then return nil end
+  if type(old) ~= "table" then return nil end
+  local migrated=self.profile.migrate(old.Data)
+  if not migrated then return nil end
   if old.Lock ~= nil then
    if type(old.Lock) ~= "table" or type(old.Lock.Id) ~= "string" or type(old.Lock.Expires) ~= "number"
     or old.Lock.Expires ~= old.Lock.Expires or old.Lock.Expires == math.huge or old.Lock.Expires < 0 then return nil end
    if old.Lock.Id ~= self.sessionId and old.Lock.Expires > self.clock() then return nil end
   end
-  return { Data = self.profile.copy(old.Data), Lock = { Id = self.sessionId, Expires = self.clock() + self.settings.LeaseSeconds } }
+  return { Data = self.profile.copy(migrated), Lock = { Id = self.sessionId, Expires = self.clock() + self.settings.LeaseSeconds } }
  end)
  if not ok then return nil, "DataStoreUnavailable" end
  if type(record) ~= "table" or not record.Lock or record.Lock.Id ~= self.sessionId then return nil, "LockedOrInvalidProfile" end

@@ -11,7 +11,7 @@ LUAU = os.environ.get('LUAU_BIN', str(ROOT / '.tools/luau'))
 COMPILER = os.environ.get('LUAU_COMPILE_BIN', str(ROOT / '.tools/luau-compile'))
 for source in sorted((ROOT / 'src').rglob('*.luau')):
     subprocess.run([COMPILER, '--binary', str(source)], stdout=subprocess.DEVNULL, check=True)
-modules = ['Numbers', 'Config', 'CatalogMetadata', 'Catalog', 'Rules', 'Profile', 'Protocol', 'Persistence', 'SavePolicy', 'TrainingController', 'RateLimiter', 'Format', 'Presentation', 'ClientState', 'CourseData', 'RaceCourse', 'RaceController']
+modules = ['Numbers', 'Config', 'CatalogMetadata', 'World1Content', 'Catalog', 'Rules', 'Profile', 'Protocol', 'Persistence', 'SavePolicy', 'PetRules', 'EconomyController', 'TrainingController', 'RateLimiter', 'Format', 'Presentation', 'ClientState', 'CourseData', 'RaceCourse', 'RaceController']
 bundle = ['--!strict\nlocal modules: any = {}']
 for name in modules:
     folder = 'server' if name in ('Persistence', 'SavePolicy') else 'shared'
@@ -35,6 +35,7 @@ bundle.append((ROOT / 'tests/rules.spec.luau').read_text())
 bundle.append((ROOT / 'tests/lifecycle.spec.luau').read_text())
 bundle.append((ROOT / 'tests/training.spec.luau').read_text())
 bundle.append((ROOT / 'tests/phase21.spec.luau').read_text())
+bundle.append((ROOT / 'tests/world1.spec.luau').read_text())
 bundle.append((ROOT / 'tests/race_lifecycle.spec.luau').read_text())
 with tempfile.TemporaryDirectory(prefix='bike-tests-') as directory:
     analysis_file = Path(directory) / 'production.luau'

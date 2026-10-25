@@ -63,6 +63,11 @@ function Service.change(player: Player, transform: (Profile.Data) -> boolean): (
  session.Revision += 1
  return true, nil
 end
+function Service.read(player: Player): Profile.Data?
+ local session=sessions[player]
+ if closing or not session or session.Closing or session.Expires<=os.time() then return nil end
+ return Profile.copy(session.Data)
+end
 function Service.ownsVehicle(player: Player, id: number): boolean
  local session=sessions[player]
  return not closing and session~=nil and not session.Closing and session.Expires>os.time() and table.find(session.Data.OwnedVehicles,id)~=nil

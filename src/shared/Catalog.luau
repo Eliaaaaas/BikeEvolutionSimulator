@@ -1,6 +1,7 @@
 --!strict
 local Config = require(script.Parent.Config)
 local Numbers = require(script.Parent.Numbers)
+local Content = require(script.Parent.World1Content)
 local Metadata = require(script.Parent.CatalogMetadata)
 local Catalog: { Worlds: {any}, Vehicles: {any}, Treadmills: {any}, Eggs: {any}, Pets: {any} } = { Worlds = {}, Vehicles = {}, Treadmills = {}, Eggs = {}, Pets = {} }
 local function vehicleClass(id: number): string
@@ -36,6 +37,16 @@ for _, group in ipairs({ {Items=Catalog.Vehicles,Metadata=Metadata.Vehicles}, {I
   for key, value in pairs(Metadata.resolve(group.Metadata[id])) do enriched[key] = value end
   group.Items[id] = table.freeze(enriched)
  end
+end
+for id, content in ipairs(Content.Vehicles) do
+ local v=table.clone(Catalog.Vehicles[id]);v.Name=content.Name;v.CashCost=content.Price;v.SpeedMultiplier=content.Speed;v.Model=content.Model;v.Playable=true
+ Catalog.Vehicles[id]=table.freeze(v)
+end
+for id,content in ipairs(Content.Eggs) do
+ local e=table.clone(Catalog.Eggs[id]);e.Name=content.Name;e.CashCost=content.Price;e.Weights=Content.Weights;e.Playable=true;Catalog.Eggs[id]=table.freeze(e)
+end
+for id,content in ipairs(Content.Pets) do
+ local p=table.clone(Catalog.Pets[id]);p.Name=content.Name;p.Rarity=Content.Rarities[(id-1)%4+1];p.EnergyMultiplier=content.Energy;p.CashMultiplier=content.Cash;p.Playable=true;Catalog.Pets[id]=table.freeze(p)
 end
 for _, category in ipairs({Catalog.Worlds,Catalog.Vehicles,Catalog.Treadmills,Catalog.Eggs,Catalog.Pets}) do table.freeze(category) end
 return table.freeze(Catalog)

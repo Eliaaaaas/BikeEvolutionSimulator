@@ -1,0 +1,71 @@
+local count=0
+local function test(name,cb) local ok,err=pcall(cb);assert(ok,name..": "..tostring(err));count+=1;print("PASS "..name) end
+local function fixture()
+ local data=modules.Profile.new();data.Cash=1e6
+ local clock=100;local serial=0;local events={}
+ local service={change=function(_,cb) local copy=modules.Profile.copy(data);if not cb(copy) then return false,"Rejected" end;assert(modules.Profile.validate(copy));data=copy;return true,nil end}
+ local e=modules.EconomyController.new(service,function() return clock end,function() return 1 end,function() serial+=1;return "pet-"..serial end,function(_,event) table.insert(events,event) end)
+ return e,function() return data end,function(dt) clock+=dt end,events
+end
+test("v1 migration preserves balances, inventory IDs and equips; v2 is idempotent",function()
+ local raw=modules.Profile.new();raw.SchemaVersion=1;raw.ActiveVehicle=nil;raw.DiscoveredPets=nil
+ raw.Energy=123.5;raw.Cash=321;raw.Rebirths=7;raw.Pets.uuid={SpeciesId=12,Variant="Golden"};raw.EquippedPets={"uuid"};raw.OwnedVehicles={1,7}
+ local migrated=modules.Profile.migrate(raw);assert(migrated and modules.Profile.validate(migrated))
+ assert(migrated.ActiveVehicle==1 and migrated.Energy==123.5 and migrated.Cash==321 and migrated.Rebirths==7)
+ assert(migrated.Pets.uuid.Variant=="Golden" and migrated.EquippedPets[1]=="uuid" and migrated.DiscoveredPets[1]==12)
+ assert(raw.SchemaVersion==1 and raw.ActiveVehicle==nil)
+ local again=modules.Profile.migrate(migrated);assert(again.SchemaVersion==2 and again.Cash==321 and again~=migrated)
+ raw.Energy=-1;assert(not modules.Profile.migrate(raw));raw.SchemaVersion=999;assert(not modules.Profile.migrate(raw))
+end)
+test("migration honors foreign locks and only commits through UpdateAsync",function()
+ local raw=modules.Profile.new();raw.SchemaVersion=1;raw.ActiveVehicle=nil;raw.DiscoveredPets=nil
+ local record={Data=raw,Lock={Id="old",Expires=500}}
+ local store={UpdateAsync=function(_,_,cb) local result=cb(record);if result then record=result end;return result end}
+ local backend=modules.Persistence.new(store,modules.Profile,modules.Config.Data,"new",function() return 100 end,function() end)
+ assert(not backend:load("p"));assert(record.Data.SchemaVersion==1)
+ record.Lock.Expires=99;assert(backend:load("p"));assert(record.Data.SchemaVersion==2 and record.Lock.Id=="new")
+end)
+test("vehicle prices and classes preserve all stable catalogue IDs",function()
+ local prices={0,250,750,2000,5000,12000,25000,50000,100000,200000}
+ for id,price in ipairs(prices) do assert(modules.Catalog.Vehicles[id].CashCost==price);assert(modules.Catalog.Vehicles[id].Class==(if id<=6 then "Bicycle" else "Moped")) end
+ assert(#modules.Catalog.Vehicles==40)
+end)
+test("atomic purchase/equip, no world requirement, duplicate requests do not debit twice",function()
+ local e,get=fixture();local before=get().Cash
+ assert(e:handle("p",{Action="BuyVehicle",VehicleId=10,RequestId=1}));assert(get().Cash==before-200000)
+ assert(not e:handle("p",{Action="BuyVehicle",VehicleId=10,RequestId=1}));assert(get().Cash==before-200000)
+ assert(e:handle("p",{Action="EquipVehicle",VehicleId=10,RequestId=2}));assert(get().ActiveVehicle==10)
+ assert(not e:handle("p",{Action="EquipVehicle",VehicleId=9,RequestId=3}));assert(get().ActiveVehicle==10)
+end)
+test("all egg probability boundaries sum exactly to 10000",function()
+ for egg=1,3 do
+  local counts={0,0,0,0}
+  for roll=1,10000 do local species=modules.PetRules.roll(egg,roll);counts[(species-1)%4+1]+=1 end
+  for i,weight in ipairs(modules.World1Content.Weights) do assert(counts[i]==weight) end
+ end
+ assert(not modules.PetRules.roll(1,0));assert(not modules.PetRules.roll(1,10001))
+end)
+test("hatch deducts cash exactly once, records index, equips three unique pets",function()
+ local e,get,advance=fixture();local before=get().Cash
+ for i=1,4 do assert(e:handle("p",{Action="Hatch",EggId=1,RequestId=i}));advance(1.1) end
+ assert(get().Cash==before-400 and #get().DiscoveredPets==1)
+ for i=1,3 do assert(e:handle("p",{Action="EquipPet",PetId="pet-"..i,RequestId=4+i})) end
+ assert(not e:handle("p",{Action="EquipPet",PetId="pet-4",RequestId=8}))
+ assert(#get().EquippedPets==3)
+ assert(e:handle("p",{Action="UnequipPet",PetId="pet-2",RequestId=9}));assert(#get().EquippedPets==2)
+end)
+test("pet bonuses add excess over one and support Golden/Rainbow without schema redesign",function()
+ local data=modules.Profile.new();data.Pets.a={SpeciesId=1,Variant="Normal"};data.Pets.b={SpeciesId=1,Variant="Golden"};data.Pets.c={SpeciesId=1,Variant="Rainbow"};data.EquippedPets={"a","b","c"};data.DiscoveredPets={1}
+ assert(math.abs(modules.PetRules.bonus(data,"Energy")-1.7)<1e-10)
+ assert(math.abs(modules.PetRules.bonus(data,"Cash")-1.35)<1e-10)
+ assert(modules.World1Content.FusionWorlds.Golden==4 and modules.World1Content.FusionWorlds.Rainbow==5)
+end)
+test("economic protocol requires bounded IDs and request sequences, rejects spoofed money",function()
+ local valid=modules.Protocol.validAction
+ assert(valid({Version=1,Action="Hatch",EggId=3,RequestId=1}))
+ assert(not valid({Version=1,Action="Hatch",EggId=3}))
+ assert(not valid({Version=1,Action="BuyVehicle",VehicleId=11,RequestId=1}))
+ assert(not valid({Version=1,Action="Hatch",EggId=3,RequestId=1,Cash=0}))
+ assert(not valid({Version=1,Action="EquipPet",PetId=string.rep("x",65),RequestId=1}))
+end)
+print(string.format("%d World-1 economy/migration tests passed",count))
