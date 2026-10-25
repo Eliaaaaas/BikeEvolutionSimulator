@@ -1,0 +1,19 @@
+name: Validate Luau foundation
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned tools
+        run: python3 tools/bootstrap.py
+      - name: Compile, type-check pure modules and run tests
+        run: python3 tools/test.py
+      - name: Build Rojo place
+        run: |
+          mkdir -p build
+          .tools/rojo build default.project.json --output build/BikeEvolutionSimulator.rbxlx
