@@ -6,7 +6,7 @@ export type Snapshot = { Energy: number, Cash: number, Rebirths: number }
 export type Pet = { SpeciesId: number, Variant: string }
 export type Data = {
  SchemaVersion: number, Energy: number, Cash: number, Rebirths: number,
- OwnedWorlds: {number}, OwnedVehicles: {number}, Pets: {[string]: Pet}, EquippedPets: {string}, ActiveVehicle: number, DiscoveredPets: {number},
+ OwnedWorlds: {number}, OwnedVehicles: {number}, Pets: {[string]: Pet}, EquippedPets: {string}, ActiveVehicle: number, DiscoveredPets: {number}, LastRaceReward: string,
 }
 local function numberIn(value: any, maximum: number, integer: boolean)
  return type(value) == "number" and value == value and value >= 0 and value <= maximum and (not integer or value % 1 == 0)
@@ -23,7 +23,7 @@ local function arrayValid(value: any, maximum: number, predicate: (any) -> boole
 end
 function Profile.new(): Data
  return { SchemaVersion = Config.Data.SchemaVersion, Energy = 0, Cash = 0, Rebirths = 0,
-  OwnedWorlds = {1}, OwnedVehicles = {1}, Pets = {}, EquippedPets = {}, ActiveVehicle = 1, DiscoveredPets = {} }
+  OwnedWorlds = {1}, OwnedVehicles = {1}, Pets = {}, EquippedPets = {}, ActiveVehicle = 1, DiscoveredPets = {}, LastRaceReward = "" }
 end
 local function validate(data: any, legacy: boolean): boolean
  if type(data) ~= "table" or data.SchemaVersion ~= (if legacy then 1 else Config.Data.SchemaVersion) then return false end
@@ -40,6 +40,7 @@ local function validate(data: any, legacy: boolean): boolean
   if pet.Variant ~= "Normal" and pet.Variant ~= "Golden" and pet.Variant ~= "Rainbow" then return false end
  end
  if not legacy then
+  if type(data.LastRaceReward)~="string" or #data.LastRaceReward>100 then return false end
   if not numberIn(data.ActiveVehicle,40,true) or not table.find(data.OwnedVehicles,data.ActiveVehicle) then return false end
   if not arrayValid(data.DiscoveredPets,96,function(id:any) return numberIn(id,96,true) and id>=1 end) then return false end
   for _,rawPet in pairs(data.Pets) do local pet:any=rawPet;if not table.find(data.DiscoveredPets,pet.SpeciesId) then return false end end
@@ -52,14 +53,14 @@ function Profile.copy(data: Data): Data
  for id, pet in pairs(data.Pets) do pets[id] = { SpeciesId = pet.SpeciesId, Variant = pet.Variant } end
  return { SchemaVersion = data.SchemaVersion, Energy = data.Energy, Cash = data.Cash, Rebirths = data.Rebirths,
   OwnedWorlds = table.clone(data.OwnedWorlds), OwnedVehicles = table.clone(data.OwnedVehicles),
-  Pets = pets, EquippedPets = table.clone(data.EquippedPets), ActiveVehicle = data.ActiveVehicle, DiscoveredPets = table.clone(data.DiscoveredPets) }
+  Pets = pets, EquippedPets = table.clone(data.EquippedPets), ActiveVehicle = data.ActiveVehicle, DiscoveredPets = table.clone(data.DiscoveredPets), LastRaceReward = data.LastRaceReward }
 end
 function Profile.migrate(raw: any): Data?
  if type(raw)~="table" then return nil end
  if raw.SchemaVersion==Config.Data.SchemaVersion then return if Profile.validate(raw) then Profile.copy(raw) else nil end
  if not validate(raw,true) then return nil end
  local enriched:any=table.clone(raw)
- enriched.SchemaVersion=Config.Data.SchemaVersion;enriched.ActiveVehicle=1;enriched.DiscoveredPets={}
+ enriched.SchemaVersion=Config.Data.SchemaVersion;enriched.ActiveVehicle=1;enriched.DiscoveredPets={};enriched.LastRaceReward=""
  for _,rawPet in pairs(raw.Pets) do local pet:any=rawPet;if not table.find(enriched.DiscoveredPets,pet.SpeciesId) then table.insert(enriched.DiscoveredPets,pet.SpeciesId) end end
  table.sort(enriched.DiscoveredPets)
  return Profile.copy(enriched)

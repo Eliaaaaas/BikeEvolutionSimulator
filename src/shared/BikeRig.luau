@@ -24,7 +24,7 @@ function Rig.prepare(model: Model): any
  end
  local frame=group("Frame",root)
  local steering=group("Steering",frame)
- group("FrontWheel",steering);group("RearWheel",frame);group("Crank",frame)
+ group("FrontWheel",steering);group("RearWheel",frame);if model:FindFirstChild("Crank") then group("Crank",frame) end
  root.Anchored=true
  return {Root=root,Motors=motors}
 end

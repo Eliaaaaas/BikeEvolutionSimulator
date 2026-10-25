@@ -10,6 +10,72 @@
         "$className": "Folder",
         "Mountainbike": {
           "$path": "src/models/Mountainbike.rbxmx"
+        },
+        "Vehicle2": {
+          "$path": "src/models/Vehicle2.rbxmx"
+        },
+        "Vehicle3": {
+          "$path": "src/models/Vehicle3.rbxmx"
+        },
+        "Vehicle4": {
+          "$path": "src/models/Vehicle4.rbxmx"
+        },
+        "Vehicle5": {
+          "$path": "src/models/Vehicle5.rbxmx"
+        },
+        "Vehicle6": {
+          "$path": "src/models/Vehicle6.rbxmx"
+        },
+        "Vehicle7": {
+          "$path": "src/models/Vehicle7.rbxmx"
+        },
+        "Vehicle8": {
+          "$path": "src/models/Vehicle8.rbxmx"
+        },
+        "Vehicle9": {
+          "$path": "src/models/Vehicle9.rbxmx"
+        },
+        "Vehicle10": {
+          "$path": "src/models/Vehicle10.rbxmx"
+        }
+      },
+      "PetModels": {
+        "$className": "Folder",
+        "Pet1": {
+          "$path": "src/models/Pet1.rbxmx"
+        },
+        "Pet2": {
+          "$path": "src/models/Pet2.rbxmx"
+        },
+        "Pet3": {
+          "$path": "src/models/Pet3.rbxmx"
+        },
+        "Pet4": {
+          "$path": "src/models/Pet4.rbxmx"
+        },
+        "Pet5": {
+          "$path": "src/models/Pet5.rbxmx"
+        },
+        "Pet6": {
+          "$path": "src/models/Pet6.rbxmx"
+        },
+        "Pet7": {
+          "$path": "src/models/Pet7.rbxmx"
+        },
+        "Pet8": {
+          "$path": "src/models/Pet8.rbxmx"
+        },
+        "Pet9": {
+          "$path": "src/models/Pet9.rbxmx"
+        },
+        "Pet10": {
+          "$path": "src/models/Pet10.rbxmx"
+        },
+        "Pet11": {
+          "$path": "src/models/Pet11.rbxmx"
+        },
+        "Pet12": {
+          "$path": "src/models/Pet12.rbxmx"
         }
       }
     },

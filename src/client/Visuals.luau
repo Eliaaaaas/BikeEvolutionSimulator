@@ -27,7 +27,7 @@ function Visuals.new(settings:any,ui:any):any
     if not bike:IsA("Model") or not bike.PrimaryPart then continue end
     local camera=workspace.CurrentCamera
     if camera and (bike.PrimaryPart.Position-camera.CFrame.Position).Magnitude>230 then continue end
-    local owner=bike:GetAttribute("OwnerUserId");riderBikes[owner]=bike
+    local owner=bike:GetAttribute("OwnerUserId");if type(owner)=="number" then riderBikes[owner]=bike end
     if not settings.Animations then continue end
     local record=bikes[bike]
     if not record then
@@ -37,7 +37,7 @@ function Visuals.new(settings:any,ui:any):any
     end
     local distance=bike:GetAttribute("Distance") or 0
     local speed=bike:GetAttribute("RaceSpeed") or 0
-    local target=distance/1.43
+    local target=distance/(bike:GetAttribute("WheelRadius") or 1.43)
     record.Wheel+=(target-record.Wheel)*math.min(1,dt*18)
     if speed==0 then record.Wheel=target end
     record.Crank=record.Wheel/2.2
@@ -69,7 +69,7 @@ function Visuals.new(settings:any,ui:any):any
     if not current then local record=Pose.new(character,bike);if record then current={Record=record,Character=character,Bike=bike};poses[player]=current end end
     if current then
      current.Exit=nil
-     local phase=if bike and bikes[bike] then bikes[bike].Crank else os.clock()*7
+     local phase=if bike and bike:GetAttribute("Pedaling")==false then 0 elseif bike and bikes[bike] then bikes[bike].Crank else os.clock()*7
      Pose.update(current.Record,phase,bike~=nil,math.min(1,dt*12))
     end
    end
@@ -77,7 +77,7 @@ function Visuals.new(settings:any,ui:any):any
   for player,pose in pairs(poses) do if player.Parent~=Players then Pose.destroy(pose.Record);poses[player]=nil end end
   if ui.Viewport and ui.Viewport.Frame.Parent and settings.Animations then
    local angle=os.clock()*0.22
-   ui.Viewport.Camera.CFrame=CFrame.lookAt(Vector3.new(math.sin(angle)*10,5,math.cos(angle)*10),Vector3.new(0,2,0))
+   ui.Viewport.Camera.CFrame=CFrame.lookAt(Vector3.new(math.sin(angle)*(ui.Viewport.Distance or 10),(ui.Viewport.TargetY or 2)+3,math.cos(angle)*(ui.Viewport.Distance or 10)),Vector3.new(0,ui.Viewport.TargetY or 2,0))
   end
  end
  function api.refresh()

@@ -83,13 +83,31 @@ sign(training,'PREMIUM\nPLATZ RESERVIERT',(3,15,-59),(22,6,1),(211,150,51))
 for name,text,x,z,color in [
  ('RacePreview','RACE / TEST-RENNEN',0,63,(255,151,74)),
  ('GaragePreview','GARAGE / MOUNTAINBIKE',-61,10,(69,171,229)),
- ('EggsPreview','EGGS / VORSCHAU',60,10,(159,127,224)),
- ('WorldPreview','WORLDS / VORSCHAU',60,36,(47,183,165))]:
+ 
+ ('WorldPreview','WORLDS / VORSCHAU',-54,55,(47,183,165))]:
     place,_=item(model,'Model',name)
     part(place,'Platform',(22,0.2,16),(x,8.1,z),color)
     sign(place,text,(x,16,z-4),(24,5,1),color,face=5)
     for side in [-11,11]:part(place,'ArchPost',(1.5,13,1.5),(x+side,14.5,z-4),color)
     part(place,'ArchTop',(24,1.5,1.5),(x,21,z-4),color)
+# Separate functional egg stations with clear walking space between them.
+for id,(z,color,title) in enumerate([(-16,(246,199,64),'TROPICAL EGG'),(5,(74,188,103),'JUNGLE EGG'),(26,(79,194,225),'WATERFALL EGG')],1):
+ station,_=item(model,'Model',f'EggStation_{id}')
+ part(station,'Platform',(12,.2,13),(60,8.1,z),color)
+ part(station,'Pedestal',(5,.8,5),(60,8.6,z),color)
+ part(station,'Egg',(3.3,4.5,3.3),(60,11.25,z),color,shape=0)
+ for j in range(id+2):part(station,'EggPattern',(.55,.6,.25),(59+(j%3),11+(j//3)*.7,z-1.6),(230,252,226),collide=False,shape=0)
+ sign(station,title,(60,16,z+2),(16,3,1),color,face=5)
+rebirth,_=item(model,'Model','RebirthStation')
+part(rebirth,'Platform',(12,.2,12),(-29,8.1,26),(57,192,184))
+part(rebirth,'RebirthOrb',(4,4,4),(-29,11,26),(255,221,82),collide=False,shape=0)
+sign(rebirth,'REBIRTHS',(-29,16,27),(16,4,1),(40,170,176),face=5)
+for name,size,pos in [('TrainingPath',(8,.03,35),(0,8.02,-25)),('RacePath',(8,.03,45),(0,8.02,35)),('GaragePath',(48,.03,7),(-30,8.02,0)),('EggPath',(50,.03,7),(31,8.02,0))]:part(model,name,size,pos,(232,213,157),collide=False)
+for i,(x,z) in enumerate([(-48,-35),(40,-28),(-40,38),(30,42),(50,48),(-60,-20),(-22,63),(23,68)]):
+ bush,_=item(model,'Model',f'BushFlowers_{i}')
+ for dx in [-1,0,1]:part(bush,'Leaves',(2.8,2.4,2.8),(x+dx,9,z),(64,160+10*(i%3),84),shape=0)
+ for dx in [-.8,.8]:
+  part(bush,'Flower',(.9,.4,.9),(x+dx,10.3,z),(255,201,89) if i%2 else (246,145,109),collide=False,shape=0)
 decor,_=item(model,'Folder','TropicalDecor')
 for index,(x,z) in enumerate([(-66,-30),(63,-27),(-59,43),(47,57),(-31,66),(28,70),(-71,-3),(70,-3),(-41,-70),(35,-70)]):
     palm,_=item(decor,'Model',f'Palm_{index}')

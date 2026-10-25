@@ -61,11 +61,11 @@ local function fixture()
  local character=add(workspace,"Model","Character");player.Character=character
  local root=add(character,"Part","HumanoidRootPart");root.CFrame=cf.new(0,11,63);root.Anchored=false
  local hum=add(character,"Humanoid","Humanoid");hum.Health=100;hum.WalkSpeed=16;hum.AutoRotate=true;hum.PlatformStand=false
- local game={GetService=function(_,name) return if name=="Players" then players else rep end}
+ local game={GetService=function(_,name) return if name=="Players" then players elseif name=="HttpService" then {GenerateGUID=function() return "fixture-race-uuid" end} else rep end}
  local shutdown;game.BindToClose=function(_,callback) shutdown=callback end
  local now=1000;local threads={};local task={defer=function(callback) callback() end,wait=function() coroutine.yield() end,spawn=function(callback) local co=coroutine.create(callback);table.insert(threads,co);assert(coroutine.resume(co)) end}
- local data={Energy=500,Cash=75,Rebirths=0}
- local service={snapshot=function() return table.clone(data) end,ownsVehicle=function(_,id) return id==1 end}
+ local data=modules.Profile.new();data.Energy=500;data.Cash=75
+ local service={change=function(_,cb) return cb(data),nil end,snapshot=function() return table.clone(data) end,ownsVehicle=function(_,id) return id==1 end}
  local old=modules.BikeRig;modules.BikeRig=modules.makeBikeRig(instance)
  local race=modules.makeRaceService(game,workspace,task,{clock=function() return now end},function() end,instance,cf,vector,{HumanoidStateType={GettingUp="GettingUp"}})
  local events={};local api=race.new(service,function() end,function(_,event) table.insert(events,event) end);modules.BikeRig=old
@@ -100,5 +100,15 @@ end)
 test("shutdown cleanup restores a live rider without leaving an anchored character",function()
  local e=fixture();assert(e.api.start(e.player));e.shutdown()
  assert(not e.api.active(e.player));assert(not e.root.Anchored and e.hum.WalkSpeed==16)
+end)
+test("real Easy race creates five opponents and pays a validated finish once",function()
+ local e=fixture();assert(e.api.start(e.player,"Easy"));assert(#e.workspace:FindFirstChild("ActiveRaceBikes"):GetChildren()==6)
+ assert(e.api.snapshot(e.player).Opponents==5)
+ for _=1,700 do e.advance(0.1) end
+ assert(not e.api.active(e.player));local result=e.events[#e.events]
+ assert(result.Reason=="Finished" and result.Place>=1 and result.Place<=6)
+ assert(e.data.Cash==75+modules.World1Content.Difficulties.Easy.Rewards[result.Place] and e.data.Energy==500)
+ local cash=e.data.Cash;for _=1,20 do e.advance(0.1) end;assert(e.data.Cash==cash)
+ assert(#e.workspace:FindFirstChild("ActiveRaceBikes"):GetChildren()==0)
 end)
 print(string.format("%d race adapter tests passed",count))

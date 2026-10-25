@@ -33,10 +33,10 @@ for x in [-7,7]:part(track,'BridgeRail',(0.6,2.5,43),(x,9.5,96),(51,159,161))
 for i,(a,b) in enumerate(zip(points,points[1:])):
  dx,dz=b[0]-a[0],b[2]-a[2];length=math.hypot(dx,dz);center=((a[0]+b[0])/2,7.5,(a[2]+b[2])/2)
  yaw=math.degrees(math.atan2(dx,dz))
- part(track,f'Road_{i}',(15,1,length+0.5),center,(81,121,130),256,yaw=yaw)
+ part(track,f'Road_{i}',(24,1,length+0.5),center,(81,121,130),256,yaw=yaw)
  if i%3==0:part(track,f'Marking_{i}',(0.35,0.03,2.5),(center[0],8.02,center[2]),(255,238,151),collide=False,yaw=yaw)
  for side in [-1,1]:
-  x=center[0]+side*7.5*math.cos(math.radians(yaw));z=center[2]-side*7.5*math.sin(math.radians(yaw))
+  x=center[0]+side*12*math.cos(math.radians(yaw));z=center[2]-side*12*math.sin(math.radians(yaw))
   part(track,f'Barrier_{i}_{side}',(0.4,1.5,length+0.7),(x,8.9,z),(77,206,183),yaw=yaw)
 for title,index in [('START',0),('ZIEL',-1)]:
  x,y,z=points[index]

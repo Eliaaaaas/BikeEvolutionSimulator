@@ -11,7 +11,7 @@ LUAU = os.environ.get('LUAU_BIN', str(ROOT / '.tools/luau'))
 COMPILER = os.environ.get('LUAU_COMPILE_BIN', str(ROOT / '.tools/luau-compile'))
 for source in sorted((ROOT / 'src').rglob('*.luau')):
     subprocess.run([COMPILER, '--binary', str(source)], stdout=subprocess.DEVNULL, check=True)
-modules = ['Numbers', 'Config', 'CatalogMetadata', 'World1Content', 'Catalog', 'Rules', 'Profile', 'Protocol', 'Persistence', 'SavePolicy', 'PetRules', 'EconomyController', 'TrainingController', 'RateLimiter', 'Format', 'Presentation', 'ClientState', 'CourseData', 'RaceCourse', 'RaceController']
+modules = ['Numbers', 'Config', 'CatalogMetadata', 'World1Content', 'Catalog', 'Rules', 'Profile', 'Protocol', 'Persistence', 'SavePolicy', 'PetRules', 'EconomyController', 'TrainingController', 'RateLimiter', 'Format', 'Presentation', 'ClientState', 'CourseData', 'RaceCourse', 'RaceRules', 'RaceController']
 bundle = ['--!strict\nlocal modules: any = {}']
 for name in modules:
     folder = 'server' if name in ('Persistence', 'SavePolicy') else 'shared'
@@ -50,6 +50,8 @@ subprocess.run(['python3', str(ROOT / 'tools/build_world.py'), '--check'], check
 subprocess.run(['python3', str(ROOT / 'tests/world_test.py')], check=True)
 subprocess.run(['python3', str(ROOT / 'tools/build_race_assets.py'), '--check'], check=True)
 subprocess.run(['python3', str(ROOT / 'tests/race_assets_test.py')], check=True)
+subprocess.run(['python3', str(ROOT / 'tools/build_vehicle_fleet.py'), '--check'], check=True)
+subprocess.run(['python3', str(ROOT / 'tools/build_pet_assets.py'), '--check'], check=True)
 
 (ROOT / 'build').mkdir(exist_ok=True)
 subprocess.run([str(ROOT / '.tools/rojo'), 'sourcemap', 'default.project.json', '--output', 'build/sourcemap.json'], cwd=ROOT, check=True)

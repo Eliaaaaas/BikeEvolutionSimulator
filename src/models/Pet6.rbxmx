@@ -1,0 +1,312 @@
+<?xml version='1.0' encoding='utf-8'?>
+<roblox version="4">
+  <Item class="Model">
+    <Properties>
+      <string name="Name">Pet6</string>
+    </Properties>
+    <Item class="Part">
+      <Properties>
+        <string name="Name">Body</string>
+        <bool name="Anchored">true</bool>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <bool name="CanQuery">true</bool>
+        <float name="Transparency">0</float>
+        <token name="Material">256</token>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <token name="shape">0</token>
+        <Vector3 name="size">
+          <X>1.5</X>
+          <Y>1.3</Y>
+          <Z>1.7</Z>
+        </Vector3>
+        <Color3 name="Color">
+          <R>0.34509803921568627</R>
+          <G>0.803921568627451</G>
+          <B>0.3764705882352941</B>
+        </Color3>
+        <CoordinateFrame name="CFrame">
+          <X>0</X>
+          <Y>1</Y>
+          <Z>0</Z>
+          <R00>1.0</R00>
+          <R01>0</R01>
+          <R02>0.0</R02>
+          <R10>0</R10>
+          <R11>1</R11>
+          <R12>0</R12>
+          <R20>-0.0</R20>
+          <R21>0</R21>
+          <R22>1.0</R22>
+        </CoordinateFrame>
+      </Properties>
+    </Item>
+    <Item class="Part">
+      <Properties>
+        <string name="Name">Head</string>
+        <bool name="Anchored">true</bool>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <bool name="CanQuery">true</bool>
+        <float name="Transparency">0</float>
+        <token name="Material">256</token>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <token name="shape">0</token>
+        <Vector3 name="size">
+          <X>1.2</X>
+          <Y>1.1</Y>
+          <Z>1.1</Z>
+        </Vector3>
+        <Color3 name="Color">
+          <R>0.34509803921568627</R>
+          <G>0.803921568627451</G>
+          <B>0.3764705882352941</B>
+        </Color3>
+        <CoordinateFrame name="CFrame">
+          <X>0</X>
+          <Y>1.65</Y>
+          <Z>-0.8</Z>
+          <R00>1.0</R00>
+          <R01>0</R01>
+          <R02>0.0</R02>
+          <R10>0</R10>
+          <R11>1</R11>
+          <R12>0</R12>
+          <R20>-0.0</R20>
+          <R21>0</R21>
+          <R22>1.0</R22>
+        </CoordinateFrame>
+      </Properties>
+    </Item>
+    <Item class="Part">
+      <Properties>
+        <string name="Name">Eye</string>
+        <bool name="Anchored">true</bool>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <bool name="CanQuery">true</bool>
+        <float name="Transparency">0</float>
+        <token name="Material">256</token>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <token name="shape">0</token>
+        <Vector3 name="size">
+          <X>0.16</X>
+          <Y>0.2</Y>
+          <Z>0.12</Z>
+        </Vector3>
+        <Color3 name="Color">
+          <R>0.11764705882352941</R>
+          <G>0.25098039215686274</G>
+          <B>0.3058823529411765</B>
+        </Color3>
+        <CoordinateFrame name="CFrame">
+          <X>-0.3</X>
+          <Y>1.85</Y>
+          <Z>-1.34</Z>
+          <R00>1.0</R00>
+          <R01>0</R01>
+          <R02>0.0</R02>
+          <R10>0</R10>
+          <R11>1</R11>
+          <R12>0</R12>
+          <R20>-0.0</R20>
+          <R21>0</R21>
+          <R22>1.0</R22>
+        </CoordinateFrame>
+      </Properties>
+    </Item>
+    <Item class="Part">
+      <Properties>
+        <string name="Name">Eye</string>
+        <bool name="Anchored">true</bool>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <bool name="CanQuery">true</bool>
+        <float name="Transparency">0</float>
+        <token name="Material">256</token>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <token name="shape">0</token>
+        <Vector3 name="size">
+          <X>0.16</X>
+          <Y>0.2</Y>
+          <Z>0.12</Z>
+        </Vector3>
+        <Color3 name="Color">
+          <R>0.11764705882352941</R>
+          <G>0.25098039215686274</G>
+          <B>0.3058823529411765</B>
+        </Color3>
+        <CoordinateFrame name="CFrame">
+          <X>0.3</X>
+          <Y>1.85</Y>
+          <Z>-1.34</Z>
+          <R00>1.0</R00>
+          <R01>0</R01>
+          <R02>0.0</R02>
+          <R10>0</R10>
+          <R11>1</R11>
+          <R12>0</R12>
+          <R20>-0.0</R20>
+          <R21>0</R21>
+          <R22>1.0</R22>
+        </CoordinateFrame>
+      </Properties>
+    </Item>
+    <Item class="Part">
+      <Properties>
+        <string name="Name">EyeBulge</string>
+        <bool name="Anchored">true</bool>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <bool name="CanQuery">true</bool>
+        <float name="Transparency">0</float>
+        <token name="Material">256</token>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <token name="shape">0</token>
+        <Vector3 name="size">
+          <X>0.65</X>
+          <Y>0.65</Y>
+          <Z>0.65</Z>
+        </Vector3>
+        <Color3 name="Color">
+          <R>0.34509803921568627</R>
+          <G>0.803921568627451</G>
+          <B>0.3764705882352941</B>
+        </Color3>
+        <CoordinateFrame name="CFrame">
+          <X>-0.48</X>
+          <Y>2</Y>
+          <Z>-0.8</Z>
+          <R00>1.0</R00>
+          <R01>0</R01>
+          <R02>0.0</R02>
+          <R10>0</R10>
+          <R11>1</R11>
+          <R12>0</R12>
+          <R20>-0.0</R20>
+          <R21>0</R21>
+          <R22>1.0</R22>
+        </CoordinateFrame>
+      </Properties>
+    </Item>
+    <Item class="Part">
+      <Properties>
+        <string name="Name">HindLeg</string>
+        <bool name="Anchored">true</bool>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <bool name="CanQuery">true</bool>
+        <float name="Transparency">0</float>
+        <token name="Material">256</token>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <token name="shape">0</token>
+        <Vector3 name="size">
+          <X>0.7</X>
+          <Y>0.5</Y>
+          <Z>1.1</Z>
+        </Vector3>
+        <Color3 name="Color">
+          <R>0.34509803921568627</R>
+          <G>0.803921568627451</G>
+          <B>0.3764705882352941</B>
+        </Color3>
+        <CoordinateFrame name="CFrame">
+          <X>-0.8</X>
+          <Y>0.55</Y>
+          <Z>0.5</Z>
+          <R00>1.0</R00>
+          <R01>0</R01>
+          <R02>0.0</R02>
+          <R10>0</R10>
+          <R11>1</R11>
+          <R12>0</R12>
+          <R20>-0.0</R20>
+          <R21>0</R21>
+          <R22>1.0</R22>
+        </CoordinateFrame>
+      </Properties>
+    </Item>
+    <Item class="Part">
+      <Properties>
+        <string name="Name">EyeBulge</string>
+        <bool name="Anchored">true</bool>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <bool name="CanQuery">true</bool>
+        <float name="Transparency">0</float>
+        <token name="Material">256</token>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <token name="shape">0</token>
+        <Vector3 name="size">
+          <X>0.65</X>
+          <Y>0.65</Y>
+          <Z>0.65</Z>
+        </Vector3>
+        <Color3 name="Color">
+          <R>0.34509803921568627</R>
+          <G>0.803921568627451</G>
+          <B>0.3764705882352941</B>
+        </Color3>
+        <CoordinateFrame name="CFrame">
+          <X>0.48</X>
+          <Y>2</Y>
+          <Z>-0.8</Z>
+          <R00>1.0</R00>
+          <R01>0</R01>
+          <R02>0.0</R02>
+          <R10>0</R10>
+          <R11>1</R11>
+          <R12>0</R12>
+          <R20>-0.0</R20>
+          <R21>0</R21>
+          <R22>1.0</R22>
+        </CoordinateFrame>
+      </Properties>
+    </Item>
+    <Item class="Part">
+      <Properties>
+        <string name="Name">HindLeg</string>
+        <bool name="Anchored">true</bool>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <bool name="CanQuery">true</bool>
+        <float name="Transparency">0</float>
+        <token name="Material">256</token>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <token name="shape">0</token>
+        <Vector3 name="size">
+          <X>0.7</X>
+          <Y>0.5</Y>
+          <Z>1.1</Z>
+        </Vector3>
+        <Color3 name="Color">
+          <R>0.34509803921568627</R>
+          <G>0.803921568627451</G>
+          <B>0.3764705882352941</B>
+        </Color3>
+        <CoordinateFrame name="CFrame">
+          <X>0.8</X>
+          <Y>0.55</Y>
+          <Z>0.5</Z>
+          <R00>1.0</R00>
+          <R01>0</R01>
+          <R02>0.0</R02>
+          <R10>0</R10>
+          <R11>1</R11>
+          <R12>0</R12>
+          <R20>-0.0</R20>
+          <R21>0</R21>
+          <R22>1.0</R22>
+        </CoordinateFrame>
+      </Properties>
+    </Item>
+  </Item>
+</roblox>

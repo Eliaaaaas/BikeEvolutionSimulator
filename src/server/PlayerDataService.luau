@@ -16,7 +16,7 @@ local function newBackend()
   game.JobId .. ":" .. HttpService:GenerateGUID(false), os.time, function(attempt: number) task.wait(attempt * 2) end, log)
 end
 local Service = {}
-type Session = { Data: Profile.Data, Expires: number, Saving: boolean, Backend: any, Closing: boolean, Revision: number }
+type Session = { Data: Profile.Data, Expires: number, Saving: boolean, Backend: any, Closing: boolean, Revision: number, InventoryRevision: number }
 local sessions: {[Player]: Session} = {}
 local closing = false
 local loading = 0
@@ -48,7 +48,7 @@ function Service.snapshot(player: Player): Profile.Snapshot?
  return Profile.snapshot(session.Data)
 end
 -- Trusted server callbacks only; copy/validate/commit forms a single synchronous transaction.
-function Service.change(player: Player, transform: (Profile.Data) -> boolean): (boolean, string?)
+function Service.change(player: Player, transform: (Profile.Data) -> boolean, inventory: boolean?): (boolean, string?)
  local session = sessions[player]
  if closing or not session or session.Closing or player.Parent ~= Players or session.Expires <= os.time() then return false, "NotReady" end
  if session.Saving then return false, "Saving" end
@@ -61,7 +61,14 @@ function Service.change(player: Player, transform: (Profile.Data) -> boolean): (
  if sessions[player] ~= session or closing or session.Closing or session.Saving or session.Revision ~= revision or session.Expires <= os.time() then return false, "NotReady" end
  session.Data = candidate
  session.Revision += 1
+ if inventory then session.InventoryRevision+=1 end
  return true, nil
+end
+function Service.revision(player: Player): number
+ local session=sessions[player];return if session then session.Revision else 0
+end
+function Service.inventoryRevision(player: Player): number
+ local session=sessions[player];return if session then session.InventoryRevision else 0
 end
 function Service.read(player: Player): Profile.Data?
  local session=sessions[player]
@@ -90,7 +97,7 @@ function Service.start()
    loading -= 1
    return
   end
-  sessions[player] = { Data = data, Expires = expires, Saving = false, Backend = backend, Closing = false, Revision = 0 }
+  sessions[player] = { Data = data, Expires = expires, Saving = false, Backend = backend, Closing = false, Revision = 0, InventoryRevision = 0 }
   loading -= 1
  end
  Players.PlayerAdded:Connect(added)

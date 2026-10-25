@@ -21,11 +21,11 @@ function Pose.new(character:Model,bike:Model?):any
    local control=Instance.new("IKControl");control.Name="ProceduralBikeIK";control.Type=Enum.IKControlType.Position
    control.ChainRoot=a;control.EndEffector=b;control.Target=target;control.Weight=1;control.SmoothTime=0.06;control.Parent=hum;table.insert(record.IK,control)
   end
-  local steer=steering:FindFirstChild("Pivot") :: BasePart;local pedal=crank:FindFirstChild("Pivot") :: BasePart
+  local steer=steering:FindFirstChild("Pivot") :: BasePart;local pedal=if crank then crank:FindFirstChild("Pivot") :: BasePart else bike:FindFirstChild("Root") :: BasePart
   for _,side in ipairs({"Left","Right"}) do
    local x=if side=="Left" then -1 else 1
    ik(side.."UpperArm",side.."Hand",steer,Vector3.new(x*1.13,0.7,-0.2))
-   ik(side.."UpperLeg",side.."Foot",pedal,Vector3.new(x*0.65,x*0.7,0))
+   ik(side.."UpperLeg",side.."Foot",pedal,if crank then Vector3.new(x*0.65,x*0.7,0) else Vector3.new(x*0.8,1.7,0))
   end
  end
  return record

@@ -21,7 +21,7 @@ function RemoteService.start(gameplay: any)
   if previousRequest and now - previousRequest < Config.Network.SnapshotCooldown then return { Ok=false, Error="RateLimited" } end
   lastRequest[player] = now
   if not Protocol.validRequest(payload) then return { Ok=false, Error="BadRequest" } end
-  local snapshot = gameplay.snapshot(player)
+  local snapshot = gameplay.snapshot(player,true)
   return if snapshot then {Ok=true,Data=snapshot} else {Ok=false,Error="NotReady"}
  end
  local lastFeedback: {[Player]: number} = {}
@@ -42,7 +42,7 @@ function RemoteService.start(gameplay: any)
    task.wait(0.25)
    for _, player in ipairs(Players:GetPlayers()) do
     local snapshot, old = gameplay.snapshot(player), previous[player]
-    if snapshot and (not old or old.Energy~=snapshot.Energy or old.Cash~=snapshot.Cash or old.Rebirths~=snapshot.Rebirths or old.SelectedTreadmill~=snapshot.SelectedTreadmill or old.Race.Phase~=snapshot.Race.Phase or old.Race.Countdown~=snapshot.Race.Countdown or math.abs(old.Race.Progress-snapshot.Race.Progress)>0.005) then
+    if snapshot and (not old or old.Revision~=snapshot.Revision or old.Energy~=snapshot.Energy or old.Cash~=snapshot.Cash or old.Rebirths~=snapshot.Rebirths or old.SelectedTreadmill~=snapshot.SelectedTreadmill or old.Race.Phase~=snapshot.Race.Phase or old.Race.Countdown~=snapshot.Race.Countdown or old.Race.Place~=snapshot.Race.Place or math.abs(old.Race.Progress-snapshot.Race.Progress)>0.005) then
      previous[player]=snapshot
      remotes.SnapshotChanged:FireClient(player,snapshot)
     end

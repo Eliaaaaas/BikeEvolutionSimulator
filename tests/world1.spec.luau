@@ -68,4 +68,20 @@ test("economic protocol requires bounded IDs and request sequences, rejects spoo
  assert(not valid({Version=1,Action="Hatch",EggId=3,RequestId=1,Cash=0}))
  assert(not valid({Version=1,Action="EquipPet",PetId=string.rep("x",65),RequestId=1}))
 end)
+test("bot ranks use progress and crossing timestamps; all tiers reward every place",function()
+ local rules=modules.RaceRules
+ assert(rules.position({Distance=100,Bots={{Distance=101},{Distance=99},{Distance=150}}})==3)
+ assert(rules.position({Distance=800,FinishedAt=20,Bots={{Distance=800,FinishedAt=19},{Distance=800,FinishedAt=21},{Distance=799}}})==2)
+ for _,tier in ipairs({"Easy","Medium","Hard"}) do
+  local definition=modules.World1Content.Difficulties[tier];assert(#definition.Speeds==5 and #definition.Rewards==6)
+  for place=1,6 do assert(definition.Rewards[place]>0);if place>1 then assert(definition.Rewards[place]<definition.Rewards[place-1]) end end
+ end
+end)
+test("race payout receipt prevents repeat cash including retry with pet bonus",function()
+ local data=modules.Profile.new();data.Pets.a={SpeciesId=12,Variant="Normal"};data.EquippedPets={"a"};data.DiscoveredPets={12}
+ local state={Difficulty="Hard",Place=1,FinishedAt=10,RewardId="server-uuid"}
+ local ok,amount=modules.RaceRules.pay(data,state);assert(ok and math.abs(amount-5280)<1e-8)
+ local before=data.Cash;local second,repeatAmount=modules.RaceRules.pay(data,state);assert(second and repeatAmount==0 and data.Cash==before)
+ state.RewardId="other";state.FinishedAt=nil;assert(not modules.RaceRules.pay(data,state));assert(data.Cash==before)
+end)
 print(string.format("%d World-1 economy/migration tests passed",count))
