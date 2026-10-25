@@ -8,6 +8,8 @@ local Config = {
   RebirthBonus = 0.5, GoldenIngredients = 5, RainbowIngredients = 3 },
  Numbers = { MaxBalance = Numbers.Max, MaxRebirths = Numbers.MaxRebirths },
  Treadmills = { EnergyBase = 1, RebirthBase = 1, EnergyFactor = 4, RebirthFactor = 3 },
+ Training = { AutoSeconds = 1, ClickCooldown = 0.2, SelectCooldown = 0.4, RebirthCooldown = 1,
+  RemoteCapacity = 12, RemoteRefillPerSecond = 8, MaxDistance = 10, MaxVerticalDistance = 6 },
  Network = { Folder = "BikeRemotes", ProtocolVersion = 1, SnapshotCooldown = 1 },
  -- Economy values are provisional configuration, not implemented purchase systems.
  Economy = { RebirthBaseEnergy = 1000, WorldBaseCash = 1000, VehicleBaseCash = 100 },

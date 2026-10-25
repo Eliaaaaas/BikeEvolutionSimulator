@@ -11,7 +11,7 @@ LUAU = os.environ.get('LUAU_BIN', str(ROOT / '.tools/luau'))
 COMPILER = os.environ.get('LUAU_COMPILE_BIN', str(ROOT / '.tools/luau-compile'))
 for source in sorted((ROOT / 'src').rglob('*.luau')):
     subprocess.run([COMPILER, '--binary', str(source)], stdout=subprocess.DEVNULL, check=True)
-modules = ['Numbers', 'Config', 'CatalogMetadata', 'Catalog', 'Rules', 'Profile', 'Protocol', 'Persistence', 'SavePolicy']
+modules = ['Numbers', 'Config', 'CatalogMetadata', 'Catalog', 'Rules', 'Profile', 'Protocol', 'Persistence', 'SavePolicy', 'TrainingController', 'RateLimiter']
 bundle = ['--!strict\nlocal modules: any = {}']
 for name in modules:
     folder = 'server' if name in ('Persistence', 'SavePolicy') else 'shared'
@@ -28,6 +28,7 @@ service = re.sub(r'require\(script.Parent\.(\w+)\)', r'modules.\1', service)
 bundle.append('modules.makeService = function(game, task, os, warn)\n' + service + '\nend')
 bundle.append((ROOT / 'tests/rules.spec.luau').read_text())
 bundle.append((ROOT / 'tests/lifecycle.spec.luau').read_text())
+bundle.append((ROOT / 'tests/training.spec.luau').read_text())
 with tempfile.TemporaryDirectory(prefix='bike-tests-') as directory:
     analysis_file = Path(directory) / 'production.luau'
     analysis_file.write_text(production_bundle)
@@ -37,3 +38,11 @@ with tempfile.TemporaryDirectory(prefix='bike-tests-') as directory:
     test_file.write_text('\n'.join(bundle))
     subprocess.run([LUAU, str(test_file)], cwd=ROOT, check=True)
 print('All production Luau files compiled successfully.')
+subprocess.run(['python3', str(ROOT / 'tools/build_world.py'), '--check'], check=True)
+subprocess.run(['python3', str(ROOT / 'tests/world_test.py')], check=True)
+
+(ROOT / 'build').mkdir(exist_ok=True)
+subprocess.run([str(ROOT / '.tools/rojo'), 'sourcemap', 'default.project.json', '--output', 'build/sourcemap.json'], cwd=ROOT, check=True)
+subprocess.run([str(ROOT / '.tools/luau-lsp'), 'analyze', '--platform', 'roblox', '--sourcemap', 'build/sourcemap.json',
+                '--definitions', str(ROOT / '.tools/roblox.d.luau'), 'src'], cwd=ROOT, check=True)
+print('Roblox-aware type analysis passed for all production Luau.')

@@ -18,6 +18,32 @@
           "$path": "src/client"
         }
       }
+    },
+    "Workspace": {
+      "$className": "Workspace",
+      "World1": {
+        "$path": "src/world/World1.rbxmx"
+      },
+      "$properties": {
+        "FallenPartsDestroyHeight": -80
+      }
+    },
+    "Lighting": {
+      "$className": "Lighting",
+      "$properties": {
+        "ClockTime": 14,
+        "Brightness": 2.5,
+        "Ambient": [
+          0.55,
+          0.65,
+          0.65
+        ],
+        "OutdoorAmbient": [
+          0.65,
+          0.75,
+          0.78
+        ]
+      }
     }
   }
 }

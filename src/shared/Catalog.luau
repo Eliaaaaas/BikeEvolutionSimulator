@@ -2,7 +2,7 @@
 local Config = require(script.Parent.Config)
 local Numbers = require(script.Parent.Numbers)
 local Metadata = require(script.Parent.CatalogMetadata)
-local Catalog: any = { Worlds = {}, Vehicles = {}, Treadmills = {}, Eggs = {}, Pets = {} }
+local Catalog: { Worlds: {any}, Vehicles: {any}, Treadmills: {any}, Eggs: {any}, Pets: {any} } = { Worlds = {}, Vehicles = {}, Treadmills = {}, Eggs = {}, Pets = {} }
 local function vehicleClass(id: number): string
  if id <= 6 then return "Bicycle" end
  if id <= 15 then return "Moped" end
@@ -30,12 +30,12 @@ for id = 1, Config.Rules.PetSpeciesCount do
  Catalog.Pets[id] = table.freeze({ Id = id, EggId = math.ceil(id / 4) })
 end
 -- Explicit pending fields can be replaced per stable ID without inventing content.
-for _, name in ipairs({ "Vehicles", "Eggs", "Pets" }) do
- for id, entry in ipairs(Catalog[name]) do
+for _, group in ipairs({ {Items=Catalog.Vehicles,Metadata=Metadata.Vehicles}, {Items=Catalog.Eggs,Metadata=Metadata.Eggs}, {Items=Catalog.Pets,Metadata=Metadata.Pets} }) do
+ for id, entry in ipairs(group.Items) do
   local enriched = table.clone(entry)
-  for key, value in pairs(Metadata.resolve(Metadata[name][id])) do enriched[key] = value end
-  Catalog[name][id] = table.freeze(enriched)
+  for key, value in pairs(Metadata.resolve(group.Metadata[id])) do enriched[key] = value end
+  group.Items[id] = table.freeze(enriched)
  end
 end
-for _, category in pairs(Catalog) do table.freeze(category) end
+for _, category in ipairs({Catalog.Worlds,Catalog.Vehicles,Catalog.Treadmills,Catalog.Eggs,Catalog.Pets}) do table.freeze(category) end
 return table.freeze(Catalog)

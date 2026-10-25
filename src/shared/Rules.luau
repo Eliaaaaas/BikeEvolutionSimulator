@@ -11,6 +11,14 @@ function Rules.rebirthRequirement(rebirths: number): number
  assert(Numbers.validRebirth(rebirths), "Invalid rebirth count")
  return Numbers.multiply(Config.Economy.RebirthBaseEnergy, Numbers.add(rebirths, 1))
 end
+function Rules.withinTrainingZone(dx: number, dy: number, dz: number, width: number, depth: number): boolean
+ -- Reject NaN/infinite transforms, including malformed client-owned character motion.
+ for _, value in ipairs({dx, dy, dz, width, depth}) do
+  if value ~= value or math.abs(value) == math.huge then return false end
+ end
+ return width > 0 and depth > 0 and math.abs(dx) <= width/2+1 and math.abs(dz) <= depth/2+1
+  and math.abs(dy) <= Config.Training.MaxVerticalDistance
+end
 function Rules.canUseTreadmill(id: number, energy: number, rebirths: number, ownedWorlds: {number}): boolean
  if not Numbers.valid(id) or id % 1 ~= 0 or not Numbers.valid(energy) or not Numbers.validRebirth(rebirths) then return false end
  local treadmill = Catalog.Treadmills[id]

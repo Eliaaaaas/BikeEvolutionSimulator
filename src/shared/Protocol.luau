@@ -1,7 +1,7 @@
 --!strict
 local Protocol = {}
--- Clients may only request their own read-only HUD snapshot. No client currency writes.
-Protocol.Remotes = table.freeze({ GetSnapshot = "RemoteFunction", SnapshotChanged = "RemoteEvent" })
+-- Clients send intents only. Amounts, positions, identity and timing are server-owned.
+Protocol.Remotes = table.freeze({ GetSnapshot = "RemoteFunction", SnapshotChanged = "RemoteEvent", Action = "RemoteEvent", ActionResult = "RemoteEvent" })
 function Protocol.validRequest(payload: any): boolean
  if type(payload) ~= "table" or payload.Version ~= 1 then return false end
  local count = 0
@@ -10,6 +10,18 @@ function Protocol.validRequest(payload: any): boolean
   if count > 1 then return false end
  end
  return count == 1
+end
+function Protocol.validAction(payload: any): boolean
+ if type(payload) ~= "table" or payload.Version ~= 1 then return false end
+ local count = 0
+ for key in pairs(payload) do
+  count += 1
+  if count > 3 or (key ~= "Version" and key ~= "Action" and key ~= "TreadmillId") then return false end
+ end
+ if payload.Action == "Select" then
+  return count == 3 and type(payload.TreadmillId) == "number" and payload.TreadmillId % 1 == 0 and payload.TreadmillId >= 1 and payload.TreadmillId <= 5
+ end
+ return count == 2 and (payload.Action == "Click" or payload.Action == "Stop" or payload.Action == "Rebirth")
 end
 function Protocol.validSnapshot(payload: any): boolean
  if type(payload) ~= "table" then return false end
