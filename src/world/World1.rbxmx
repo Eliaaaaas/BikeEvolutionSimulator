@@ -5638,7 +5638,7 @@ PLATZ RESERVIERT</string>
           <Item class="TextLabel">
             <Properties>
               <string name="Name">Text</string>
-              <string name="Text">RACE / VORSCHAU</string>
+              <string name="Text">RACE / TEST-RENNEN</string>
               <bool name="TextScaled">true</bool>
               <float name="BackgroundTransparency">1</float>
               <token name="Font">20</token>
@@ -5860,7 +5860,7 @@ PLATZ RESERVIERT</string>
           <Item class="TextLabel">
             <Properties>
               <string name="Name">Text</string>
-              <string name="Text">GARAGE / VORSCHAU</string>
+              <string name="Text">GARAGE / MOUNTAINBIKE</string>
               <bool name="TextScaled">true</bool>
               <float name="BackgroundTransparency">1</float>
               <token name="Font">20</token>

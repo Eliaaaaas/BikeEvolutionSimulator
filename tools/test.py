@@ -11,7 +11,7 @@ LUAU = os.environ.get('LUAU_BIN', str(ROOT / '.tools/luau'))
 COMPILER = os.environ.get('LUAU_COMPILE_BIN', str(ROOT / '.tools/luau-compile'))
 for source in sorted((ROOT / 'src').rglob('*.luau')):
     subprocess.run([COMPILER, '--binary', str(source)], stdout=subprocess.DEVNULL, check=True)
-modules = ['Numbers', 'Config', 'CatalogMetadata', 'Catalog', 'Rules', 'Profile', 'Protocol', 'Persistence', 'SavePolicy', 'TrainingController', 'RateLimiter']
+modules = ['Numbers', 'Config', 'CatalogMetadata', 'Catalog', 'Rules', 'Profile', 'Protocol', 'Persistence', 'SavePolicy', 'TrainingController', 'RateLimiter', 'Format', 'Presentation', 'ClientState', 'CourseData', 'RaceCourse', 'RaceController']
 bundle = ['--!strict\nlocal modules: any = {}']
 for name in modules:
     folder = 'server' if name in ('Persistence', 'SavePolicy') else 'shared'
@@ -26,9 +26,16 @@ service = (ROOT / 'src/server/PlayerDataService.luau').read_text()
 service = re.sub(r'require\(Shared:WaitForChild\("(\w+)"\)\)', r'modules.\1', service)
 service = re.sub(r'require\(script.Parent\.(\w+)\)', r'modules.\1', service)
 bundle.append('modules.makeService = function(game, task, os, warn)\n' + service + '\nend')
+rig = (ROOT / 'src/shared/BikeRig.luau').read_text()
+bundle.append('modules.makeBikeRig = function(Instance)\n' + rig + '\nend')
+race = (ROOT / 'src/server/RaceService.luau').read_text()
+race = re.sub(r'require\(Shared:WaitForChild\("(\w+)"\)\)', r'modules.\1', race)
+bundle.append('modules.makeRaceService = function(game,workspace,task,os,warn,Instance,CFrame,Vector3,Enum)\n' + race + '\nend')
 bundle.append((ROOT / 'tests/rules.spec.luau').read_text())
 bundle.append((ROOT / 'tests/lifecycle.spec.luau').read_text())
 bundle.append((ROOT / 'tests/training.spec.luau').read_text())
+bundle.append((ROOT / 'tests/phase21.spec.luau').read_text())
+bundle.append((ROOT / 'tests/race_lifecycle.spec.luau').read_text())
 with tempfile.TemporaryDirectory(prefix='bike-tests-') as directory:
     analysis_file = Path(directory) / 'production.luau'
     analysis_file.write_text(production_bundle)
@@ -40,6 +47,8 @@ with tempfile.TemporaryDirectory(prefix='bike-tests-') as directory:
 print('All production Luau files compiled successfully.')
 subprocess.run(['python3', str(ROOT / 'tools/build_world.py'), '--check'], check=True)
 subprocess.run(['python3', str(ROOT / 'tests/world_test.py')], check=True)
+subprocess.run(['python3', str(ROOT / 'tools/build_race_assets.py'), '--check'], check=True)
+subprocess.run(['python3', str(ROOT / 'tests/race_assets_test.py')], check=True)
 
 (ROOT / 'build').mkdir(exist_ok=True)
 subprocess.run([str(ROOT / '.tools/rojo'), 'sourcemap', 'default.project.json', '--output', 'build/sourcemap.json'], cwd=ROOT, check=True)

@@ -207,7 +207,7 @@ test("large balances and training are finite and bounded", function()
 end)
 test("catalog metadata stays pending and individual overrides are preserved", function()
  for _, entries in ipairs({Catalog.Vehicles, Catalog.Eggs, Catalog.Pets}) do
-  for _, entry in ipairs(entries) do equal(entry.ContentStatus, "Pending"); equal(entry.Name, false) end
+  for _, entry in ipairs(entries) do equal(entry.ContentStatus, "Pending"); equal(entry.Name, if entries==Catalog.Vehicles and entry.Id==1 then "Mountainbike" else false) end
  end
  local entry = modules.CatalogMetadata.resolve({Name="Reviewed name", Rarity="Rare", Multiplier=2.5, Design={AssetId="rbxassetid://123"}})
  equal(entry.Name, "Reviewed name"); equal(entry.Multiplier, 2.5); equal(entry.Design.AssetId, "rbxassetid://123")

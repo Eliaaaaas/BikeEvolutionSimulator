@@ -13,7 +13,8 @@ local Config = {
  Network = { Folder = "BikeRemotes", ProtocolVersion = 1, SnapshotCooldown = 1 },
  -- Economy values are provisional configuration, not implemented purchase systems.
  Economy = { RebirthBaseEnergy = 1000, WorldBaseCash = 1000, VehicleBaseCash = 100 },
- Race = { Automatic = true, OpponentType = "Bot", EnergyCost = 0 },
+ Race = { Automatic = true, OpponentType = "Bot", EnergyCost = 0,
+  Test = { BaseSpeed = 24, EnergyFactor = 4, SpeedBonusCap = 28, Countdown = 3, Timeout = 150 } },
  RaceDifficulties = { "Easy", "Medium", "Hard" },
 }
 local function freezeDeep(value)

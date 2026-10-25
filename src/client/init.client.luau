@@ -1,61 +1,65 @@
 --!strict
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Shared = ReplicatedStorage:WaitForChild("Shared")
-local Config = require(Shared:WaitForChild("Config"))
-local Protocol = require(Shared:WaitForChild("Protocol"))
-local Catalog = require(Shared:WaitForChild("Catalog"))
-local UI = require(script.UI)
-local ui = UI.new(Players.LocalPlayer:WaitForChild("PlayerGui"))
+local Players=game:GetService("Players")
+local ReplicatedStorage=game:GetService("ReplicatedStorage")
+local UserInputService=game:GetService("UserInputService")
+local Shared=ReplicatedStorage:WaitForChild("Shared")
+local Config=require(Shared:WaitForChild("Config"))
+local Protocol=require(Shared:WaitForChild("Protocol"))
+local Format=require(Shared:WaitForChild("Format"))
+local Presentation=require(Shared:WaitForChild("Presentation"))
+local State=require(Shared:WaitForChild("ClientState"))
+local UI=require(script.UI)
+local Audio=require(script.Audio)
+local Effects=require(script.Effects)
+local Visuals=require(script.Visuals)
+local camera=workspace.CurrentCamera
+local size=if camera then camera.ViewportSize else Vector2.new(800,600)
+local settings=State.new(UserInputService.TouchEnabled and math.min(size.X,size.Y)<700)
+local audio=Audio.new(settings)
+local ui=UI.new(Players.LocalPlayer:WaitForChild("PlayerGui"),settings,audio)
+local effects=Effects.new(ui.Gui,settings)
+local visuals=Visuals.new(settings,ui)
+ui.OnSetting=function() audio.refresh();effects.refresh();ui.refreshSettings();visuals.refresh() end
 local remotes=ReplicatedStorage:WaitForChild(Config.Network.Folder)
 local action=remotes:WaitForChild("Action") :: RemoteEvent
 local snapshotRemote=remotes:WaitForChild("GetSnapshot") :: RemoteFunction
-local snapshot: any=nil
-local lastError=0
-local function number(value: number): string
- if value>=1e6 then return string.format("%.2e",value) end
- if value%1==0 then return string.format("%.0f",value) end
- return string.format("%.1f",value)
+local snapshot:any=nil
+local lastProgress=0
+local function send(kind:string)
+ if snapshot then action:FireServer({Version=1,Action=kind}) end
 end
-local function send(kind: string, id: number?)
+ui.OnMenu=function(name:string)
+ if not snapshot and name~="Settings" and name~="Garage" then ui.message("Spielerdaten werden noch geladen.");return end
+ ui.open(name)
+end
+ui.OnAction=function(kind:string)
  if not snapshot then return end
- action:FireServer({Version=1,Action=kind,TreadmillId=id})
+ if kind=="Training" then
+  if snapshot.SelectedTreadmill==0 then ui.message("Stelle dich hinten auf ein Laufband und nutze „Trainieren“.") else send("Click") end
+ elseif kind=="Rebirth" then
+  if Presentation.rebirth(snapshot).Allowed then send("Rebirth") else ui.message("Noch nicht genug Energy oder maximales Rebirth-Level erreicht.") end
+ else send(kind) end
 end
-local function render(data: any): boolean
- if not Protocol.validSnapshot(data) or type(data.SelectedTreadmill)~="number" or type(data.TrainingMultiplier)~="number" then return false end
- snapshot=data
- ui.Energy.Text="⚡ Energy\n"..number(data.Energy)
- ui.Cash.Text="● Cash\n"..number(data.Cash)
- ui.Rebirths.Text="↻ Rebirths\n"..number(data.Rebirths)
- ui.Multiplier.Text="Trainingsmultiplikator ×"..number(data.TrainingMultiplier)
- ui.Training.Text=if data.SelectedTreadmill==0 then "⚡ TRAINING" else "⚡ +"..number(data.ImpulseGain).." TIPPEN"
- if os.clock()-lastError>3 then
-  ui.Status.Text=if data.SelectedTreadmill==0 then "Gehe hinten auf ein Laufband und wähle „Trainieren“." else "Laufband "..data.SelectedTreadmill.." • +"..number(data.ImpulseGain).." automatisch/Sek."
- end
- return true
+local function render(data:any):boolean
+ if not Protocol.validSnapshot(data) or type(data.SelectedTreadmill)~="number" then return false end
+ local progress=Presentation.training(data).Ratio
+ if snapshot and progress>=1 and lastProgress<1 then audio.play("Unlock") end
+ lastProgress=progress;snapshot=data;ui.update(data);return true
 end
-ui.Training.Activated:Connect(function()
- if not snapshot or ui.modalOpen() then return end
- if snapshot.SelectedTreadmill~=0 then send("Click");return end
- ui.dialog("Los geht’s!","Gehe zur Trainingsreihe an der hinteren Inselwand. Stelle dich auf ein Laufband und nutze „Trainieren“. Danach trainierst du automatisch und kannst hier zusätzlich tippen.",nil)
+local snapshotEvent=remotes:WaitForChild("SnapshotChanged") :: RemoteEvent
+snapshotEvent.OnClientEvent:Connect(render)
+local errors={TooFar="Stelle dich auf dein Laufband.",Locked="Energy- oder Rebirth-Anforderung fehlt.",NotReady="Daten noch nicht bereit.",Saving="Speichern läuft – kurz warten.",NoTreadmill="Bitte zuerst ein Laufband auswählen.",NotEnoughEnergy="Nicht genug Energy.",NotAlive="Aktion nur mit lebendem Charakter.",AlreadyRacing="Während des Rennens nicht verfügbar.",RaceUnavailable="Gehe zur Race-Zone vorne auf der Insel."}
+local resultEvent=remotes:WaitForChild("ActionResult") :: RemoteEvent
+resultEvent.OnClientEvent:Connect(function(result)
+ if type(result)=="table" and not result.Ok and result.Error~="Cooldown" then ui.message(errors[result.Error] or "Aktion nicht verfügbar.") end
 end)
-ui.Rebirth.Activated:Connect(function()
- if not snapshot or ui.modalOpen() then return end
- if snapshot.Rebirths>=Config.Numbers.MaxRebirths then ui.dialog("Rebirth", "Das maximale Rebirth-Level ist erreicht.", nil);return end
- if snapshot.Energy<snapshot.RebirthRequirement then
-  ui.dialog("Rebirth","Du brauchst "..number(snapshot.RebirthRequirement).." Energy. Dein aktueller Stand: "..number(snapshot.Energy)..".",nil);return
- end
- ui.dialog("Rebirth bestätigen?","Energy wird auf 0 gesetzt. Dein permanenter Multiplikator steigt um +0,5. Ein höheres Laufband kann dadurch wieder gesperrt werden.",function() send("Rebirth") end)
-end)
-for name,button in pairs(ui.Previews) do
- button.Activated:Connect(function() ui.dialog(name.." • Vorschau","Dieser Bereich kommt in einer späteren Phase. Hier gibt es aktuell keine Käufe, Rennen oder Belohnungen.",nil) end)
-end
-(remotes:WaitForChild("SnapshotChanged") :: RemoteEvent).OnClientEvent:Connect(render)
-local errors={TooFar="Stelle dich auf dein Laufband.",Locked="Energy- oder Rebirth-Anforderung noch nicht erfüllt.",NotReady="Daten momentan nicht bereit.",
- Saving="Daten werden gespeichert – gleich erneut versuchen.",NoTreadmill="Wähle zuerst ein Laufband.",NotEnoughEnergy="Nicht genug Energy für einen Rebirth.",NotAlive="Training pausiert. Bitte erneut auf ein Laufband gehen."}
-(remotes:WaitForChild("ActionResult") :: RemoteEvent).OnClientEvent:Connect(function(result)
- if type(result)~="table" then return end
- if not result.Ok and result.Error~="Cooldown" then lastError=os.clock();ui.Status.Text=errors[result.Error] or "Aktion nicht verfügbar." end
+local feedbackEvent=remotes:WaitForChild("Feedback") :: RemoteEvent
+feedbackEvent.OnClientEvent:Connect(function(event)
+ if type(event)~="table" or type(event.Id)~="number" or not State.event(settings,event.Id) then return end
+ if event.Kind=="Training" and type(event.Amount)=="number" then effects.training(event.Amount);audio.play("Training")
+ elseif event.Kind=="Selected" then audio.play("Selected")
+ elseif event.Kind=="Rebirth" and type(event.Rebirths)=="number" then effects.rebirth(event.Rebirths);audio.play("Rebirth")
+ elseif event.Kind=="RaceEnded" then ui.message(if event.Reason=="Finished" then "Ziel erreicht! Energy und Cash bleiben erhalten." else "Test-Rennen beendet.");if event.Reason=="Finished" then audio.play("Success") end end
 end)
 task.spawn(function()
  while not snapshot do
@@ -64,11 +68,10 @@ task.spawn(function()
   if not snapshot then task.wait(2) end
  end
 end)
--- Server-created prompts display current requirements without creating client permissions.
 local training=workspace:WaitForChild("World1"):WaitForChild("Training")
+local Catalog=require(Shared:WaitForChild("Catalog"))
 for id=1,5 do
- local zone=training:WaitForChild("Treadmill_"..id):WaitForChild("Zone")
- local prompt=zone:WaitForChild("SelectTraining") :: ProximityPrompt
+ local prompt=training:WaitForChild("Treadmill_"..id):WaitForChild("Zone"):WaitForChild("SelectTraining") :: ProximityPrompt
  local t=Catalog.Treadmills[id]
- prompt.ObjectText="Laufband "..id.." • "..number(t.EnergyRequirement).." Energy ODER "..number(t.RebirthRequirement).." Rebirths"
+ prompt.ObjectText="Laufband "..id.." • "..Format.number(t.EnergyRequirement).." Energy ODER "..Format.number(t.RebirthRequirement).." Rebirths"
 end

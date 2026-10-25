@@ -81,8 +81,8 @@ part(training,'PremiumReserved',(20,0.12,17),(3,8.06,-51),(255,221,132),collide=
 sign(training,'PREMIUM\nPLATZ RESERVIERT',(3,15,-59),(22,6,1),(211,150,51))
 # Clearly labelled, non-interactive previews.
 for name,text,x,z,color in [
- ('RacePreview','RACE / VORSCHAU',0,63,(255,151,74)),
- ('GaragePreview','GARAGE / VORSCHAU',-61,10,(69,171,229)),
+ ('RacePreview','RACE / TEST-RENNEN',0,63,(255,151,74)),
+ ('GaragePreview','GARAGE / MOUNTAINBIKE',-61,10,(69,171,229)),
  ('EggsPreview','EGGS / VORSCHAU',60,10,(159,127,224)),
  ('WorldPreview','WORLDS / VORSCHAU',60,36,(47,183,165))]:
     place,_=item(model,'Model',name)

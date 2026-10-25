@@ -14,6 +14,7 @@ function RemoteService.start(gameplay: any)
   remote.Parent = folder
   remotes[name] = remote
  end
+ gameplay.setFeedback(function(player:Player,event:any) remotes.Feedback:FireClient(player,event) end)
  local lastRequest: {[Player]: number} = {}
  remotes.GetSnapshot.OnServerInvoke = function(player: Player, payload: any): any
   local now, previousRequest = os.clock(), lastRequest[player]
@@ -41,7 +42,7 @@ function RemoteService.start(gameplay: any)
    task.wait(0.25)
    for _, player in ipairs(Players:GetPlayers()) do
     local snapshot, old = gameplay.snapshot(player), previous[player]
-    if snapshot and (not old or old.Energy~=snapshot.Energy or old.Cash~=snapshot.Cash or old.Rebirths~=snapshot.Rebirths or old.SelectedTreadmill~=snapshot.SelectedTreadmill) then
+    if snapshot and (not old or old.Energy~=snapshot.Energy or old.Cash~=snapshot.Cash or old.Rebirths~=snapshot.Rebirths or old.SelectedTreadmill~=snapshot.SelectedTreadmill or old.Race.Phase~=snapshot.Race.Phase or old.Race.Countdown~=snapshot.Race.Countdown or math.abs(old.Race.Progress-snapshot.Race.Progress)>0.005) then
      previous[player]=snapshot
      remotes.SnapshotChanged:FireClient(player,snapshot)
     end

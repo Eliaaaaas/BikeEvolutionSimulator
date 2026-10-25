@@ -5,6 +5,12 @@
     "ReplicatedStorage": {
       "Shared": {
         "$path": "src/shared"
+      },
+      "Vehicles": {
+        "$className": "Folder",
+        "Mountainbike": {
+          "$path": "src/models/Mountainbike.rbxmx"
+        }
       }
     },
     "ServerScriptService": {
@@ -26,6 +32,9 @@
       },
       "$properties": {
         "FallenPartsDestroyHeight": -80
+      },
+      "TestCourse": {
+        "$path": "src/world/TestCourse.rbxmx"
       }
     },
     "Lighting": {

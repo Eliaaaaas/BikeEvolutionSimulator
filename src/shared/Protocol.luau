@@ -1,7 +1,7 @@
 --!strict
 local Protocol = {}
 -- Clients send intents only. Amounts, positions, identity and timing are server-owned.
-Protocol.Remotes = table.freeze({ GetSnapshot = "RemoteFunction", SnapshotChanged = "RemoteEvent", Action = "RemoteEvent", ActionResult = "RemoteEvent" })
+Protocol.Remotes = table.freeze({ GetSnapshot = "RemoteFunction", SnapshotChanged = "RemoteEvent", Action = "RemoteEvent", ActionResult = "RemoteEvent", Feedback = "RemoteEvent" })
 function Protocol.validRequest(payload: any): boolean
  if type(payload) ~= "table" or payload.Version ~= 1 then return false end
  local count = 0
@@ -21,7 +21,7 @@ function Protocol.validAction(payload: any): boolean
  if payload.Action == "Select" then
   return count == 3 and type(payload.TreadmillId) == "number" and payload.TreadmillId % 1 == 0 and payload.TreadmillId >= 1 and payload.TreadmillId <= 5
  end
- return count == 2 and (payload.Action == "Click" or payload.Action == "Stop" or payload.Action == "Rebirth")
+ return count == 2 and (payload.Action == "Click" or payload.Action == "Stop" or payload.Action == "Rebirth" or payload.Action == "StartRace" or payload.Action == "AbortRace")
 end
 function Protocol.validSnapshot(payload: any): boolean
  if type(payload) ~= "table" then return false end

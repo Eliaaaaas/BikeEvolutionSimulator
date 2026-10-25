@@ -1,88 +1,177 @@
 --!strict
--- Roblox widgets only; no economy or training authority on the client.
-local UserInputService = game:GetService("UserInputService")
-local UI = {}
-local colors = {Ink=Color3.fromRGB(28,76,88),Cream=Color3.fromRGB(249,255,237),Teal=Color3.fromRGB(34,177,164),
- Gold=Color3.fromRGB(255,205,81),Orange=Color3.fromRGB(249,151,75),Blue=Color3.fromRGB(75,177,230),Purple=Color3.fromRGB(154,131,227)}
-local function create(className: string, parent: Instance?, props: any): any
- local object: any = Instance.new(className)
- for key,value in pairs(props) do object[key]=value end
- object.Parent=parent
- return object
+local TweenService=game:GetService("TweenService")
+local UserInputService=game:GetService("UserInputService")
+local Shared=game:GetService("ReplicatedStorage"):WaitForChild("Shared")
+local Format=require(Shared:WaitForChild("Format"))
+local Presentation=require(Shared:WaitForChild("Presentation"))
+local State=require(Shared:WaitForChild("ClientState"))
+local Icons=require(script.Parent.Icons)
+local UI={}
+local white=Color3.new(1,1,1)
+local palette={Energy=Color3.fromRGB(217,157,23),Cash=Color3.fromRGB(32,151,88),Rebirths=Color3.fromRGB(23,157,177),Garage=Color3.fromRGB(44,133,204),Pets=Color3.fromRGB(59,162,106),Race=Color3.fromRGB(229,125,38),Worlds=Color3.fromRGB(33,163,159),Upgrades=Color3.fromRGB(197,153,29),Settings=Color3.fromRGB(54,130,174)}
+local function make(class:string,parent:Instance?,props:any):any
+ local o:any=Instance.new(class);for k,v in pairs(props) do o[k]=v end;o.Parent=parent;return o
 end
-local function round(object: Instance, radius: number)
- create("UICorner",object,{CornerRadius=UDim.new(0,radius)})
+local function corner(o:Instance,r:number) make("UICorner",o,{CornerRadius=UDim.new(0,r)}) end
+local function text(parent:Instance,value:string,height:number):any
+ return make("TextLabel",parent,{Size=UDim2.new(1,-16,0,height),BackgroundTransparency=1,Text=value,TextWrapped=true,TextColor3=white,TextSize=16,Font=Enum.Font.GothamBold,LayoutOrder=0})
 end
-local function label(parent: Instance, text: string, size: UDim2, position: UDim2, textSize: number): any
- return create("TextLabel",parent,{BackgroundTransparency=1,Text=text,Size=size,Position=position,
-  Font=Enum.Font.GothamBold,TextSize=textSize,TextColor3=colors.Ink,TextWrapped=true})
-end
-local function button(parent: Instance,text: string,color: Color3,size: UDim2,position: UDim2): any
- local result=create("TextButton",parent,{Text=text,Size=size,Position=position,Font=Enum.Font.GothamBold,
-  TextSize=15,TextColor3=colors.Ink,BackgroundColor3=color,AutoButtonColor=true,BorderSizePixel=0,TextWrapped=true})
- round(result,14)
- return result
-end
-local function panel(parent: Instance,size: UDim2,position: UDim2): any
- local result=create("Frame",parent,{Size=size,Position=position,BackgroundColor3=colors.Cream,BackgroundTransparency=0.08,BorderSizePixel=0})
- round(result,18)
- create("UIStroke",result,{Color=Color3.fromRGB(255,255,255),Thickness=1.5,Transparency=0.35})
- return result
-end
-function UI.new(playerGui: Instance): any
- local gui=create("ScreenGui",playerGui,{Name="PalmBayUI",ResetOnSpawn=false,ZIndexBehavior=Enum.ZIndexBehavior.Sibling,
-  ScreenInsets=Enum.ScreenInsets.DeviceSafeInsets})
- local root=create("Frame",gui,{Size=UDim2.new(1,-20,1,-20),Position=UDim2.fromOffset(10,10),BackgroundTransparency=1})
- local top=panel(root,UDim2.new(1,0,0,106),UDim2.new())
- label(top,"PALM BAY  •  BIKE EVOLUTION",UDim2.new(1,-16,0,22),UDim2.fromOffset(8,5),13)
- local energy=label(top,"⚡ Energy\n…",UDim2.new(0.33,0,0,48),UDim2.new(0,0,0,27),17)
- local cash=label(top,"● Cash\n…",UDim2.new(0.33,0,0,48),UDim2.new(0.33,0,0,27),17)
- local rebirths=label(top,"↻ Rebirths\n…",UDim2.new(0.34,0,0,48),UDim2.new(0.66,0,0,27),17)
- local multiplier=label(top,"Trainingsmultiplikator ×1",UDim2.new(1,-12,0,22),UDim2.fromOffset(6,79),13)
- local bottom=panel(root,UDim2.new(1,0,0,190),UDim2.new(0,0,1,-190))
- local status=label(bottom,"Spielerdaten werden sicher geladen …",UDim2.new(1,-16,0,34),UDim2.fromOffset(8,4),13)
- local training=button(bottom,"⚡ TRAINING",colors.Gold,UDim2.new(0.5,-12,0,58),UDim2.fromOffset(8,42))
- local rebirth=button(bottom,"↻ REBIRTH",colors.Orange,UDim2.new(0.5,-12,0,58),UDim2.new(0.5,4,0,42))
- local previews={}
- for i,entry in ipairs({{Name="Garage",Color=colors.Blue},{Name="Pets",Color=colors.Purple},{Name="Race",Color=colors.Orange},{Name="Worlds",Color=colors.Teal}}) do
-  local b=button(bottom,entry.Name.."\nVORSCHAU",entry.Color,UDim2.new(0.25,-10,0,58),UDim2.new((i-1)*0.25,6,0,110))
-  b.TextSize=12;previews[entry.Name]=b
+function UI.new(playerGui:Instance,settings:any,audio:any):any
+ local gui=make("ScreenGui",playerGui,{Name="PalmBaySidebar",ResetOnSpawn=false,ScreenInsets=Enum.ScreenInsets.DeviceSafeInsets,ZIndexBehavior=Enum.ZIndexBehavior.Sibling})
+ local root=make("Frame",gui,{Size=UDim2.new(1,-16,1,-16),Position=UDim2.fromOffset(8,8),BackgroundTransparency=1})
+ local sidebar=make("Frame",root,{Size=UDim2.fromOffset(210,535),Position=UDim2.fromOffset(0,4),BackgroundColor3=Color3.fromRGB(17,89,112),BackgroundTransparency=0.14,BorderSizePixel=0})
+ corner(sidebar,18);make("UIStroke",sidebar,{Color=white,Thickness=1,Transparency=0.65})
+ local scale=make("UIScale",sidebar,{Scale=1})
+ local shadow=make("Frame",sidebar,{Size=UDim2.new(1,4,1,4),Position=UDim2.fromOffset(2,3),BackgroundColor3=Color3.fromRGB(13,59,78),BackgroundTransparency=0.85,ZIndex=0,BorderSizePixel=0});corner(shadow,18)
+ local toggle=make("TextButton",sidebar,{Size=UDim2.new(1,-12,0,38),Position=UDim2.fromOffset(6,6),Text="☰  PALM BAY",TextColor3=white,TextSize=15,Font=Enum.Font.GothamBold,BackgroundTransparency=1})
+ local list=make("ScrollingFrame",sidebar,{Position=UDim2.fromOffset(6,48),Size=UDim2.new(1,-12,1,-54),BackgroundTransparency=1,BorderSizePixel=0,ScrollBarThickness=3,AutomaticCanvasSize=Enum.AutomaticSize.Y,CanvasSize=UDim2.new()})
+ make("UIListLayout",list,{Padding=UDim.new(0,7),SortOrder=Enum.SortOrder.LayoutOrder})
+ local buttons:any={};local labels:any={};local scales:any={};local activeTweens:any={}
+ local function tween(object:any,properties:any,duration:number?)
+  if activeTweens[object] then activeTweens[object]:Cancel();activeTweens[object]=nil end
+  if not settings.Animations then for key,value in pairs(properties) do object[key]=value end;return end
+  local t=TweenService:Create(object,TweenInfo.new(duration or 0.18,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),properties)
+  activeTweens[object]=t;t.Completed:Once(function() if activeTweens[object]==t then activeTweens[object]=nil end end);t:Play()
  end
- label(bottom,"Automatisch 1×/Sek. • Tippen = Extra-Impuls",UDim2.new(1,-8,0,18),UDim2.new(0,4,1,-20),11)
- local shade=create("TextButton",root,{Text="",Size=UDim2.fromScale(1,1),BackgroundColor3=Color3.fromRGB(20,61,75),
-  BackgroundTransparency=0.25,Visible=false,AutoButtonColor=false,ZIndex=10})
- local modal=panel(shade,UDim2.new(0.92,0,0,280),UDim2.fromScale(0.04,0.5))
- modal.AnchorPoint=Vector2.new(0,0.5);modal.ZIndex=11
- create("UISizeConstraint",modal,{MaxSize=Vector2.new(560,400)})
- local title=label(modal,"",UDim2.new(1,-24,0,36),UDim2.fromOffset(12,10),21);title.ZIndex=12
- local body=label(modal,"",UDim2.new(1,-28,0,115),UDim2.fromOffset(14,50),16);body.ZIndex=12
- local confirm=button(modal,"Bestätigen",colors.Gold,UDim2.new(0.5,-18,0,55),UDim2.new(0.5,6,1,-68));confirm.ZIndex=12
- local cancel=button(modal,"Schließen",colors.Teal,UDim2.new(0.5,-18,0,55),UDim2.new(0,12,1,-68));cancel.ZIndex=12
- -- Keep the built-in mobile thumbstick/jump controls uncovered.
- local function layout()
-  local size=root.AbsoluteSize
-  if UserInputService.TouchEnabled and size.X>size.Y then
-   bottom.Size=UDim2.new(0.54,0,0,190)
-   bottom.Position=UDim2.new(0.23,0,1,-190)
-  else
-   bottom.Size=UDim2.new(1,0,0,190)
-   bottom.Position=UDim2.new(0,0,1,-190-(if UserInputService.TouchEnabled then 130 else 0))
+ local sidebarHeight=535
+ local generation=0
+ local api:any={Settings=settings,Buttons=buttons,Snapshot=nil,Viewport=nil,OnAction=function() end,OnSetting=function() end,OnMenu=function() end}
+ for i,name in ipairs({"Energy","Cash","Rebirths","Garage","Pets","Race","Worlds","Upgrades","Settings"}) do
+  local button=make("TextButton",list,{Name=name,LayoutOrder=i,Size=UDim2.new(1,-4,0,47),BackgroundColor3=palette[name],BackgroundTransparency=0.08,BorderSizePixel=0,Text="",AutoButtonColor=false})
+  corner(button,12);make("UIGradient",button,{Color=ColorSequence.new(white,Color3.fromRGB(185,226,241)),Rotation=32})
+  make("UIStroke",button,{Color=white,Transparency=0.8,Thickness=1})
+  Icons.draw(button,name)
+  labels[name]=make("TextLabel",button,{Position=UDim2.fromOffset(48,0),Size=UDim2.new(1,-52,1,0),BackgroundTransparency=1,Text=name,TextColor3=white,TextSize=14,TextStrokeTransparency=0.65,TextStrokeColor3=Color3.fromRGB(16,72,95),TextXAlignment=Enum.TextXAlignment.Left,Font=Enum.Font.GothamBold,TextWrapped=true})
+  local hover=make("UIScale",button,{Scale=1});scales[name]=hover;buttons[name]=button
+  button.MouseEnter:Connect(function() if settings.Animations then tween(hover,{Scale=1.025}) end end)
+  button.MouseLeave:Connect(function() tween(hover,{Scale=1}) end)
+  button.Activated:Connect(function()
+   audio.play("Button");settings.Active=name
+   for key,b in pairs(buttons) do local s=b:FindFirstChildOfClass("UIStroke");if s then tween(s,{Thickness=if key==name then 3 else 1,Transparency=if key==name then 0.1 else 0.8}) end end
+   tween(button,{BackgroundTransparency=0},0.07);task.delay(0.1,function() if button.Parent then tween(button,{BackgroundTransparency=0.08}) end end)
+   api.OnMenu(name)
+  end)
+ end
+ local training=make("TextButton",root,{AnchorPoint=Vector2.new(1,1),Size=UDim2.fromOffset(225,54),Position=UDim2.new(1,-8,1,-142),Text="ϟ TRAINIEREN",Font=Enum.Font.GothamBold,TextSize=17,TextColor3=white,BackgroundColor3=palette.Energy,BorderSizePixel=0});corner(training,15)
+ local status=make("TextLabel",root,{AnchorPoint=Vector2.new(1,1),Size=UDim2.fromOffset(225,58),Position=UDim2.new(1,-8,1,-200),BackgroundColor3=Color3.fromRGB(20,111,128),BackgroundTransparency=0.2,Text="Daten werden geladen …",TextWrapped=true,TextColor3=white,TextSize=13,Font=Enum.Font.GothamBold});corner(status,12)
+ training.Activated:Connect(function() audio.play("Button");api.OnAction("Training") end)
+ local overlay=make("TextButton",root,{Visible=false,Size=UDim2.fromScale(1,1),BackgroundColor3=Color3.fromRGB(12,51,68),BackgroundTransparency=0.3,Text="",AutoButtonColor=false,ZIndex=20})
+ local window=make("Frame",overlay,{AnchorPoint=Vector2.new(0.5,0.5),Size=UDim2.new(0.9,0,0.85,0),Position=UDim2.fromScale(0.5,0.5),BackgroundColor3=Color3.fromRGB(25,116,139),BorderSizePixel=0,ZIndex=21});corner(window,20)
+ make("UISizeConstraint",window,{MaxSize=Vector2.new(560,560),MinSize=Vector2.new(240,200)})
+ local heading=make("TextLabel",window,{Size=UDim2.new(1,-70,0,48),Position=UDim2.fromOffset(14,0),Text="",BackgroundTransparency=1,TextColor3=white,TextSize=22,Font=Enum.Font.GothamBold,ZIndex=22})
+ local close=make("TextButton",window,{Size=UDim2.fromOffset(42,38),Position=UDim2.new(1,-50,0,6),Text="×",TextColor3=white,TextSize=28,BackgroundTransparency=1,ZIndex=22})
+ local content=make("ScrollingFrame",window,{Size=UDim2.new(1,-24,1,-60),Position=UDim2.fromOffset(12,54),BackgroundTransparency=1,BorderSizePixel=0,ScrollBarThickness=4,AutomaticCanvasSize=Enum.AutomaticSize.Y,CanvasSize=UDim2.new(),ZIndex=22})
+ local function clear()
+  api.Viewport=nil
+  for object,t in pairs(activeTweens) do if object:IsDescendantOf(content) then t:Cancel();activeTweens[object]=nil end end
+  for _,child in ipairs(content:GetChildren()) do child:Destroy() end
+  make("UIListLayout",content,{Padding=UDim.new(0,12),HorizontalAlignment=Enum.HorizontalAlignment.Center,SortOrder=Enum.SortOrder.LayoutOrder})
+ end
+ local function row(value:string,height:number?):any local l=text(content,value,height or 52);l.ZIndex=23;return l end
+ local function bar(ratio:number):any
+  local frame=make("Frame",content,{Size=UDim2.new(1,-20,0,15),BackgroundColor3=Color3.fromRGB(13,76,98),BorderSizePixel=0,ZIndex=23});corner(frame,8)
+  local fill=make("Frame",frame,{Size=UDim2.fromScale(0,1),BackgroundColor3=Color3.fromRGB(111,234,115),BorderSizePixel=0,ZIndex=24});corner(fill,8)
+  tween(fill,{Size=UDim2.fromScale(math.clamp(ratio,0,1),1)},0.3);return fill
+ end
+ local function command(value:string,callback:()->()):any
+  local b=make("TextButton",content,{Size=UDim2.new(1,-20,0,48),Text=value,TextColor3=white,TextSize=16,Font=Enum.Font.GothamBold,BackgroundColor3=palette.Worlds,BorderSizePixel=0,ZIndex=23});corner(b,12)
+  b.Activated:Connect(function() audio.play("Button");callback() end);return b
+ end
+ function api.collapse(value:boolean)
+  State.setting(settings,"Collapsed",value)
+  tween(sidebar,{Size=UDim2.fromOffset(if value then 94 else 210,sidebarHeight)})
+  toggle.Text=if value then "☰" else "☰  PALM BAY"
+  for name,label in pairs(labels) do
+   if name=="Energy" or name=="Cash" or name=="Rebirths" then
+    label.Position=if value then UDim2.fromOffset(39,0) else UDim2.fromOffset(48,0)
+    label.Size=UDim2.new(1,if value then -40 else -52,1,0);label.TextSize=if value then 11 else 14
+   else label.Visible=not value end
+  end
+  api.OnSetting()
+ end
+ toggle.Activated:Connect(function() audio.play("Button");api.collapse(not settings.Collapsed) end)
+ local function hide()
+  local token=generation
+  tween(window,{Position=UDim2.fromScale(0.5,0.53)},0.12)
+  task.delay(if settings.Animations then 0.12 else 0,function() if generation==token then overlay.Visible=false;api.Viewport=nil end end)
+ end
+ close.Activated:Connect(hide)
+ function api.open(name:string)
+  generation+=1
+  clear();heading.Text=name;overlay.Visible=true;window.Position=UDim2.fromScale(0.5,0.53);tween(window,{Position=UDim2.fromScale(0.5,0.5)})
+  local snap=api.Snapshot
+  if name=="Settings" then
+   for _,entry in ipairs({{Key="Animations",Label="Animationen"},{Key="Popups",Label="Energy-Pop-ups"},{Key="Sound",Label="Soundeffekte"},{Key="Collapsed",Label="Kompakte Sidebar"}}) do
+    local b:any
+    b=command(entry.Label..": "..(if settings[entry.Key] then "AN" else "AUS"),function()
+     if entry.Key=="Collapsed" then api.collapse(not settings.Collapsed) else State.setting(settings,entry.Key,not settings[entry.Key]) end
+     b.Text=entry.Label..": "..(if settings[entry.Key] then "AN" else "AUS");api.OnSetting()
+    end)
+   end
+   local volume=row("Lautstärke: "..math.floor(settings.Volume*100).." %",30)
+   command("− Leiser",function() State.setting(settings,"Volume",settings.Volume-0.1);volume.Text="Lautstärke: "..math.floor(settings.Volume*100).." %";api.OnSetting() end)
+   command("+ Lauter",function() State.setting(settings,"Volume",settings.Volume+0.1);volume.Text="Lautstärke: "..math.floor(settings.Volume*100).." %";api.OnSetting() end)
+  elseif name=="Garage" then
+   row("Mountainbike • Fahrzeug-ID 1\nKostenloses, ausgerüstetes Startbike",56)
+   local view=make("ViewportFrame",content,{Size=UDim2.new(1,-20,0,220),BackgroundColor3=Color3.fromRGB(26,76,100),BorderSizePixel=0,Ambient=Color3.fromRGB(200,220,230),LightColor=white,ZIndex=23});corner(view,14)
+   local world=Instance.new("WorldModel");world.Parent=view
+   local bike=game:GetService("ReplicatedStorage"):WaitForChild("Vehicles"):WaitForChild("Mountainbike"):Clone();bike.Parent=world
+   local camera=Instance.new("Camera");camera.CFrame=CFrame.lookAt(Vector3.new(8,5,9),Vector3.new(0,2,0));camera.Parent=view;view.CurrentCamera=camera;api.Viewport={Camera=camera,Frame=view}
+   row("Nur im Test-Rennen fahrbar. Weitere Bikes sind noch nicht spielbar.",55)
+  elseif name=="Rebirths" and snap then
+   local p=Presentation.rebirth(snap)
+   api.RebirthInfo=row("",110);api.RebirthBar=bar(p.Ratio)
+   api.RebirthConfirm=command("Rebirth bestätigen",function() api.OnAction("Rebirth");hide() end)
+   command("Abbrechen",hide)
+  elseif name=="Energy" and snap then
+   api.TrainingInfo=row("",125);api.TrainingBar=bar(0)
+   command("Zusätzlicher Trainingsimpuls",function() api.OnAction("Training") end)
+   command("Training beenden",function() api.OnAction("Stop");hide() end)
+  elseif name=="Race" then
+   api.RaceInfo=row("",100);api.RaceBar=bar(0)
+   command("Mountainbike-Test starten",function() api.OnAction("StartRace");hide() end)
+   command("Rennen abbrechen",function() api.OnAction("AbortRace");hide() end)
+   row("Start nur in der Race-Zone. Automatische Fahrt, keine Bots oder Cash-Belohnung. Energy bleibt erhalten.",65)
+  elseif name=="Cash" then row("Cash wird erhalten, im Test-Rennen aber weder verbraucht noch vergeben.",80)
+  else row(name.." • VORSCHAU\nDieser Bereich ist noch nicht spielbar. Keine Käufe oder Belohnungen.",90) end
+  api.update(api.Snapshot)
+ end
+ function api.update(snap:any)
+  if not snap then return end
+  api.Snapshot=snap
+  for _,name in ipairs({"Energy","Cash","Rebirths"}) do labels[name].Text=(if settings.Collapsed then "" else name.."\n")..Format.number(snap[name]) end
+  local p=Presentation.training(snap)
+  local info="Laufband "..p.Current.." • +"..Format.number(p.Gain).."/Impuls\n"..(if p.Complete then "Alle fünf Insel-Laufbänder verfügbar." else "Nächstes: "..p.Next.." • fehlen "..Format.number(p.Missing).." Energy\nODER "..Format.number(p.RebirthRequirement).." Rebirths (Weltzugang nötig)")
+  status.Text=if snap.Race and snap.Race.Phase~="Idle" then "TEST-RENNEN • "..snap.Race.Phase.."\n"..(if snap.Race.Phase=="Countdown" then tostring(snap.Race.Countdown) else Format.number(snap.Race.Speed).." Studs/Sek.") else "×"..Format.number(snap.TrainingMultiplier).." • "..info
+  training.Text=if snap.SelectedTreadmill==0 then "ϟ TRAINIEREN" else "+"..Format.number(snap.ImpulseGain).." ϟ TIPPEN"
+  if api.TrainingInfo and api.TrainingInfo.Parent then api.TrainingInfo.Text=info;tween(api.TrainingBar,{Size=UDim2.fromScale(p.Ratio,1)}) end
+  if api.RebirthInfo and api.RebirthInfo.Parent then
+   local r=Presentation.rebirth(snap);api.RebirthInfo.Text="Rebirths: "..Format.number(r.Current).."\nMultiplikator ×"..Format.number(r.Multiplier).." → ×"..Format.number(r.NextMultiplier).."\nBenötigt: "..Format.number(r.Requirement).." Energy\nEnergy wird auf 0 gesetzt. Laufbandzugang kann entfallen."
+   tween(api.RebirthBar,{Size=UDim2.fromScale(r.Ratio,1)});api.RebirthConfirm.Text=if r.Allowed then "Rebirth bestätigen" else "Noch nicht genug Energy"
+  end
+  if api.RaceInfo and api.RaceInfo.Parent then
+   local race=snap.Race or {Phase="Idle",Progress=0};api.RaceInfo.Text="Mountainbike Test\n"..race.Phase.." • "..math.floor(race.Progress*100).." %"
+   tween(api.RaceBar,{Size=UDim2.fromScale(race.Progress,1)})
   end
  end
- root:GetPropertyChangedSignal("AbsoluteSize"):Connect(layout)
- layout()
- local selected: any = nil
- cancel.Activated:Connect(function() shade.Visible=false;selected=nil end)
- confirm.Activated:Connect(function()
-  local callback=selected;selected=nil;shade.Visible=false
-  if callback then callback() end
- end)
- local api: any={Gui=gui,Energy=energy,Cash=cash,Rebirths=rebirths,Multiplier=multiplier,Status=status,
-  Training=training,Rebirth=rebirth,Previews=previews}
- function api.dialog(heading: string, message: string, action: (() -> ())?)
-  title.Text=heading;body.Text=message;selected=action;confirm.Visible=action~=nil;shade.Visible=true
+ api.Status=status
+ function api.message(value:string) status.Text=value end
+ function api.refreshSettings()
+  if not settings.Animations then
+   for object,t in pairs(activeTweens) do t:Cancel();activeTweens[object]=nil end
+   for _,s in pairs(scales) do s.Scale=1 end
+   sidebar.Size=UDim2.fromOffset(if settings.Collapsed then 94 else 210,sidebarHeight)
+   window.Position=UDim2.fromScale(0.5,0.5)
+  end
  end
- function api.modalOpen(): boolean return shade.Visible end
+ local function layout()
+  local size=root.AbsoluteSize
+  scale.Scale=if size.X<360 then 0.92 else 1
+  sidebarHeight=math.min(535,math.max(100,(size.Y-(if UserInputService.TouchEnabled then 130 else 12))/scale.Scale))
+  sidebar.Size=UDim2.fromOffset(if settings.Collapsed then 94 else 210,sidebarHeight)
+  local width=math.min(225,math.max(155,size.X*0.4));training.Size=UDim2.fromOffset(width,48);status.Size=UDim2.fromOffset(width,65)
+ end
+ root:GetPropertyChangedSignal("AbsoluteSize"):Connect(layout);layout();api.collapse(settings.Collapsed)
  return api
 end
 return UI
