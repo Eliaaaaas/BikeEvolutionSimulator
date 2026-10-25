@@ -39,7 +39,7 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
  local generation=0
  local messageUntil=0
  local messageText=""
- local api:any={Settings=settings,Buttons=buttons,Snapshot=nil,Viewport=nil,OnAction=function() end,OnSetting=function() end,OnMenu=function() end,Difficulty="Easy"}
+ local api:any={Gui=gui,Settings=settings,Buttons=buttons,Snapshot=nil,Viewport=nil,OnAction=function() end,OnSetting=function() end,OnMenu=function() end,Difficulty="Easy"}
  for i,name in ipairs({"Energy","Cash","Rebirths","Garage","Pets","Race","Worlds","Upgrades","Settings"}) do
   local button=make("TextButton",list,{Name=name,LayoutOrder=i,Size=UDim2.new(1,-4,0,47),BackgroundColor3=palette[name],BackgroundTransparency=0.08,BorderSizePixel=0,Text="",AutoButtonColor=false})
   corner(button,12);make("UIGradient",button,{Color=ColorSequence.new(white,Color3.fromRGB(185,226,241)),Rotation=32})
@@ -85,9 +85,16 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
  function api.preview(folder:Instance,modelName:string,pet:boolean):any
   local view=make("ViewportFrame",content,{Size=UDim2.new(1,-20,0,180),BackgroundColor3=Color3.fromRGB(26,76,100),BorderSizePixel=0,Ambient=Color3.fromRGB(200,220,230),LightColor=white,ZIndex=23});corner(view,14)
   local world=Instance.new("WorldModel");world.Parent=view
-  local source=folder:FindFirstChild(modelName);if source then local model=source:Clone();model.Parent=world end
-  local camera=Instance.new("Camera");camera.CFrame=CFrame.lookAt(Vector3.new(if pet then 4 else 8,if pet then 3 else 5,if pet then 4 else 9),Vector3.new(0,if pet then 1 else 2,0));camera.Parent=view;view.CurrentCamera=camera
-  api.Viewport={Camera=camera,Frame=view,Distance=if pet then 5 else 10,TargetY=if pet then 1 else 2}
+  local source=folder:FindFirstChild(modelName)
+  local distance=if pet then 5 else 10
+  if source and source:IsA("Model") then
+   local model=source:Clone();model.Parent=world
+   local bounds,size=model:GetBoundingBox()
+   model:PivotTo(CFrame.new(-bounds.Position)*model:GetPivot())
+   distance=math.max(3,math.max(size.X,size.Y,size.Z)*1.45)
+  else row("Modell fehlt: "..modelName,35) end
+  local camera=Instance.new("Camera");camera.FieldOfView=40;camera.CFrame=CFrame.lookAt(Vector3.new(distance*0.75,distance*0.4,distance),Vector3.zero);camera.Parent=view;view.CurrentCamera=camera
+  api.Viewport={Camera=camera,Frame=view,Distance=distance,TargetY=0}
   return view
  end
  function api.collapse(value:boolean)

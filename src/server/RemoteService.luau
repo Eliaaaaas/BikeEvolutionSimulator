@@ -23,7 +23,7 @@ function RemoteService.start(gameplay: any)
   lastRequest[player] = now
   if not Protocol.validRequest(payload) then return { Ok=false, Error="BadRequest" } end
   local snapshot = gameplay.snapshot(player,true)
-  return if snapshot then {Ok=true,Data=snapshot} else {Ok=false,Error="NotReady"}
+  return if snapshot then {Ok=true,Data=snapshot} else {Ok=false,Error=gameplay.status(player)}
  end
  local lastFeedback: {[Player]: number} = {}
  remotes.Action.OnServerEvent:Connect(function(player: Player, payload: any)

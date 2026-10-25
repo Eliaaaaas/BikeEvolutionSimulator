@@ -71,14 +71,14 @@ function Race.new(data:any,stopTraining:(Player)->(),feedback:(Player,any)->()):
  end
  function adapter.move(player:Player,state:any,point:any)
   local position=Vector3.new(point.X+point.DZ*state.Lane,point.Y,point.Z-point.DX*state.Lane)
-  local cf=CFrame.lookAt(position,position+Vector3.new(point.DX,0,point.DZ))
+  local cf=CFrame.lookAt(position,position+Vector3.new(point.DX,point.DY or 0,point.DZ))
   state.Rig.Root.CFrame=cf
   state.Root.CFrame=cf*CFrame.new(0,4.8,0.9)
   state.Root.AssemblyLinearVelocity=Vector3.zero;state.Root.AssemblyAngularVelocity=Vector3.zero
   state.Bike:SetAttribute("RaceSpeed",state.Speed);state.Bike:SetAttribute("Distance",state.Distance)
   for _,bot in ipairs(state.Bots) do
    local p=Course.sample(bot.Distance);local pos=Vector3.new(p.X+p.DZ*bot.Lane,p.Y,p.Z-p.DX*bot.Lane)
-   bot.Rig.Root.CFrame=CFrame.lookAt(pos,pos+Vector3.new(p.DX,0,p.DZ))
+   bot.Rig.Root.CFrame=CFrame.lookAt(pos,pos+Vector3.new(p.DX,p.DY or 0,p.DZ))
    bot.Model:SetAttribute("RaceSpeed",if state.Phase=="Countdown" or bot.FinishedAt then 0 else bot.Speed);bot.Model:SetAttribute("Distance",bot.Distance)
   end
  end

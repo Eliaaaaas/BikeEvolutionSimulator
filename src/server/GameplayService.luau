@@ -47,8 +47,10 @@ function Service.new(dataService: any): any
  local inventorySent: {[Player]:number}={}
  local inventoryCache: {[Player]:any}={}
  local snapshotSequence: {[Player]:number}={}
+ local autoBlocked: {[Player]:boolean}={}
  local result: any = {}
  function result.setFeedback(callback:any) sink=callback end
+ function result.status(player:Player):string return dataService.status(player) end
  function result.handle(player: Player, payload: any): (boolean, string?)
   if player.Parent~=Players then return false,"NotReady" end
   -- Shared gate for UI remotes AND proximity prompts, before inspecting untrusted payloads.
@@ -59,10 +61,14 @@ function Service.new(dataService: any): any
   if race.active(player) then return false,"AlreadyRacing" end
   if payload.Action=="StartRace" then return race.start(player,payload.Difficulty or "Easy") end
   if payload.RequestId then return economy:handle(player,payload) end
-  if payload.Action == "Select" then return controller:select(player, payload.TreadmillId) end
+  if payload.Action == "Select" then autoBlocked[player]=nil;return controller:select(player, payload.TreadmillId) end
   if payload.Action == "Click" then return controller:impulse(player, true) end
-  if payload.Action == "Stop" then controller:stop(player); return true, nil end
+  if payload.Action == "Stop" then autoBlocked[player]=true;controller:stop(player); return true, nil end
   return controller:rebirth(player)
+ end
+ function result.interact(player:Player,payload:any)
+  local ok,reason=result.handle(player,payload)
+  if not ok and reason~="RateLimited" and reason~="Cooldown" then emit(player,{Kind="InteractionError",Error=reason}) end
  end
  function result.snapshot(player: Player, forceInventory: boolean?): any
   local snapshot = dataService.snapshot(player)
@@ -81,6 +87,7 @@ function Service.new(dataService: any): any
   -- Only the counters above change while training. Avoid cloning up to 500 pets at 4 Hz.
   local profile=cached.Profile
   snapshot.ActiveVehicle=profile.ActiveVehicle
+  snapshot.OwnedWorlds=profile.OwnedWorlds
   snapshotSequence[player]=(snapshotSequence[player] or 0)+1
   snapshot.SnapshotId=snapshotSequence[player]
   snapshot.InventoryRevision=inventoryRevision
@@ -112,7 +119,7 @@ function Service.new(dataService: any): any
   for id=1,3 do menuPrompt(island:WaitForChild("EggStation_"..id):WaitForChild("Egg") :: BasePart,Catalog.Eggs[id].Name,{Kind="OpenEgg",EggId=id}) end
   menuPrompt(island:WaitForChild("GaragePreview"):WaitForChild("Platform") :: BasePart,"Garage",{Kind="OpenMenu",Menu="Garage"})
   menuPrompt(island:WaitForChild("RebirthStation"):WaitForChild("RebirthOrb") :: BasePart,"Rebirth",{Kind="OpenMenu",Menu="Rebirths"})
-  race.request=function(player) result.handle(player,{Version=1,Action="StartRace"}) end
+  race.request=function(player) result.interact(player,{Version=1,Action="StartRace"}) end
   race.run()
   for id=1,5 do
    local prompt = Instance.new("ProximityPrompt")
@@ -123,16 +130,32 @@ function Service.new(dataService: any): any
    prompt.MaxActivationDistance = Config.Training.MaxDistance
    prompt.RequiresLineOfSight = false
    prompt.Parent = zones[id]
-   prompt.Triggered:Connect(function(player) result.handle(player, {Version=1,Action="Select",TreadmillId=id}) end)
+   prompt.Triggered:Connect(function(player) result.interact(player, {Version=1,Action="Select",TreadmillId=id}) end)
   end
   local function added(player: Player)
    player.CharacterRemoving:Connect(function() controller:stop(player) end)
   end
   Players.PlayerAdded:Connect(added)
   for _, player in ipairs(Players:GetPlayers()) do added(player) end
-  Players.PlayerRemoving:Connect(function(player) controller:remove(player); limiter:remove(player);sequence[player]=nil;inventorySent[player]=nil;inventoryCache[player]=nil;snapshotSequence[player]=nil;economy:remove(player) end)
+  Players.PlayerRemoving:Connect(function(player) controller:remove(player); limiter:remove(player);sequence[player]=nil;inventorySent[player]=nil;inventoryCache[player]=nil;snapshotSequence[player]=nil;autoBlocked[player]=nil;economy:remove(player) end)
   task.spawn(function()
-   while true do task.wait(0.1); controller:tick() end
+   local entered:{[Player]:number}={}
+   local retry:{[Player]:number}={}
+   Players.PlayerRemoving:Connect(function(player) entered[player]=nil;retry[player]=nil end)
+   while true do
+    task.wait(0.2)
+    for _,player in ipairs(Players:GetPlayers()) do
+     local onBelt=0
+     for id=1,5 do if near(player,id) then onBelt=id;break end end
+     if onBelt==0 then entered[player]=nil;retry[player]=nil;autoBlocked[player]=nil
+     elseif not autoBlocked[player] and controller:selection(player)~=onBelt and (entered[player]~=onBelt or os.clock()>=(retry[player] or 0)) then
+      entered[player]=onBelt;retry[player]=os.clock()+1
+      -- Stepping onto the belt uses the same authority/limiter as a prompt, never client touch events.
+      result.handle(player,{Version=1,Action="Select",TreadmillId=onBelt})
+     end
+    end
+    controller:tick()
+   end
   end)
  end
  return result

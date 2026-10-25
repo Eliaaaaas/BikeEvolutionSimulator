@@ -40,7 +40,7 @@ local function environment()
  end
  local shared={WaitForChild=function() return {} end}
  local services={Players=players,ReplicatedStorage={WaitForChild=function() return shared end},
-  DataStoreService={GetDataStore=function() return store end},
+  DataStoreService={GetDataStore=function() if store.InitFailure then error("Publish place first") end;return store end},
   HttpService={GenerateGUID=function() serial+=1;return tostring(serial) end,JSONEncode=function() return "log" end}}
  local game={JobId="test-job",GetService=function(_,name) return services[name] end,
   BindToClose=function(_,callback) close=callback end}
@@ -118,5 +118,10 @@ test("invalid transactions cannot partially overwrite live state",function()
  assert(not e.service.change(p,function(data) data.Energy=999;error("injected failure") end))
  assert(e.service.snapshot(p).Energy==0)
  e.shutdown();assert(not e.service.change(p,function() return true end))
+end)
+test("GetDataStore initialization failure is caught and cannot strand shutdown",function()
+ local e=environment();e.store.InitFailure=true;local p=e.join()
+ assert(p.Kicks==1 and e.service.snapshot(p)==nil and e.service.status(p)=="DataStoreInitializationFailed")
+ e.shutdown();e.advance(1)
 end)
 print(string.format("%d lifecycle tests passed",count))

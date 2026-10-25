@@ -29,8 +29,8 @@ test("800-stud guide is finite, smooth and outside the main island",function()
  local course=modules.RaceCourse;assert(math.abs(course.Length-800)<0.001)
  local last=course.sample(0)
  for distance=1,800 do
-  local p=course.sample(distance);assert(p.Z>=110 and p.Y==8.2)
-  assert(math.abs(p.DX*p.DX+p.DZ*p.DZ-1)<1e-5)
+  local p=course.sample(distance);assert(p.Z>=110 and p.Y>=8 and p.Y<25)
+  assert(math.abs(p.DX*p.DX+p.DY*p.DY+p.DZ*p.DZ-1)<1e-5)
   assert(math.sqrt((p.X-last.X)^2+(p.Z-last.Z)^2)<1.01);last=p
  end
  assert(course.sample(-100).X==course.sample(0).X)

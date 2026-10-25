@@ -107,13 +107,16 @@
       },
       "TestCourse": {
         "$path": "src/world/TestCourse.rbxmx"
+      },
+      "$attributes": {
+        "StudioPreviewData": true
       }
     },
     "Lighting": {
       "$className": "Lighting",
       "$properties": {
-        "ClockTime": 14,
-        "Brightness": 2.5,
+        "ClockTime": 14.5,
+        "Brightness": 2.8,
         "Ambient": [
           0.55,
           0.65,
@@ -123,7 +126,45 @@
           0.65,
           0.75,
           0.78
-        ]
+        ],
+        "EnvironmentDiffuseScale": 0.65,
+        "EnvironmentSpecularScale": 0.65,
+        "GlobalShadows": true
+      },
+      "TropicalAtmosphere": {
+        "$className": "Atmosphere",
+        "$properties": {
+          "Density": 0.22,
+          "Offset": 0.1,
+          "Color": [
+            0.76,
+            0.91,
+            1
+          ],
+          "Decay": [
+            0.65,
+            0.79,
+            0.89
+          ],
+          "Glare": 0.15,
+          "Haze": 0.8
+        }
+      },
+      "TropicalBloom": {
+        "$className": "BloomEffect",
+        "$properties": {
+          "Intensity": 0.15,
+          "Size": 20,
+          "Threshold": 1.5
+        }
+      },
+      "TropicalGrade": {
+        "$className": "ColorCorrectionEffect",
+        "$properties": {
+          "Saturation": 0.12,
+          "Contrast": 0.04,
+          "Brightness": 0.01
+        }
       }
     }
   }

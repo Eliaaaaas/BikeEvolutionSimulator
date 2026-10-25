@@ -8,14 +8,26 @@ local Profile = require(Shared:WaitForChild("Profile"))
 local Persistence = require(script.Parent.Persistence)
 local SavePolicy = require(script.Parent.SavePolicy)
 local shutdownDeadline = math.huge
+local options:any={}
+local started=false
+local statuses: {[Player]:string}={}
+local StudioStore=require(script.Parent.StudioStore)
+local previewStore:any=nil
 local function log(event: any)
  warn("[BikeData] " .. HttpService:JSONEncode(event))
 end
 local function newBackend()
- return Persistence.new(DataStoreService:GetDataStore(Config.Data.Store), Profile, Config.Data,
+ local store=if options.Preview then previewStore else DataStoreService:GetDataStore(options.StoreName or Config.Data.Store)
+ return Persistence.new(store, Profile, Config.Data,
   game.JobId .. ":" .. HttpService:GenerateGUID(false), os.time, function(attempt: number) task.wait(attempt * 2) end, log)
 end
 local Service = {}
+function Service.configure(value:any)
+ assert(not started,"Data service already started")
+ options=value
+ if options.Preview then previewStore=StudioStore.new() end
+end
+function Service.status(player:Player):string return statuses[player] or "Loading" end
 type Session = { Data: Profile.Data, Expires: number, Saving: boolean, Backend: any, Closing: boolean, Revision: number, InventoryRevision: number }
 local sessions: {[Player]: Session} = {}
 local closing = false
@@ -80,13 +92,22 @@ function Service.ownsVehicle(player: Player, id: number): boolean
  return not closing and session~=nil and not session.Closing and session.Expires>os.time() and table.find(session.Data.OwnedVehicles,id)~=nil
 end
 function Service.start()
+ assert(not started,"Data service started twice");started=true
  local function added(player: Player)
   if closing then return end
   loading += 1
-  local backend = newBackend()
+  statuses[player]="Loading"
+  local created,backend=pcall(newBackend)
+  if not created then
+   loading-=1;statuses[player]="DataStoreInitializationFailed"
+   log({Event="DataStoreInitializationFailed",UserId=player.UserId,Error=tostring(backend)})
+   player:Kick("Datenspeicher konnte nicht initialisiert werden. In Studio: StudioPreviewData aktivieren oder separate Test-Experience konfigurieren.")
+   return
+  end
   local data, reason, expires = backend:load(key(player))
   if not data then
    loading -= 1
+   statuses[player]=reason or "LoadFailed"
    warn("Profile load rejected", player.UserId, reason)
    player:Kick("Spielerdaten sind momentan nicht verfügbar. Bitte später erneut versuchen.")
    return
@@ -98,10 +119,11 @@ function Service.start()
    return
   end
   sessions[player] = { Data = data, Expires = expires, Saving = false, Backend = backend, Closing = false, Revision = 0, InventoryRevision = 0 }
+  statuses[player]=if options.Preview then "StudioPreviewReady" else "Ready"
   loading -= 1
  end
  Players.PlayerAdded:Connect(added)
- Players.PlayerRemoving:Connect(function(player) save(player, true) end)
+ Players.PlayerRemoving:Connect(function(player) save(player, true);statuses[player]=nil end)
  for _, player in ipairs(Players:GetPlayers()) do task.spawn(added, player) end
  task.spawn(function()
   while not closing do

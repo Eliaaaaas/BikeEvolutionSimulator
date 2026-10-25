@@ -9,11 +9,11 @@ def size(item):return [float(item.find(f"Properties/Vector3[@name='size']/{key}"
 items=list(root.iter('Item'))
 by_name={name(i):i for i in items}
 grass=[i for i in items if name(i).startswith('Grass_')]
-assert len(grass)==44
+assert len(grass)==96
 assert all(abs(position(i)[1]+size(i)[1]/2-8)<1e-9 for i in grass)
 minx=min(position(i)[0]-size(i)[0]/2 for i in grass);maxx=max(position(i)[0]+size(i)[0]/2 for i in grass)
 assert 165<maxx-minx<195
-assert max(position(i)[2]+size(i)[2]/2 for i in grass)-min(position(i)[2]-size(i)[2]/2 for i in grass)==176
+assert max(position(i)[2]+size(i)[2]/2 for i in grass)-min(position(i)[2]-size(i)[2]/2 for i in grass)>180
 spawn=by_name['IslandSpawn'];assert spawn.attrib['class']=='SpawnLocation';assert position(spawn)[0]==position(spawn)[2]==0
 training=by_name['Training'];treadmills=[i for i in training.findall('Item') if name(i).startswith('Treadmill_')]
 assert len(treadmills)==5
