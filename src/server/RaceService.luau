@@ -37,7 +37,7 @@ function Race.new(data:any,stopTraining:(Player)->(),feedback:(Player,any)->()):
   local definition=Content.Vehicles[state.VehicleId]
   local asset=if state.VehicleId==1 then prototype else game:GetService("ReplicatedStorage").Vehicles:FindFirstChild(definition.Model)
   assert(asset,"Vehicle model missing")
-  local bike=asset:Clone();state.Bike=bike;bike.Name="Mountainbike_"..player.UserId
+  local bike=asset:Clone();state.Bike=bike;bike.Name="Vehicle_"..player.UserId;bike.ModelStreamingMode=Enum.ModelStreamingMode.Atomic
   -- Build joints while still at prototype origin, before transporting the assembly.
   state.Rig=BikeRig.prepare(bike)
   bike:SetAttribute("VehicleId",state.VehicleId);bike:SetAttribute("Pedaling",state.VehicleId<=6);bike:SetAttribute("WheelRadius",if state.VehicleId==3 or state.VehicleId==8 then 1.15 else 1.43)
@@ -47,7 +47,7 @@ function Race.new(data:any,stopTraining:(Player)->(),feedback:(Player,any)->()):
   for i,bot in ipairs(state.Bots) do
    local botAsset=game:GetService("ReplicatedStorage"):WaitForChild("Vehicles"):FindFirstChild("Vehicle2") or prototype
    local model=botAsset:Clone();table.insert(state.BotModels,model)
-   local rig=BikeRig.prepare(model);model.Name="Bot_"..player.UserId.."_"..i
+   local rig=BikeRig.prepare(model);model.Name="Bot_"..player.UserId.."_"..i;model.ModelStreamingMode=Enum.ModelStreamingMode.Atomic;model:SetAttribute("RaceOwnerUserId",player.UserId)
    model:SetAttribute("RaceSpeed",0);model:SetAttribute("Distance",0);model:SetAttribute("Bot",true)
    model.Parent=bikes;bot.Rig=rig;bot.Model=model;bot.Lane=({-8,-5,-2,3,7})[i]
   end

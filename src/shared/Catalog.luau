@@ -39,14 +39,14 @@ for _, group in ipairs({ {Items=Catalog.Vehicles,Metadata=Metadata.Vehicles}, {I
  end
 end
 for id, content in ipairs(Content.Vehicles) do
- local v=table.clone(Catalog.Vehicles[id]);v.Name=content.Name;v.CashCost=content.Price;v.SpeedMultiplier=content.Speed;v.Model=content.Model;v.Playable=true
+ local v=table.clone(Catalog.Vehicles[id]);v.Name=content.Name;v.CashCost=content.Price;v.SpeedMultiplier=content.Speed;v.Model=content.Model;v.Playable=true;v.ContentStatus="Configured";v.Design=table.freeze({ModelPath="ReplicatedStorage/Vehicles/"..content.Model})
  Catalog.Vehicles[id]=table.freeze(v)
 end
 for id,content in ipairs(Content.Eggs) do
- local e=table.clone(Catalog.Eggs[id]);e.Name=content.Name;e.CashCost=content.Price;e.Weights=Content.Weights;e.Playable=true;Catalog.Eggs[id]=table.freeze(e)
+ local e=table.clone(Catalog.Eggs[id]);e.Name=content.Name;e.CashCost=content.Price;e.Weights=Content.Weights;e.Playable=true;e.ContentStatus="Configured";Catalog.Eggs[id]=table.freeze(e)
 end
 for id,content in ipairs(Content.Pets) do
- local p=table.clone(Catalog.Pets[id]);p.Name=content.Name;p.Rarity=Content.Rarities[(id-1)%4+1];p.EnergyMultiplier=content.Energy;p.CashMultiplier=content.Cash;p.Playable=true;Catalog.Pets[id]=table.freeze(p)
+ local p=table.clone(Catalog.Pets[id]);p.Name=content.Name;p.Rarity=Content.Rarities[(id-1)%4+1];p.EnergyMultiplier=content.Energy;p.CashMultiplier=content.Cash;p.Playable=true;p.ContentStatus="Configured";p.Model="Pet"..id;p.HatchWeight=Content.Weights[(id-1)%4+1];p.HatchChance=p.HatchWeight/10000;p.Design=table.freeze({ModelPath="ReplicatedStorage/PetModels/Pet"..id});Catalog.Pets[id]=table.freeze(p)
 end
 for _, category in ipairs({Catalog.Worlds,Catalog.Vehicles,Catalog.Treadmills,Catalog.Eggs,Catalog.Pets}) do table.freeze(category) end
 return table.freeze(Catalog)

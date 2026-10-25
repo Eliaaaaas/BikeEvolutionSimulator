@@ -17,6 +17,7 @@ function RemoteService.start(gameplay: any)
  gameplay.setFeedback(function(player:Player,event:any) remotes.Feedback:FireClient(player,event) end)
  local lastRequest: {[Player]: number} = {}
  remotes.GetSnapshot.OnServerInvoke = function(player: Player, payload: any): any
+  if player.Parent~=Players then return {Ok=false,Error="NotReady"} end
   local now, previousRequest = os.clock(), lastRequest[player]
   if previousRequest and now - previousRequest < Config.Network.SnapshotCooldown then return { Ok=false, Error="RateLimited" } end
   lastRequest[player] = now
@@ -31,7 +32,8 @@ function RemoteService.start(gameplay: any)
   if reason == "RateLimited" then return end
   if not ok and lastFeedback[player] and os.clock() - (lastFeedback[player] or 0) < 0.5 then return end
   lastFeedback[player] = os.clock()
-  remotes.ActionResult:FireClient(player, {Ok=ok,Error=reason})
+  local actionName=if type(payload)=="table" and type(payload.Action)=="string" and #payload.Action<=20 then payload.Action else ""
+  remotes.ActionResult:FireClient(player, {Ok=ok,Error=reason,Action=actionName})
  end)
  local previous: {[Player]: any} = {}
  Players.PlayerRemoving:Connect(function(player) lastRequest[player]=nil;lastFeedback[player]=nil;previous[player]=nil end)

@@ -67,7 +67,7 @@ local function fixture()
  local data=modules.Profile.new();data.Energy=500;data.Cash=75
  local service={change=function(_,cb) return cb(data),nil end,snapshot=function() return table.clone(data) end,ownsVehicle=function(_,id) return id==1 end}
  local old=modules.BikeRig;modules.BikeRig=modules.makeBikeRig(instance)
- local race=modules.makeRaceService(game,workspace,task,{clock=function() return now end},function() end,instance,cf,vector,{HumanoidStateType={GettingUp="GettingUp"}})
+ local race=modules.makeRaceService(game,workspace,task,{clock=function() return now end},function() end,instance,cf,vector,{HumanoidStateType={GettingUp="GettingUp"},ModelStreamingMode={Atomic="Atomic"}})
  local events={};local api=race.new(service,function() end,function(_,event) table.insert(events,event) end);modules.BikeRig=old
  api.run()
  local function advance(dt)

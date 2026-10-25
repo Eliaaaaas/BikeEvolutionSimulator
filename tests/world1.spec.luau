@@ -84,4 +84,34 @@ test("race payout receipt prevents repeat cash including retry with pet bonus",f
  local before=data.Cash;local second,repeatAmount=modules.RaceRules.pay(data,state);assert(second and repeatAmount==0 and data.Cash==before)
  state.RewardId="other";state.FinishedAt=nil;assert(not modules.RaceRules.pay(data,state));assert(data.Cash==before)
 end)
+test("v2 persist/reload keeps active bike, pets, discoveries and race receipt",function()
+ local stored=nil
+ local store={UpdateAsync=function(_,_,cb) local result=cb(stored);if result then stored=result end;return result end}
+ local function backend(id) return modules.Persistence.new(store,modules.Profile,modules.Config.Data,id,function() return 100 end,function() end) end
+ local a=backend("a");local data=a:load("p");data.OwnedVehicles={1,10};data.ActiveVehicle=10
+ data.Pets.uuid={SpeciesId=12,Variant="Rainbow"};data.DiscoveredPets={12};data.EquippedPets={"uuid"};data.LastRaceReward="paid-race"
+ assert(a:save("p",data,true));local loaded=backend("b"):load("p")
+ assert(loaded.ActiveVehicle==10 and loaded.Pets.uuid.Variant=="Rainbow" and loaded.EquippedPets[1]=="uuid" and loaded.DiscoveredPets[1]==12 and loaded.LastRaceReward=="paid-race")
+end)
+test("insufficient cash, full inventory and hatch cooldown cannot debit or grant",function()
+ local data=modules.Profile.new();local sequence=0;local now=1
+ local service={change=function(_,cb) local copy=modules.Profile.copy(data);if not cb(copy) then return false,"Rejected" end;data=copy;return true,nil end}
+ local e=modules.EconomyController.new(service,function() return now end,function() return 10000 end,function() sequence+=1;return "new"..sequence end,function() end)
+ assert(not e:handle("p",{Action="BuyVehicle",VehicleId=2,RequestId=1}));assert(data.Cash==0 and #data.OwnedVehicles==1)
+ assert(not e:handle("p",{Action="Hatch",EggId=1,RequestId=2}));assert(next(data.Pets)==nil and data.Cash==0)
+ data.Cash=1e6;assert(not e:handle("p",{Action="Hatch",EggId=1,RequestId=3}));assert(data.Cash==1e6)
+ now=3;for i=1,500 do data.Pets[tostring(i)]={SpeciesId=1,Variant="Normal"} end;data.DiscoveredPets={1}
+ assert(not e:handle("p",{Action="Hatch",EggId=1,RequestId=4}));assert(data.Cash==1e6)
+end)
+test("equipped vehicle affects authoritative speed and unowned selection is rejected",function()
+ local data=modules.Profile.new();data.OwnedVehicles={1,10};data.ActiveVehicle=10
+ local c=modules.RaceController.new({profile=function() return data end,nearStart=function() return true end,begin=function() end,cleanup=function() end,log=function() end},function() return 100 end)
+ assert(c:start("p","Hard"));assert(math.abs(c.States.p.Target-24*2.1)<1e-10)
+ assert(#c.States.p.Bots==5 and c.States.p.Bots[1].Speed==55)
+ c:remove("p");data.ActiveVehicle=9;assert(not c:start("p","Hard"))
+end)
+test("UI keeps small vehicle and pet multipliers distinguishable",function()
+ assert(modules.Format.multiplier(1.06)=="1.06" and modules.Format.multiplier(1.12)=="1.12")
+ assert(modules.Format.multiplier(1.05)=="1.05" and modules.Format.multiplier(1.5)=="1.5")
+end)
 print(string.format("%d World-1 economy/migration tests passed",count))

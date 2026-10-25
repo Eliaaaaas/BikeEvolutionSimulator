@@ -25,6 +25,13 @@ function Visuals.new(settings:any,ui:any):any
   if folder then
    for _,bike in ipairs(folder:GetChildren()) do
     if not bike:IsA("Model") or not bike.PrimaryPart then continue end
+    if bike:GetAttribute("Bot") and bike:GetAttribute("RaceOwnerUserId")~=Players.LocalPlayer.UserId then
+     if not bike:GetAttribute("LocallyHidden") then
+      for _,part in ipairs(bike:GetDescendants()) do if part:IsA("BasePart") then part.LocalTransparencyModifier=1 end end
+      bike:SetAttribute("LocallyHidden",true)
+     end
+     continue
+    end
     local camera=workspace.CurrentCamera
     if camera and (bike.PrimaryPart.Position-camera.CFrame.Position).Magnitude>230 then continue end
     local owner=bike:GetAttribute("OwnerUserId");if type(owner)=="number" then riderBikes[owner]=bike end
@@ -47,7 +54,7 @@ function Visuals.new(settings:any,ui:any):any
     for motor,base in pairs(record.Bases) do
      if motor.Name=="SteeringMotor" then motor.C0=base*CFrame.Angles(0,record.Steer,0)
      elseif motor.Name=="CrankMotor" then motor.C0=base*CFrame.Angles(-record.Crank,0,0)
-     elseif motor.Name=="FrameMotor" then motor.C0=base*CFrame.Angles(0,0,-record.Steer*0.4)
+     elseif motor.Name=="FrameMotor" then motor.C0=base*CFrame.new(0,if bike:GetAttribute("Pedaling")==false and speed>0 then math.sin(os.clock()*28)*0.015 else 0,0)*CFrame.Angles(0,0,-record.Steer*0.4)
      else motor.C0=base*CFrame.Angles(-record.Wheel,0,0) end
     end
     -- A small visual roll of the frame group, without moving authoritative root/path.
@@ -87,6 +94,11 @@ function Visuals.new(settings:any,ui:any):any
  local function updateConnection()
   local active=ui.Viewport~=nil or next(poses)~=nil
   for _,player in ipairs(Players:GetPlayers()) do if visible(player.Character) and (player:GetAttribute("Racing") or (player:GetAttribute("SelectedTreadmill") or 0)>0) then active=true;break end end
+  local folder=workspace:FindFirstChild("ActiveRaceBikes")
+  local camera=workspace.CurrentCamera
+  if not active and folder and camera then
+   for _,model in ipairs(folder:GetChildren()) do if model:IsA("Model") and model.PrimaryPart and (model.PrimaryPart.Position-camera.CFrame.Position).Magnitude<230 and (model:GetAttribute("RaceSpeed") or 0)>0 then active=true;break end end
+  end
   if active and settings.Animations and not connection then connection=RunService.PreSimulation:Connect(frame)
   elseif (not active or not settings.Animations) and connection then connection:Disconnect();connection=nil;restore() end
  end

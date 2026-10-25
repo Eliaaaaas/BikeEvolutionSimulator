@@ -27,7 +27,7 @@ function Controller.start(self:any,player:any,difficulty:string?): (boolean,stri
  if not data or not self.Adapter.nearStart(player) or not table.find(data.OwnedVehicles,data.ActiveVehicle or 1) or not Content.Vehicles[data.ActiveVehicle or 1] then return false,"RaceUnavailable" end
  if difficulty~=nil and not Content.Difficulties[difficulty] then return false,"BadRequest" end
  self.Sequence+=1
- local state={Id=self.Sequence,Started=self.Clock(),Last=self.Clock(),Distance=0,Speed=0,Target=Controller.speed(data.Energy)*(if Content.Vehicles[data.ActiveVehicle or 1] then Content.Vehicles[data.ActiveVehicle or 1].Speed else 1),Phase="Countdown",Difficulty=difficulty or "Test",Bots={},VehicleId=data.ActiveVehicle or 1,Reward=0}
+ local state={Id=self.Sequence,Started=self.Clock(),Last=self.Clock(),Distance=0,Speed=0,Target=Controller.speed(data.Energy)*(if Content.Vehicles[data.ActiveVehicle or 1] then Content.Vehicles[data.ActiveVehicle or 1].Speed else 1),Phase="Countdown",WorldId=1,Difficulty=difficulty or "Test",Bots={},VehicleId=data.ActiveVehicle or 1,Reward=0}
  if difficulty then for i,speed in ipairs(Content.Difficulties[difficulty].Speeds) do table.insert(state.Bots,{Id=i,Speed=speed,Distance=0}) end end
  self.States[player]=state -- reserve before spawning anything; simultaneous starts are refused
  local ok,err=pcall(self.Adapter.begin,player,state)

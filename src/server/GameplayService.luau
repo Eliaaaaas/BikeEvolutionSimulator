@@ -48,6 +48,7 @@ function Service.new(dataService: any): any
  local result: any = {}
  function result.setFeedback(callback:any) sink=callback end
  function result.handle(player: Player, payload: any): (boolean, string?)
+  if player.Parent~=Players then return false,"NotReady" end
   -- Shared gate for UI remotes AND proximity prompts, before inspecting untrusted payloads.
   if not limiter:allow(player) then return false, "RateLimited" end
   if not Protocol.validAction(payload) then return false, "BadRequest" end

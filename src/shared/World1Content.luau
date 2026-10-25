@@ -26,9 +26,10 @@ C.Rarities={"Common","Uncommon","Rare","Legendary"}
 C.Weights={5500,2800,1400,300}
 C.Difficulties={
  Easy={Speeds={22,24,26,28,30},Rewards={200,150,110,80,60,40}},
- Medium={Speeds={34,37,40,43,46},Rewards={700,500,350,250,180,120}},
- Hard={Speeds={55,59,63,67,71},Rewards={2400,1800,1300,900,650,450}},
+ Medium={Speeds={34,37,40,43,46},Rewards={700,450,250,130,75,45}},
+ Hard={Speeds={55,59,63,67,71},Rewards={2400,1500,600,200,90,50}},
 }
+C.RaceWorlds={[1]={Length=800,RewardMultiplier=1}}
 C.Variants={Normal=1,Golden=2,Rainbow=4}
 C.FusionWorlds={Golden=4,Rainbow=5}
 local function freeze(t:any):any for _,v in pairs(t) do if type(v)=="table" then freeze(v) end end;return table.freeze(t) end

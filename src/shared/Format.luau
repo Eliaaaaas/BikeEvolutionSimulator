@@ -14,4 +14,11 @@ function Format.number(value: number): string
  local text=if scaled%1==0 then string.format("%.0f",scaled) else string.format("%.1f",scaled)
  return sign..text..suffixes[group+1]
 end
+function Format.multiplier(value:number):string
+ if value~=value or math.abs(value)==math.huge then return "—" end
+ if math.abs(value)>=1000 then return Format.number(value) end
+ local text=string.format("%.3f",value)
+ text=string.gsub(text,"0+$","");text=string.gsub(text,"%.$","")
+ return text
+end
 return table.freeze(Format)

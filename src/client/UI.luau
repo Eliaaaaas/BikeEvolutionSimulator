@@ -4,6 +4,8 @@ local UserInputService=game:GetService("UserInputService")
 local Shared=game:GetService("ReplicatedStorage"):WaitForChild("Shared")
 local Format=require(Shared:WaitForChild("Format"))
 local Presentation=require(Shared:WaitForChild("Presentation"))
+local Catalog=require(Shared:WaitForChild("Catalog"))
+local Content=require(Shared:WaitForChild("World1Content"))
 local State=require(Shared:WaitForChild("ClientState"))
 local Icons=require(script.Parent.Icons)
 local UI={}
@@ -35,7 +37,7 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
  end
  local sidebarHeight=535
  local generation=0
- local api:any={Settings=settings,Buttons=buttons,Snapshot=nil,Viewport=nil,OnAction=function() end,OnSetting=function() end,OnMenu=function() end}
+ local api:any={Settings=settings,Buttons=buttons,Snapshot=nil,Viewport=nil,OnAction=function() end,OnSetting=function() end,OnMenu=function() end,Difficulty="Easy"}
  for i,name in ipairs({"Energy","Cash","Rebirths","Garage","Pets","Race","Worlds","Upgrades","Settings"}) do
   local button=make("TextButton",list,{Name=name,LayoutOrder=i,Size=UDim2.new(1,-4,0,47),BackgroundColor3=palette[name],BackgroundTransparency=0.08,BorderSizePixel=0,Text="",AutoButtonColor=false})
   corner(button,12);make("UIGradient",button,{Color=ColorSequence.new(white,Color3.fromRGB(185,226,241)),Rotation=32})
@@ -49,7 +51,7 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
    audio.play("Button");settings.Active=name
    for key,b in pairs(buttons) do local s=b:FindFirstChildOfClass("UIStroke");if s then tween(s,{Thickness=if key==name then 3 else 1,Transparency=if key==name then 0.1 else 0.8}) end end
    tween(button,{BackgroundTransparency=0},0.07);task.delay(0.1,function() if button.Parent then tween(button,{BackgroundTransparency=0.08}) end end)
-   api.OnMenu(name)
+   api.CurrentMenu=name;api.OnMenu(name)
   end)
  end
  local training=make("TextButton",root,{AnchorPoint=Vector2.new(1,1),Size=UDim2.fromOffset(225,54),Position=UDim2.new(1,-8,1,-142),Text="ϟ TRAINIEREN",Font=Enum.Font.GothamBold,TextSize=17,TextColor3=white,BackgroundColor3=palette.Energy,BorderSizePixel=0});corner(training,15)
@@ -60,7 +62,8 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
  make("UISizeConstraint",window,{MaxSize=Vector2.new(560,560),MinSize=Vector2.new(240,200)})
  local heading=make("TextLabel",window,{Size=UDim2.new(1,-70,0,48),Position=UDim2.fromOffset(14,0),Text="",BackgroundTransparency=1,TextColor3=white,TextSize=22,Font=Enum.Font.GothamBold,ZIndex=22})
  local close=make("TextButton",window,{Size=UDim2.fromOffset(42,38),Position=UDim2.new(1,-50,0,6),Text="×",TextColor3=white,TextSize=28,BackgroundTransparency=1,ZIndex=22})
- local content=make("ScrollingFrame",window,{Size=UDim2.new(1,-24,1,-60),Position=UDim2.fromOffset(12,54),BackgroundTransparency=1,BorderSizePixel=0,ScrollBarThickness=4,AutomaticCanvasSize=Enum.AutomaticSize.Y,CanvasSize=UDim2.new(),ZIndex=22})
+ local content=make("ScrollingFrame",window,{Size=UDim2.new(1,-24,1,-90),Position=UDim2.fromOffset(12,54),BackgroundTransparency=1,BorderSizePixel=0,ScrollBarThickness=4,AutomaticCanvasSize=Enum.AutomaticSize.Y,CanvasSize=UDim2.new(),ZIndex=22})
+ local notice=make("TextLabel",window,{Size=UDim2.new(1,-20,0,26),Position=UDim2.new(0,10,1,-28),BackgroundTransparency=1,Text="",TextColor3=Color3.fromRGB(255,234,150),TextSize=12,TextWrapped=true,ZIndex=24,Font=Enum.Font.GothamBold})
  local function clear()
   api.Viewport=nil
   for object,t in pairs(activeTweens) do if object:IsDescendantOf(content) then t:Cancel();activeTweens[object]=nil end end
@@ -76,6 +79,14 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
  local function command(value:string,callback:()->()):any
   local b=make("TextButton",content,{Size=UDim2.new(1,-20,0,48),Text=value,TextColor3=white,TextSize=16,Font=Enum.Font.GothamBold,BackgroundColor3=palette.Worlds,BorderSizePixel=0,ZIndex=23});corner(b,12)
   b.Activated:Connect(function() audio.play("Button");callback() end);return b
+ end
+ function api.preview(folder:Instance,modelName:string,pet:boolean):any
+  local view=make("ViewportFrame",content,{Size=UDim2.new(1,-20,0,180),BackgroundColor3=Color3.fromRGB(26,76,100),BorderSizePixel=0,Ambient=Color3.fromRGB(200,220,230),LightColor=white,ZIndex=23});corner(view,14)
+  local world=Instance.new("WorldModel");world.Parent=view
+  local source=folder:FindFirstChild(modelName);if source then local model=source:Clone();model.Parent=world end
+  local camera=Instance.new("Camera");camera.CFrame=CFrame.lookAt(Vector3.new(if pet then 4 else 8,if pet then 3 else 5,if pet then 4 else 9),Vector3.new(0,if pet then 1 else 2,0));camera.Parent=view;view.CurrentCamera=camera
+  api.Viewport={Camera=camera,Frame=view,Distance=if pet then 5 else 10,TargetY=if pet then 1 else 2}
+  return view
  end
  function api.collapse(value:boolean)
   State.setting(settings,"Collapsed",value)
@@ -97,8 +108,9 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
  end
  close.Activated:Connect(hide)
  function api.open(name:string)
+  api.CurrentMenu=name
   generation+=1
-  clear();heading.Text=name;overlay.Visible=true;window.Position=UDim2.fromScale(0.5,0.53);tween(window,{Position=UDim2.fromScale(0.5,0.5)})
+  clear();notice.Text="";heading.Text=name;overlay.Visible=true;window.Position=UDim2.fromScale(0.5,0.53);tween(window,{Position=UDim2.fromScale(0.5,0.5)})
   local snap=api.Snapshot
   if name=="Settings" then
    for _,entry in ipairs({{Key="Animations",Label="Animationen"},{Key="Popups",Label="Energy-Pop-ups"},{Key="Sound",Label="Soundeffekte"},{Key="Collapsed",Label="Kompakte Sidebar"}}) do
@@ -111,13 +123,65 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
    local volume=row("Lautstärke: "..math.floor(settings.Volume*100).." %",30)
    command("− Leiser",function() State.setting(settings,"Volume",settings.Volume-0.1);volume.Text="Lautstärke: "..math.floor(settings.Volume*100).." %";api.OnSetting() end)
    command("+ Lauter",function() State.setting(settings,"Volume",settings.Volume+0.1);volume.Text="Lautstärke: "..math.floor(settings.Volume*100).." %";api.OnSetting() end)
-  elseif name=="Garage" then
-   row("Mountainbike • Fahrzeug-ID 1\nKostenloses, ausgerüstetes Startbike",56)
-   local view=make("ViewportFrame",content,{Size=UDim2.new(1,-20,0,220),BackgroundColor3=Color3.fromRGB(26,76,100),BorderSizePixel=0,Ambient=Color3.fromRGB(200,220,230),LightColor=white,ZIndex=23});corner(view,14)
-   local world=Instance.new("WorldModel");world.Parent=view
-   local bike=game:GetService("ReplicatedStorage"):WaitForChild("Vehicles"):WaitForChild("Mountainbike"):Clone();bike.Parent=world
-   local camera=Instance.new("Camera");camera.CFrame=CFrame.lookAt(Vector3.new(8,5,9),Vector3.new(0,2,0));camera.Parent=view;view.CurrentCamera=camera;api.Viewport={Camera=camera,Frame=view}
-   row("Nur im Test-Rennen fahrbar. Weitere Bikes sind noch nicht spielbar.",55)
+  elseif name=="Garage" and snap then
+   local id=api.VehicleId or snap.ActiveVehicle or 1
+   if not Content.Vehicles[id] then id=1 end
+   local definition=Catalog.Vehicles[id]
+   row(definition.Name.." • ID "..id.." • Tempo ×"..Format.multiplier(definition.SpeedMultiplier),45)
+   api.preview(game:GetService("ReplicatedStorage").Vehicles,definition.Model,false)
+   local owned=table.find(snap.OwnedVehicles or {1},id)~=nil
+   row(if snap.ActiveVehicle==id then "✓ AKTIV AUSGERÜSTET" elseif owned then "In deinem Besitz" else Format.number(definition.CashCost).." Cash",30)
+   if snap.ActiveVehicle~=id then command(if owned then "Ausrüsten" else "Kaufen",function() api.OnAction(if owned then "EquipVehicle" else "BuyVehicle",{VehicleId=id}) end) end
+   for vehicleId=1,10 do local v=Catalog.Vehicles[vehicleId];command(v.Name.." • "..Format.number(v.CashCost).." Cash",function() api.VehicleId=vehicleId;api.open("Garage") end) end
+  elseif name=="Pets" and snap then
+   row("Pets • "..#(snap.EquippedPets or {}).." / 3 ausgerüstet\nEnergy ×"..Format.multiplier(snap.PetEnergyBonus or 1).." • Cash ×"..Format.multiplier(snap.PetCashBonus or 1),65)
+   local activeNames={}
+   for _,id in ipairs(snap.EquippedPets or {}) do local pet=snap.Pets[id];if pet then table.insert(activeNames,Catalog.Pets[pet.SpeciesId].Name or "Unbekannt") end end
+   row("Slots: "..(if #activeNames==0 then "leer / leer / leer" else table.concat(activeNames," / ")),50)
+   command("Eier öffnen",function() api.open("Eggs") end)
+   command("Pet-Index",function() api.open("Index") end)
+   local ids={};for id in pairs(snap.Pets or {}) do table.insert(ids,id) end;table.sort(ids)
+   if #ids==0 then row("Noch keine Pets. Verdiene Cash im Rennen und öffne ein Ei.",65) end
+   local page=math.clamp(api.PetPage or 1,1,math.max(1,math.ceil(#ids/20)));api.PetPage=page
+   row("Inventarseite "..page.." / "..math.max(1,math.ceil(#ids/20)),25)
+   for i=(page-1)*20+1,math.min(page*20,#ids) do
+    local id=ids[i];local pet=snap.Pets[id];local d=Catalog.Pets[pet.SpeciesId]
+    command((if table.find(snap.EquippedPets,id) then "✓ " else "")..(d.Name or "Unbekannte Art").." • "..pet.Variant,function() api.PetId=id;api.open("Pet") end)
+   end
+   if page>1 then command("← Vorherige Seite",function() api.PetPage=page-1;api.open("Pets") end) end
+   if page*20<#ids then command("Nächste Seite →",function() api.PetPage=page+1;api.open("Pets") end) end
+  elseif name=="Pet" and snap then
+   local id=api.PetId;local pet=snap.Pets[id]
+   if pet then
+    local d=Catalog.Pets[pet.SpeciesId];local factor=Content.Variants[pet.Variant]
+    row((d.Name or "Unbekannte Art").." • "..pet.Variant.." • "..(d.Rarity or "Offen"),45)
+    if d.Playable then api.preview(game:GetService("ReplicatedStorage").PetModels,"Pet"..pet.SpeciesId,true);row("Energy ×"..Format.multiplier(1+(d.EnergyMultiplier-1)*factor).." • Cash ×"..Format.multiplier(1+(d.CashMultiplier-1)*factor),35) end
+    local equipped=table.find(snap.EquippedPets,id)~=nil
+    command(if equipped then "Ablegen" else "Ausrüsten",function() api.OnAction(if equipped then "UnequipPet" else "EquipPet",{PetId=id}) end)
+   end
+   command("Zurück zum Inventar",function() api.open("Pets") end)
+  elseif name=="Index" and snap then
+   local found=0;for _,id in ipairs(snap.DiscoveredPets or {}) do if id<=12 then found+=1 end end
+   row("Welt-1-Sammlung: "..found.." / 12",35)
+   for eggId=1,3 do
+    row(Catalog.Eggs[eggId].Name,30)
+    for _,id in ipairs(Catalog.Eggs[eggId].Species) do local pet=Catalog.Pets[id];row((if table.find(snap.DiscoveredPets or {},id) then "✓ "..pet.Name else "???").." • "..pet.Rarity,32) end
+   end
+  elseif name=="Eggs" then
+   row("Drei Eier • Je vier mögliche Pet-Arten",40)
+   for eggId=1,3 do local e=Catalog.Eggs[eggId];command(e.Name.." • "..Format.number(e.CashCost).." Cash",function() api.EggId=eggId;api.open("Egg") end) end
+  elseif name=="Egg" then
+   local id=api.EggId or 1;local egg=Catalog.Eggs[id]
+   row(egg.Name.." • "..Format.number(egg.CashCost).." Cash",40)
+   for i,species in ipairs(egg.Species) do local d=Catalog.Pets[species];row(d.Name.." • "..d.Rarity.." • "..egg.Weights[i]/100 .." %\nEnergy ×"..Format.multiplier(d.EnergyMultiplier).." • Cash ×"..Format.multiplier(d.CashMultiplier),54) end
+   command("Ei öffnen",function() api.OnAction("Hatch",{EggId=id}) end)
+   command("Alle Eier",function() api.open("Eggs") end)
+  elseif name=="Hatch" then
+   local id=api.HatchedId;local d=Catalog.Pets[id]
+   row("ERHALTEN: "..d.Name.." • "..d.Rarity,45)
+   local view=api.preview(game:GetService("ReplicatedStorage").PetModels,"Pet"..id,true)
+   if settings.Animations then local reveal=make("UIScale",view,{Scale=0.35});tween(reveal,{Scale=1},0.45) end
+   command("Zum Pet-Inventar",function() api.open("Pets") end)
   elseif name=="Rebirths" and snap then
    local p=Presentation.rebirth(snap)
    api.RebirthInfo=row("",110);api.RebirthBar=bar(p.Ratio)
@@ -128,17 +192,25 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
    command("Zusätzlicher Trainingsimpuls",function() api.OnAction("Training") end)
    command("Training beenden",function() api.OnAction("Stop");hide() end)
   elseif name=="Race" then
-   api.RaceInfo=row("",100);api.RaceBar=bar(0)
-   command("Mountainbike-Test starten",function() api.OnAction("StartRace");hide() end)
+   row("PALM BAY • 800 Studs • 5 Bots\nEnergy wird nicht verbraucht.",55)
+   for _,tier in ipairs({"Easy","Medium","Hard"}) do command((if api.Difficulty==tier then "✓ " else "")..tier,function() api.Difficulty=tier;api.open("Race") end) end
+   local tier=Content.Difficulties[api.Difficulty]
+   row("Bot-Tempo: "..table.concat(tier.Speeds," / ").."\nCash Plätze 1–6: "..table.concat(tier.Rewards," / "),60)
+   api.RaceInfo=row("",70);api.RaceBar=bar(0)
+   if api.LastRaceResult then row("Ergebnis "..(api.LastRaceResult.Difficulty or "")..": Platz "..(api.LastRaceResult.Place or "—").." • +"..Format.number(api.LastRaceResult.Reward or 0).." Cash",50) end
+   command("Rennen starten / erneut starten",function() api.OnAction("StartRace",{Difficulty=api.Difficulty});hide() end)
    command("Rennen abbrechen",function() api.OnAction("AbortRace");hide() end)
-   row("Start nur in der Race-Zone. Automatische Fahrt, keine Bots oder Cash-Belohnung. Energy bleibt erhalten.",65)
   elseif name=="Cash" then row("Cash wird erhalten, im Test-Rennen aber weder verbraucht noch vergeben.",80)
   else row(name.." • VORSCHAU\nDieser Bereich ist noch nicht spielbar. Keine Käufe oder Belohnungen.",90) end
   api.update(api.Snapshot)
  end
  function api.update(snap:any)
   if not snap then return end
+  local oldRevision=if api.Snapshot then api.Snapshot.InventoryRevision else nil
   api.Snapshot=snap
+  if oldRevision~=nil and snap.InventoryRevision~=oldRevision and overlay.Visible and (api.CurrentMenu=="Garage" or api.CurrentMenu=="Pets" or api.CurrentMenu=="Pet" or api.CurrentMenu=="Index") then
+   api.open(api.CurrentMenu)
+  end
   for _,name in ipairs({"Energy","Cash","Rebirths"}) do labels[name].Text=(if settings.Collapsed then "" else name.."\n")..Format.number(snap[name]) end
   local p=Presentation.training(snap)
   local info="Laufband "..p.Current.." • +"..Format.number(p.Gain).."/Impuls\n"..(if p.Complete then "Alle fünf Insel-Laufbänder verfügbar." else "Nächstes: "..p.Next.." • fehlen "..Format.number(p.Missing).." Energy\nODER "..Format.number(p.RebirthRequirement).." Rebirths (Weltzugang nötig)")
@@ -150,12 +222,12 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
    tween(api.RebirthBar,{Size=UDim2.fromScale(r.Ratio,1)});api.RebirthConfirm.Text=if r.Allowed then "Rebirth bestätigen" else "Noch nicht genug Energy"
   end
   if api.RaceInfo and api.RaceInfo.Parent then
-   local race=snap.Race or {Phase="Idle",Progress=0};api.RaceInfo.Text="Mountainbike Test\n"..race.Phase.." • "..math.floor(race.Progress*100).." %"
+   local race=snap.Race or {Phase="Idle",Progress=0};api.RaceInfo.Text="Mountainbike Test\n"..race.Phase.." • Platz "..(race.Place or "—").." / 6 • "..math.floor(race.Progress*100).." %"
    tween(api.RaceBar,{Size=UDim2.fromScale(race.Progress,1)})
   end
  end
  api.Status=status
- function api.message(value:string) status.Text=value end
+ function api.message(value:string) status.Text=value;notice.Text=value end
  function api.refreshSettings()
   if not settings.Animations then
    for object,t in pairs(activeTweens) do t:Cancel();activeTweens[object]=nil end

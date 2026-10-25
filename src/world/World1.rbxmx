@@ -3366,9 +3366,9 @@
         <token name="BottomSurface">0</token>
         <token name="shape">1</token>
         <Vector3 name="size">
-          <X>650</X>
+          <X>1100</X>
           <Y>2</Y>
-          <Z>650</Z>
+          <Z>1100</Z>
         </Vector3>
         <Color3 name="Color">
           <R>0.11372549019607843</R>

@@ -13,11 +13,13 @@ function Rules.position(state:any):number
  return rank
 end
 function Rules.reward(data:any,state:any):number
+ local world=Content.RaceWorlds[state.WorldId or 1]
+ if not world then return 0 end
  local tier=Content.Difficulties[state.Difficulty]
  if not tier or not state.FinishedAt then return 0 end
  local base=tier.Rewards[state.Place]
  if not base then return 0 end
- return Numbers.multiply(base,PetRules.bonus(data,"Cash"))
+ return Numbers.multiply(Numbers.multiply(base,world.RewardMultiplier),PetRules.bonus(data,"Cash"))
 end
 function Rules.pay(data:any,state:any): (boolean,number)
  if type(state.RewardId)~="string" or #state.RewardId==0 or #state.RewardId>100 then return false,0 end

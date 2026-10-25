@@ -38,6 +38,16 @@ for i,(a,b) in enumerate(zip(points,points[1:])):
  for side in [-1,1]:
   x=center[0]+side*12*math.cos(math.radians(yaw));z=center[2]-side*12*math.sin(math.radians(yaw))
   part(track,f'Barrier_{i}_{side}',(0.4,1.5,length+0.7),(x,8.9,z),(77,206,183),yaw=yaw)
+# Tropical roadside islands and palms, outside the drivable barriers.
+for i in range(0,120,12):
+ a,b=points[i],points[i+1];yaw=math.atan2(b[0]-a[0],b[2]-a[2]);x=a[0]+math.cos(yaw)*23;z=a[2]-math.sin(yaw)*23
+ part(track,'TropicalSand',(16,3,16),(x,1,z),(236,210,151),1296)
+ part(track,'TropicalGrass',(13,.3,13),(x,2.65,z),(93,185,106),1280)
+ part(track,'PalmTrunk',(1.5,12,1.5),(x,8.8,z),(154,111,73),512)
+ for angle in range(4):part(track,'PalmLeaf',(3,.5,9),(x+math.sin(angle*math.pi/2)*3,15,z+math.cos(angle*math.pi/2)*3),(57,165,94),yaw=angle*90)
+ # Two angled bars and shaft indicate forward direction on the road surface.
+ part(track,'ArrowShaft',(.35,.04,3),(a[0],8.04,a[2]),(250,235,137),collide=False,yaw=math.degrees(yaw))
+ for side in [-1,1]:part(track,'ArrowHead',(.35,.04,1.5),(a[0]+math.sin(yaw)*1+side*math.cos(yaw)*.5,8.04,a[2]+math.cos(yaw)*1-side*math.sin(yaw)*.5),(250,235,137),collide=False,yaw=math.degrees(yaw)+side*45)
 for title,index in [('START',0),('ZIEL',-1)]:
  x,y,z=points[index]
  a,b=(points[0],points[1]) if index==0 else (points[-2],points[-1])

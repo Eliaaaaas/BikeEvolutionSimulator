@@ -54,7 +54,7 @@ for row in range(44):
     shift=3*math.sin(row*0.57)
     part(terrain,f'Sand_{row}',(half*2+5,7.5,4),(shift,3.75,z),(239,205,135),1296)
     part(terrain,f'Grass_{row}',(half*2,8,4),(shift,4,z),(97,195,105),1280)
-part(model,'Ocean',(650,2,650),(0,-1,0),(29,173,205),288,False,0.28)
+part(model,'Ocean',(1100,2,1100),(0,-1,0),(29,173,205),288,False,0.28)
 spawn,sp=part(model,'IslandSpawn',(12,0.2,12),(0,8.1,0),(255,222,94),cls='SpawnLocation')
 prop(sp,'bool','Neutral',True);prop(sp,'float','Duration',0)
 sign(model,'PALM BAY  /  WELT 1',(0,15,-12),(30,5,1))

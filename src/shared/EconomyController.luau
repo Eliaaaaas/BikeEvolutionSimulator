@@ -45,7 +45,7 @@ function E.handle(self:any,player:any,payload:any): (boolean,string?)
    table.remove(data.EquippedPets,index)
   else return false end
   return true
- end)
+ end,true)
  if ok then self.Feedback(player,result or {Kind="Purchase",Action=kind}) end
  return ok,if reason=="Rejected" then rejection else reason
 end

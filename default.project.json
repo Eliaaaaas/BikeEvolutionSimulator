@@ -94,10 +94,16 @@
     "Workspace": {
       "$className": "Workspace",
       "World1": {
-        "$path": "src/world/World1.rbxmx"
+        "$path": "src/world/World1.rbxmx",
+        "$properties": {
+          "ModelStreamingMode": "Persistent"
+        }
       },
       "$properties": {
-        "FallenPartsDestroyHeight": -80
+        "FallenPartsDestroyHeight": -80,
+        "StreamingEnabled": true,
+        "StreamingMinRadius": 64,
+        "StreamingTargetRadius": 256
       },
       "TestCourse": {
         "$path": "src/world/TestCourse.rbxmx"
