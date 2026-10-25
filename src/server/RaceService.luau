@@ -53,6 +53,7 @@ function Race.new(data:any,stopTraining:(Player)->(),feedback:(Player,any)->()):
   end
   player:SetAttribute("Racing",true)
   root.Anchored=true;hum.AutoRotate=false;hum.WalkSpeed=0;hum.PlatformStand=true
+  adapter.move(player,state,Course.sample(0))
   feedback(player,{Kind="RaceStarted",RaceId=state.Id})
  end
  function adapter.reward(player:Player,state:any): (boolean,number)
@@ -78,7 +79,7 @@ function Race.new(data:any,stopTraining:(Player)->(),feedback:(Player,any)->()):
   for _,bot in ipairs(state.Bots) do
    local p=Course.sample(bot.Distance);local pos=Vector3.new(p.X+p.DZ*bot.Lane,p.Y,p.Z-p.DX*bot.Lane)
    bot.Rig.Root.CFrame=CFrame.lookAt(pos,pos+Vector3.new(p.DX,0,p.DZ))
-   bot.Model:SetAttribute("RaceSpeed",if bot.FinishedAt then 0 else bot.Speed);bot.Model:SetAttribute("Distance",bot.Distance)
+   bot.Model:SetAttribute("RaceSpeed",if state.Phase=="Countdown" or bot.FinishedAt then 0 else bot.Speed);bot.Model:SetAttribute("Distance",bot.Distance)
   end
  end
  function adapter.cleanup(player:Player,state:any,reason:string)

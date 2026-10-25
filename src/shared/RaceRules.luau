@@ -26,7 +26,9 @@ function Rules.pay(data:any,state:any): (boolean,number)
  local amount=Rules.reward(data,state)
  if amount<=0 then return false,0 end
  if data.LastRaceReward==state.RewardId then return true,0 end
- data.Cash=Numbers.add(data.Cash,amount);data.LastRaceReward=state.RewardId
- return true,amount
+ local before=data.Cash
+ data.Cash=Numbers.add(before,amount);data.LastRaceReward=state.RewardId
+ -- At the finite currency cap, report only what was actually credited.
+ return true,data.Cash-before
 end
 return table.freeze(Rules)

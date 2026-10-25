@@ -42,9 +42,11 @@ function Service.new(dataService: any): any
  local controller = Controller.new(dataService, os.clock, near,emit)
  local race=RaceService.new(dataService,function(player) controller:stop(player) end,emit)
  local rng=Random.new()
- local economy=Economy.new(dataService,os.clock,function() return rng:NextInteger(1,10000) end,function() return Http:GenerateGUID(false) end,emit)
+ local economy=Economy.new(dataService,os.clock,function() return rng:NextInteger(1,10000) end,function() return Http:GenerateGUID(false) end,emit,function(player,event,reason) warn("[Economy]",event,player.UserId,reason) end)
  local limiter = Limiter.new(Config.Training.RemoteCapacity, Config.Training.RemoteRefillPerSecond, os.clock)
  local inventorySent: {[Player]:number}={}
+ local inventoryCache: {[Player]:any}={}
+ local snapshotSequence: {[Player]:number}={}
  local result: any = {}
  function result.setFeedback(callback:any) sink=callback end
  function result.handle(player: Player, payload: any): (boolean, string?)
@@ -69,10 +71,18 @@ function Service.new(dataService: any): any
   snapshot.SelectedTreadmill = selected
   player:SetAttribute("SelectedTreadmill",selected)
   snapshot.Race=race.snapshot(player)
-  local profile=dataService.read(player)
-  if not profile then return nil end
-  snapshot.ActiveVehicle=profile.ActiveVehicle
   local inventoryRevision=dataService.inventoryRevision(player)
+  local cached=inventoryCache[player]
+  if not cached or cached.Revision~=inventoryRevision then
+   local profile=dataService.read(player)
+   if not profile then return nil end
+   cached={Revision=inventoryRevision,Profile=profile};inventoryCache[player]=cached
+  end
+  -- Only the counters above change while training. Avoid cloning up to 500 pets at 4 Hz.
+  local profile=cached.Profile
+  snapshot.ActiveVehicle=profile.ActiveVehicle
+  snapshotSequence[player]=(snapshotSequence[player] or 0)+1
+  snapshot.SnapshotId=snapshotSequence[player]
   snapshot.InventoryRevision=inventoryRevision
   snapshot.LastRequestId=economy.Requests[player] or 0
   if forceInventory or inventorySent[player]~=inventoryRevision then
@@ -120,7 +130,7 @@ function Service.new(dataService: any): any
   end
   Players.PlayerAdded:Connect(added)
   for _, player in ipairs(Players:GetPlayers()) do added(player) end
-  Players.PlayerRemoving:Connect(function(player) controller:remove(player); limiter:remove(player);sequence[player]=nil;inventorySent[player]=nil;economy:remove(player) end)
+  Players.PlayerRemoving:Connect(function(player) controller:remove(player); limiter:remove(player);sequence[player]=nil;inventorySent[player]=nil;inventoryCache[player]=nil;snapshotSequence[player]=nil;economy:remove(player) end)
   task.spawn(function()
    while true do task.wait(0.1); controller:tick() end
   end)

@@ -24,7 +24,7 @@ function Controller.start(self:any,player:any,difficulty:string?): (boolean,stri
  if self.States[player] then return false,"AlreadyRacing" end
  if (self.Cooldowns[player] or 0)>self.Clock() then return false,"Cooldown" end
  local data=self.Adapter.profile(player)
- if not data or not self.Adapter.nearStart(player) or not table.find(data.OwnedVehicles,data.ActiveVehicle or 1) or not Content.Vehicles[data.ActiveVehicle or 1] then return false,"RaceUnavailable" end
+ if not data or type(data.Energy)~="number" or not Numbers.valid(data.Energy) or not self.Adapter.nearStart(player) or not table.find(data.OwnedVehicles,data.ActiveVehicle or 1) or not Content.Vehicles[data.ActiveVehicle or 1] then return false,"RaceUnavailable" end
  if difficulty~=nil and not Content.Difficulties[difficulty] then return false,"BadRequest" end
  self.Sequence+=1
  local state={Id=self.Sequence,Started=self.Clock(),Last=self.Clock(),Distance=0,Speed=0,Target=Controller.speed(data.Energy)*(if Content.Vehicles[data.ActiveVehicle or 1] then Content.Vehicles[data.ActiveVehicle or 1].Speed else 1),Phase="Countdown",WorldId=1,Difficulty=difficulty or "Test",Bots={},VehicleId=data.ActiveVehicle or 1,Reward=0}
@@ -36,9 +36,15 @@ function Controller.start(self:any,player:any,difficulty:string?): (boolean,stri
 end
 function Controller.tick(self:any)
  for player,state in pairs(self.States) do
-  local now=self.Clock();local dt=math.clamp(now-state.Last,0,0.25);state.Last=now
+  local now=self.Clock()
+  -- Count only the elapsed portion after GO; a delayed tick cannot grant a head start.
+  local rideStart=state.Started+Test.Countdown
+  local dt=math.clamp(now-math.max(state.Last,rideStart),0,0.25);state.Last=now
   local checked,valid=pcall(self.Adapter.valid,player,state)
-  if not checked or not valid then self:finish(player,"Aborted");continue end
+  if not checked or not valid then
+   if not checked then self.Adapter.log("RaceValidationFailed",tostring(valid)) end
+   self:finish(player,"Aborted");continue
+  end
   if now-state.Started>Test.Timeout then self:finish(player,"Timeout");continue end
   if now-state.Started>=Test.Countdown then
    for _,bot in ipairs(state.Bots) do
@@ -67,7 +73,12 @@ function Controller.tick(self:any)
     state.LastPayAttempt=now
     local paid,accepted,amount=pcall(self.Adapter.reward,player,state)
     if paid and accepted then state.Reward=amount;self:finish(player,"Finished")
-    elseif now-state.FinishedAt>10 then self:finish(player,"RewardUnavailable") end
+    else
+     if not state.RewardFailureLogged then
+      state.RewardFailureLogged=true;self.Adapter.log("RaceRewardRetry",if paid then "Profile transaction unavailable" else tostring(accepted))
+     end
+     if now-state.FinishedAt>10 then self.Adapter.log("RaceRewardUnavailable",tostring(state.RewardId));self:finish(player,"RewardUnavailable") end
+    end
    end
   end
  end

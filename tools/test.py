@@ -37,6 +37,7 @@ bundle.append((ROOT / 'tests/training.spec.luau').read_text())
 bundle.append((ROOT / 'tests/phase21.spec.luau').read_text())
 bundle.append((ROOT / 'tests/world1.spec.luau').read_text())
 bundle.append((ROOT / 'tests/race_lifecycle.spec.luau').read_text())
+bundle.append((ROOT / 'tests/hardening.spec.luau').read_text())
 with tempfile.TemporaryDirectory(prefix='bike-tests-') as directory:
     analysis_file = Path(directory) / 'production.luau'
     analysis_file.write_text(production_bundle)
