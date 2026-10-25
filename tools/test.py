@@ -11,10 +11,10 @@ LUAU = os.environ.get('LUAU_BIN', str(ROOT / '.tools/luau'))
 COMPILER = os.environ.get('LUAU_COMPILE_BIN', str(ROOT / '.tools/luau-compile'))
 for source in sorted((ROOT / 'src').rglob('*.luau')):
     subprocess.run([COMPILER, '--binary', str(source)], stdout=subprocess.DEVNULL, check=True)
-modules = ['Config', 'Catalog', 'Rules', 'Profile', 'Protocol', 'Persistence']
+modules = ['Config', 'Numbers', 'CatalogMetadata', 'Catalog', 'Rules', 'Profile', 'Protocol', 'Persistence', 'SavePolicy']
 bundle = ['--!strict\nlocal modules: any = {}']
 for name in modules:
-    folder = 'server' if name == 'Persistence' else 'shared'
+    folder = 'server' if name in ('Persistence', 'SavePolicy') else 'shared'
     source = (ROOT / 'src' / folder / (name + '.luau')).read_text()
     source = re.sub(r'^--!strict\n', '', source)
     source = re.sub(r'^export type ', 'type ', source, flags=re.M)

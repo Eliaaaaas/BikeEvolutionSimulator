@@ -170,4 +170,88 @@ test("public snapshot contains only HUD counters", function()
  for _ in pairs(snapshot) do count += 1 end
  equal(count, 3); equal(snapshot.Pets, nil); equal(snapshot.Lock, nil)
 end)
+test("all treadmill strengths and requirement progression", function()
+ for id = 1, 40 do
+  local t = Catalog.Treadmills[id]
+  equal(t.TrainingMultiplier, 2 ^ (id - 1)); equal(t.CashCost, 0)
+  if id > 1 then
+   equal(t.EnergyRequirement, 4 ^ (id - 2))
+   -- Repeated multiplication and exponentiation may differ by an ULP.
+   assert(math.abs(t.RebirthRequirement / (3 ^ (id - 2)) - 1) < 1e-14)
+  end
+ end
+end)
+test("treadmill world AND energy OR rebirth; rebirth revokes access", function()
+ assert(Rules.canUseTreadmill(1, 0, 0, {1}))
+ assert(Rules.canUseTreadmill(6, Catalog.Treadmills[6].EnergyRequirement, 0, {1,2}))
+ assert(not Rules.canUseTreadmill(6, 1e100, 1e9, {1}))
+ assert(Rules.canUseTreadmill(3, 4, 0, {1}))
+ assert(Rules.canUseTreadmill(3, 0, 3, {1}))
+ assert(not Rules.canUseTreadmill(3, 3, 2, {1}))
+ local reborn = Rules.rebirth(1000, 0)
+ assert(not Rules.canUseTreadmill(3, reborn.Energy, reborn.Rebirths, {1}))
+ assert(not Rules.canUseTreadmill(41, 1e100, 1e9, {1}))
+ assert(not Rules.canUseTreadmill(0/0, 0, 0, {1}))
+ assert(not Rules.canUseTreadmill(1, math.huge, 0, {1}))
+end)
+test("large balances and training are finite and bounded", function()
+ local n = modules.Numbers
+ equal(n.multiply(1e300, 1e300), 1e300); equal(n.add(1e300, 1e300), 1e300)
+ equal(n.multiply(0, 1e300), 0)
+ equal(Rules.trainingGain(1e300, 1e300), 1e300)
+ assert(not pcall(n.multiply, 0/0, 1)); assert(not pcall(n.add, math.huge, 1))
+ local data = Profile.new(); data.Energy = Catalog.Treadmills[40].EnergyRequirement
+ assert(Profile.validate(data)); assert(Rules.canUseTreadmill(40, data.Energy, 0, {1,8}))
+ assert(not Rules.rebirth(1e300, Config.Numbers.MaxRebirths))
+end)
+test("catalog metadata stays pending and individual overrides are preserved", function()
+ for _, entries in ipairs({Catalog.Vehicles, Catalog.Eggs, Catalog.Pets}) do
+  for _, entry in ipairs(entries) do equal(entry.ContentStatus, "Pending"); equal(entry.Name, false) end
+ end
+ local entry = modules.CatalogMetadata.resolve({Name="Reviewed name", Rarity="Rare", Multiplier=2.5, Design={AssetId="rbxassetid://123"}})
+ equal(entry.Name, "Reviewed name"); equal(entry.Multiplier, 2.5); equal(entry.Design.AssetId, "rbxassetid://123")
+ equal(entry.Design.IconId, false)
+ assert(not pcall(modules.CatalogMetadata.resolve, {Multiplier=math.huge}))
+end)
+test("release response lost after commit is idempotently retried", function()
+ local store, backend = fixture(); local a = backend("a"); local data = a:load("p")
+ local original = store.UpdateAsync; local once = true
+ function store:UpdateAsync(key, callback)
+  local result = original(self, key, callback)
+  if once then once = false; error("response lost after commit") end
+  return result
+ end
+ data.Cash = 321; assert(a:save("p", data, true))
+ equal(store.records.p.Data.Cash, 321); equal(store.records.p.Lock, nil)
+end)
+test("disconnect recovery retains latest state until successful release", function()
+ local store, backend, setTime = fixture(); local a = backend("a"); local data = a:load("p")
+ data.Cash = 765; store.failures = 3
+ local session = {Data=data, Backend=a, Expires=1180}; local now=1000; local logs={}
+ assert(modules.SavePolicy.flush(session, "p", true, 1024, function() return now end,
+  function() now += 2; setTime(now) end, function(event) table.insert(logs,event) end))
+ equal(store.records.p.Data.Cash,765); equal(store.records.p.Lock,nil); equal(#logs,1)
+end)
+test("autosave outage retains session for next save", function()
+ local store, backend = fixture(); local a=backend("a"); local data=a:load("p"); data.Cash=99
+ local session={Data=data, Backend=a, Expires=1180}; store.failures=3
+ local ok, reason=modules.SavePolicy.flush(session,"p",false,math.huge,function() return 1000 end,function() error("must not loop") end,function() end)
+ assert(not ok); equal(reason,"DataStoreUnavailable"); equal(session.Data.Cash,99)
+ assert(a:save("p",session.Data,false)); equal(store.records.p.Data.Cash,99)
+end)
+test("shutdown recovery stops at deadline without releasing unsaved data", function()
+ local store, backend, setTime=fixture(); local a=backend("a"); local data=a:load("p"); data.Cash=90
+ local now=1000; store.failures=100
+ local ok,reason=modules.SavePolicy.flush({Data=data,Backend=a,Expires=1180},"p",true,1004,
+  function() return now end,function() now+=2;setTime(now) end,function() end)
+ assert(not ok); equal(reason,"DeadlineExceeded"); equal(now,1004)
+ equal(store.records.p.Data.Cash,0); equal(store.records.p.Lock.Id,"a")
+end)
+test("recovery never retries a stolen lease", function()
+ local store,backend=fixture(); local a=backend("a");local data=a:load("p")
+ store.records.p.Lock.Id="b"
+ local ok,reason=modules.SavePolicy.flush({Data=data,Backend=a,Expires=1180},"p",true,1024,
+ function() return 1000 end,function() error("unexpected retry") end,function() end)
+ assert(not ok);equal(reason,"SessionLost");equal(store.records.p.Lock.Id,"b")
+end)
 print(string.format("%d tests passed", passed))

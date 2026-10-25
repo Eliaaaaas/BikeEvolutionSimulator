@@ -6,9 +6,14 @@ local Shared = game:GetService("ReplicatedStorage"):WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("Config"))
 local Profile = require(Shared:WaitForChild("Profile"))
 local Persistence = require(script.Parent.Persistence)
+local SavePolicy = require(script.Parent.SavePolicy)
+local shutdownDeadline = math.huge
+local function log(event: any)
+ warn("[BikeData] " .. HttpService:JSONEncode(event))
+end
 local function newBackend()
  return Persistence.new(DataStoreService:GetDataStore(Config.Data.Store), Profile, Config.Data,
- game.JobId .. ":" .. HttpService:GenerateGUID(false), os.time, function(attempt: number) task.wait(attempt * 2) end)
+ game.JobId .. ":" .. HttpService:GenerateGUID(false), os.time, function(attempt: number) task.wait(attempt * 2) end, log)
 end
 local Service = {}
 type Session = { Data: Profile.Data, Expires: number, Saving: boolean, Backend: any }
@@ -20,15 +25,17 @@ local function save(player: Player, release: boolean)
  local session = sessions[player]
  if not session then return end
  -- Serialize all writes, including leave during an autosave.
- while session.Saving do task.wait() end
+ while session.Saving and os.time() < math.min(session.Expires, shutdownDeadline) do task.wait() end
+ if session.Saving then return end
  if sessions[player] ~= session then return end
  session.Saving = true
- local ok, reason, expires = session.Backend:save(key(player), session.Data, release)
- if ok then session.Expires = expires end
+ local ok, reason = SavePolicy.flush(session, key(player), release, shutdownDeadline, os.time,
+  function() task.wait(2) end, log)
  session.Saving = false
- if release or not ok then
+ if ok and release or not ok and reason ~= "DataStoreUnavailable" then
   sessions[player] = nil
   if not ok then
+   log({ Event = "ProfileRecoveryExhausted", UserId = player.UserId, Reason = reason })
    warn("Profile save failed", player.UserId, reason)
    player:Kick("Deine Daten konnten nicht sicher gespeichert werden. Bitte später erneut verbinden.")
   end
@@ -52,7 +59,8 @@ function Service.start()
    return
   end
   if closing or player.Parent ~= Players then
-   backend:save(key(player), data, true)
+   local orphan = { Data = data, Expires = expires, Backend = backend }
+   SavePolicy.flush(orphan, key(player), true, shutdownDeadline, os.time, function() task.wait(2) end, log)
    loading -= 1
    return
   end
@@ -65,6 +73,7 @@ function Service.start()
  task.spawn(function()
   while not closing do
    task.wait(Config.Data.AutosaveSeconds)
+   if closing then break end
    for player in pairs(sessions) do task.spawn(save, player, false) end
   end
  end)
@@ -79,6 +88,7 @@ function Service.start()
  end)
  game:BindToClose(function()
   closing = true
+  shutdownDeadline = os.time() + 24
   local pending = 0
   for player in pairs(sessions) do
    pending += 1

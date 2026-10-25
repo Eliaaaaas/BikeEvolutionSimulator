@@ -1,14 +1,22 @@
 --!strict
 local Config = require(script.Parent.Config)
+local Numbers = require(script.Parent.Numbers)
+local Catalog = require(script.Parent.Catalog)
 local Rules = {}
 function Rules.trainingGain(rebirths: number, treadmillMultiplier: number?): number
- return Config.Rules.BaseTraining * (1 + rebirths * Config.Rules.RebirthBonus) * (treadmillMultiplier or 1)
+ return Numbers.multiply(Numbers.multiply(Config.Rules.BaseTraining, Numbers.add(1, Numbers.multiply(rebirths, Config.Rules.RebirthBonus))), treadmillMultiplier or 1)
 end
 function Rules.rebirthRequirement(rebirths: number): number
- return Config.Economy.RebirthBaseEnergy * (rebirths + 1)
+ return Numbers.multiply(Config.Economy.RebirthBaseEnergy, Numbers.add(rebirths, 1))
+end
+function Rules.canUseTreadmill(id: number, energy: number, rebirths: number, ownedWorlds: {number}): boolean
+ if not Numbers.valid(id) or id % 1 ~= 0 or not Numbers.valid(energy) or not Numbers.valid(rebirths) then return false end
+ local treadmill = Catalog.Treadmills[id]
+ return treadmill ~= nil and table.find(ownedWorlds, treadmill.WorldId) ~= nil
+  and (energy >= treadmill.EnergyRequirement or rebirths >= treadmill.RebirthRequirement)
 end
 function Rules.rebirth(energy: number, rebirths: number): { Energy: number, Rebirths: number }?
- if energy < Rules.rebirthRequirement(rebirths) then return nil end
+ if not Numbers.valid(energy) or not Numbers.valid(rebirths) or rebirths % 1 ~= 0 or rebirths >= Config.Numbers.MaxRebirths or energy < Rules.rebirthRequirement(rebirths) then return nil end
  return { Energy = 0, Rebirths = rebirths + 1 }
 end
 function Rules.canBuyWorld(cash: number, worldId: number, owned: {number}): boolean

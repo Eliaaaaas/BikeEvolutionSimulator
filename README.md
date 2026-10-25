@@ -50,7 +50,7 @@ Play starten. Links oben erscheinen Energy, Cash und Rebirths. Ein Respawn erhä
 - Welt 1 und Fahrzeug 1 gehören zum Startprofil. Weitere Welten sind ausschließlich mit Cash freischaltbar. Fahrzeugkäufe haben keine Weltbedingung.
 - Rennen sind automatisch gegen Bots vorgesehen, mit Easy/Medium/Hard und Energy-Kosten 0. Die Infrastruktur enthält noch keinen Rennablauf oder Scheduler.
 
-**Noch abzustimmendes Balancing:** Cash-Preise, Rebirth-Schwelle und Laufbandmultiplikatoren sind ausdrücklich provisorische zentrale Konfigurationswerte. IDs/Zuweisungen sind technische Katalogdaten, keine fertigen Assets. Pet-Stärken, Drop-Chancen, Rennbelohnungen und Bot-Geschwindigkeiten werden noch nicht erfunden oder implementiert.
+**Noch abzustimmendes Balancing:** Cash-Preise, Rebirth-Schwelle und Laufband-Basisanforderungen sind ausdrücklich provisorische zentrale Konfigurationswerte. IDs/Zuweisungen sind technische Katalogdaten, keine fertigen Assets. Pet-Stärken, Drop-Chancen, Rennbelohnungen und Bot-Geschwindigkeiten werden noch nicht erfunden oder implementiert.
 
 Schema v1 speichert Energy, Cash, Rebirths, freigeschaltete Welten, Fahrzeuge, Pet-Instanzen und ausgerüstete Pet-IDs. Ungültige Zahlen (auch NaN/Unendlich), ungültige IDs, doppelte Equip-IDs und zu große Inventare werden abgelehnt. Höhere/unbekannte Schemas werden nicht zurückgesetzt; vor einer Schemaerhöhung ist eine explizite getestete Migration nötig.
 
@@ -71,7 +71,7 @@ DataStore `BikeEvolution_Player_v1`, Schlüssel `Player_<UserId>`. Das gespeiche
 - 180 Sekunden Lease, Erneuerung durch Autosave alle 60 Sekunden. Aktive fremde Sitzungen verhindern das Laden. Abgelaufene Locks sind übernehmbar; alte Server dürfen danach nicht mehr speichern.
 - Bis zu 3 Versuche pro Operation mit 2/4 Sekunden Pause. Writes pro Spieler werden serialisiert. Snapshots sind Kopien.
 - Fehlgeschlagenes Laden, beschädigte Daten oder fremde aktive Locks führen zum Kick, niemals zum Speichern von Defaults über bestehende Daten.
-- Fehlgeschlagenes Speichern nach allen Versuchen beendet die Sitzung. Der letzte erfolgreiche Stand bleibt erhalten; ein alter Lock läuft aus. Auch bei Lease-Ablauf werden keine weiteren HUD-Daten ausgegeben.
+- Fehlgeschlagene Autosaves behalten das aktuelle Profil für den nächsten Autosave im Arbeitsspeicher. Disconnect und Shutdown wiederholen vorübergehende Speicherfehler bis zur Lease-/Shutdown-Grenze. Ein verlorener Lock verhindert weitere Writes. Auch bei Lease-Ablauf werden keine weiteren HUD-Daten ausgegeben.
 - `PlayerRemoving` speichert und gibt den Lock frei. `BindToClose` speichert parallel und wartet bis zu 25 Sekunden, inklusive noch laufender Loads. Live-Prozesse werden bei Neustarts nicht vorausgesetzt.
 
 Dies reduziert Überschreibungen und Datenverluste, garantiert aber bei Roblox-Ausfällen, abruptem Prozessabbruch, Drosselung oder Shutdown-Zeitlimit keinen verlustfreien letzten Spielstand. Seit dem letzten erfolgreichen Save können Änderungen verloren gehen. Es gibt noch kein zusätzliches Backup-/Admin-Recovery-System; für einen Live-Launch sind Monitoring, DataStore-Versionswiederherstellung und Lasttests erforderlich. Nur eine aktive Serverinstanz darf künftig über einen kontrollierten Service Daten mutieren; aktuell ist absichtlich nur eine Snapshot-API öffentlich.
@@ -93,3 +93,28 @@ Der Test-Runner kompiliert **alle Produktionsdateien** mit dem echten Luau-Compi
 4. Studio-Mehrspielerprüfung: jeder Client sieht nur eigene Werte; manipulierte `GetSnapshot`-Payloads und Spam liefern Fehler; `SnapshotChanged:FireServer(...)` ändert nichts. Engine-seitige Remote-Serialisierung und tatsächliches Rate-Limit-Timing sind CLI-seitig nicht verifiziert.
 
 Für eine sichtbare Änderungsprüfung kann im **Server-Debugger einer separaten Test-Experience** ein Haltepunkt nach dem Laden gesetzt und `data.Cash` geändert werden. Danach erscheinen die Werte im HUD und nach erfolgreichem Autosave erneutem Beitritt. Dafür existiert absichtlich kein unsicherer Debug-Schreibremote.
+
+## Phase 1.1: Balancing, Katalogpflege und Recovery
+
+Laufband `i` trainiert mit `2^(i-1)` (1, 2, 4 … bis 549755813888). Nutzung kostet kein Cash. Zugang erfordert **Weltbesitz UND (aktuelle Energy >= EnergyRequirement ODER Rebirths >= RebirthRequirement)**. Die Abfrage muss vor jeder späteren Trainingsaktion erneut serverseitig erfolgen; sie speichert keinen dauerhaften Laufband-Unlock. Ein Rebirth kann deshalb den Zugang entziehen. Noch kein Trainings-Remote oder physisches Laufband enthalten.
+
+Laufband 1 hat beide Anforderungen 0. Da keine Basisanforderungen festgelegt wurden, stehen in Config.Treadmills ausdrücklich provisorisch 1 Energy/1 Rebirth für Laufband 2; ab dort Faktor 4/3 pro Laufband. Laufband 40 benötigt damit `4^38` Energy ODER `3^38` Rebirths plus Welt 8. Beide Faktoren sind zentral konfiguriert. Die Zahl der Laufbänder bleibt 40 mit jeweils 5 pro Welt.
+
+`Numbers.luau` liefert validierte, bei **1e300** sättigende Addition/Multiplikation/Potenzen. Profile akzeptieren endliche Energy-/Cash-Werte bis zu diesem Limit; das alte Limit 1e15 verhinderte höhere Laufbandanforderungen. Rebirths bleiben ganzzahlig bis `2^53-1`. Keine Schema-/Store-Umbenennung und keine Datenmigration: bisher gültige Profile bleiben gültig. Roblox verwendet IEEE-754-Doubles: große Werte sind endlich, aber oberhalb `2^53` nicht auf jede einzelne Einheit genau. Die Anforderungen werden mit denselben Katalogwerten verglichen; für spätere exakt ganzzahlige Großwährungen wäre ein separates versioniertes BigNumber-Schema nötig. Tests prüfen insbesondere das letzte Laufband und Überlauf-/NaN-Fälle.
+
+Individuelle Inhalte werden in `CatalogMetadata.luau` nach stabiler ID unter Vehicles/Eggs/Pets gepflegt. Jedes Entry unterstützt Name, Rarity, Multiplier sowie Design.AssetId/IconId/Description. Unbekannte Felder erscheinen als `false` und ContentStatus als `Pending`, damit keine vermeintlich freigegebenen Namen, Assets oder Balancingwerte entstehen. Bereits vorhandene IDs, Fahrzeugklassen, Preise und Ei-/Pet-Zuordnungen bleiben erhalten. Beispiel für eine künftig **nach Designfreigabe** einzutragende Struktur:
+
+```lua
+Metadata.Pets[1] = {
+ Name = "Freigegebener Name", Rarity = "Freigegebene Seltenheit", Multiplier = 2,
+ Design = { AssetId = "rbxassetid://…", IconId = "rbxassetid://…", Description = "…" },
+}
+```
+
+Diese Beispielwerte werden nicht als echte Spielinhalte übernommen. Golden-/Rainbow-Rezepte bleiben unverändert 5 normale bzw. 3 Golden-Pets derselben Art.
+
+`SavePolicy.luau` kapselt die getestete Recovery-Entscheidung: ein Autosave nutzt die begrenzten Backend-Retries und behält bei temporärem Ausfall die Session für den nächsten 60-Sekunden-Zyklus. Leave/Shutdown wiederholen mit 2 Sekunden Pause bis Lease oder Deadline. Es gibt pro Spieler weiterhin nur einen aktiven Save. Bei Shutdown beträgt das Startfenster 24 Sekunden, der äußere Wait maximal 25 Sekunden. Eine bereits an Roblox übergebene UpdateAsync-Anfrage lässt sich nicht abbrechen; die Plattform kann den Prozess trotzdem beenden. Im Backend prüft jeder Callback den Lock erneut. Ein WriteId-Beleg macht den Sonderfall „Release committed, Antwort verloren“ innerhalb der Retry-Operation idempotent. Ein neuer Besitzer wird niemals überstimmt.
+
+Fehlerprotokolle `[BikeData]` enthalten Event, Key/UserId, Versuchszahl, Fehlergrund bzw. Lease-Ablauf und Release-Modus; niemals das Profilinventar oder Guthaben. DataStoreRetry, ProfileSaveFailed und ProfileRecoveryExhausted unterscheiden einzelne Versuche, Recovery und endgültige Abbrüche. Bei dauerhafter Nichterreichbarkeit oder Lock-Verlust bleiben seit dem letzten erfolgreichen Save entstandene Änderungen gefährdet; eine garantierte Speicherung ist technisch nicht möglich.
+
+Phase-1.1-Prüfungen verwenden ausschließlich injizierte In-Memory-Stores und simulierte Uhren. Es wurden keine produktiven Profile gelesen oder geschrieben. Die Studio-/Live-Integrationsprüfungen aus dem vorigen Abschnitt bleiben offen, insbesondere Roblox-Throttling, gleichzeitiges Leave/Autosave/Shutdown und reale HUD-Updates.
