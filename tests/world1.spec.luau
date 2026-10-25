@@ -114,4 +114,13 @@ test("UI keeps small vehicle and pet multipliers distinguishable",function()
  assert(modules.Format.multiplier(1.06)=="1.06" and modules.Format.multiplier(1.12)=="1.12")
  assert(modules.Format.multiplier(1.05)=="1.05" and modules.Format.multiplier(1.5)=="1.5")
 end)
+test("equipped pets modify actual training commit and actual race payout",function()
+ local data=modules.Profile.new();data.Rebirths=2;data.DiscoveredPets={1,2,3}
+ for i=1,3 do data.Pets[tostring(i)]={SpeciesId=i,Variant="Normal"};table.insert(data.EquippedPets,tostring(i)) end
+ local service={change=function(_,cb) local candidate=modules.Profile.copy(data);if not cb(candidate) then return false,"Rejected" end;assert(modules.Profile.validate(candidate));data=candidate;return true,nil end}
+ local training=modules.TrainingController.new(service,function() return 100 end,function() return true end)
+ assert(training:select("p",1));assert(training:impulse("p",true));assert(math.abs(data.Energy-3.26)<1e-9)
+ assert(modules.RaceRules.pay(data,{Difficulty="Easy",Place=1,FinishedAt=100,RewardId="coupled"}))
+ assert(math.abs(data.Cash-266)<1e-9 and math.abs(data.Energy-3.26)<1e-9)
+end)
 print(string.format("%d World-1 economy/migration tests passed",count))

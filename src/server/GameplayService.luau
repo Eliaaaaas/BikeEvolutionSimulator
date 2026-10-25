@@ -85,7 +85,7 @@ function Service.new(dataService: any): any
   end
   snapshot.PetEnergyBonus=PetRules.bonus(profile,"Energy");snapshot.PetCashBonus=PetRules.bonus(profile,"Cash")
   snapshot.Revision=dataService.revision(player)
-  snapshot.TrainingMultiplier = Rules.trainingGain(snapshot.Rebirths)
+  snapshot.TrainingMultiplier = Numbers.multiply(Rules.trainingGain(snapshot.Rebirths),snapshot.PetEnergyBonus)
   snapshot.ImpulseGain = if selected == 0 then 0 else Numbers.multiply(Rules.trainingGain(snapshot.Rebirths, Catalog.Treadmills[selected].TrainingMultiplier),snapshot.PetEnergyBonus)
   snapshot.RebirthRequirement = Rules.rebirthRequirement(snapshot.Rebirths)
   return snapshot

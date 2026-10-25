@@ -43,7 +43,9 @@ local function validate(data: any, legacy: boolean): boolean
   if type(data.LastRaceReward)~="string" or #data.LastRaceReward>100 then return false end
   if not numberIn(data.ActiveVehicle,40,true) or not table.find(data.OwnedVehicles,data.ActiveVehicle) then return false end
   if not arrayValid(data.DiscoveredPets,96,function(id:any) return numberIn(id,96,true) and id>=1 end) then return false end
-  for _,rawPet in pairs(data.Pets) do local pet:any=rawPet;if not table.find(data.DiscoveredPets,pet.SpeciesId) then return false end end
+  local discovered: {[number]:boolean}={}
+  for _,id in ipairs(data.DiscoveredPets :: {number}) do discovered[id]=true end
+  for _,rawPet in pairs(data.Pets) do local pet:any=rawPet;if not discovered[pet.SpeciesId] then return false end end
  end
  return arrayValid(data.EquippedPets, Config.Rules.EquipSlots, function(id) return type(id) == "string" and data.Pets[id] ~= nil end)
 end

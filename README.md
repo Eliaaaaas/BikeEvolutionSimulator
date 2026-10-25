@@ -1,35 +1,60 @@
-# Bike Evolution Simulator — Phase 2.1: Palm Bay & Mountainbike
+# Bike Evolution Simulator — World 1 Gameplay Build
 
-Spielbare Trainingsschleife mit tropischer Insel, fünf Laufbändern, bestätigten Rebirths, animierter linker Sidebar und servergesteuertem Mountainbike-Test-Rennen auf einer 800-Studs-Strecke. Garage zeigt das kostenlose Startbike als 3D-Vorschau. Pets, Worlds und Upgrades bleiben ausdrücklich noch nicht spielbare Vorschauen; der Testmodus enthält keine Bots oder Cash-Belohnungen.
+Palm Bay verbindet Training, Rebirths, zehn kauf-/ausrüstbare Fahrzeuge, automatische Rennen gegen fünf Bots, Cash-Belohnungen, drei Eier und zwölf sammelbare Pets. Der bestehende Draft [PR #2](https://github.com/Eliaaaaas/BikeEvolutionSimulator/pull/2) liegt auf `feat/phase-2-training-world`; Basis bleibt der ungemergte Phase-1-Branch. Der Build ist für die nächste **manuelle Studio-Abnahme** vorbereitet, nicht als bereits in Studio geprüft oder produktionsreif ausgewiesen.
 
-Phase 2 basiert auf `feat/phase-1-luau-foundation` und liegt in `feat/phase-2-training-world`. Phase 1 wird dafür nicht gemergt. Der Phase-2-Draft-PR richtet sich gegen den Phase-1-Branch, damit die Änderungen getrennt geprüft werden können.
+## Studio-Build öffnen
 
-## Fertige Datei in Roblox Studio öffnen
+1. Unter [Actions → Validate Luau foundation](https://github.com/Eliaaaaas/BikeEvolutionSimulator/actions/workflows/validate.yml) den neuesten erfolgreichen Lauf von `feat/phase-2-training-world` auswählen.
+2. **Artifacts → BikeEvolutionSimulator-Studio** herunterladen, ZIP entpacken und `BikeEvolutionSimulator.rbxlx` über **File → Open from File…** öffnen. Eine GitHub-Anmeldung ist für den Download nötig; lokale CLI-Tools sind dafür nicht erforderlich.
+3. In einer **separaten Test-Experience** veröffentlichen. Unter Game Settings → Security **Enable Studio Access to API Services** aktivieren. Niemals die produktive Experience für diese Prüfung verwenden: Studio-Zugriff verwendet deren echte DataStores.
+4. Play starten. Ohne erreichbaren DataStore oder bei fremdem aktivem Session-Lock wird der Spieler getrennt. Es gibt keinen Default-/In-Memory-Fallback über vorhandenen Daten.
 
-1. Unter [Actions → Validate Luau foundation](https://github.com/Eliaaaaas/BikeEvolutionSimulator/actions/workflows/validate.yml) einen **erfolgreichen Lauf für `feat/phase-2-training-world`** auswählen.
-2. Unter **Artifacts** `BikeEvolutionSimulator-Studio` herunterladen (GitHub-Anmeldung nötig), ZIP entpacken.
-3. `BikeEvolutionSimulator.rbxlx` in Roblox Studio über **File → Open from File…** öffnen. Dafür sind keine lokalen Rojo-/Luau-Werkzeuge erforderlich.
-4. Die Datei in einer **separaten Test-Experience** veröffentlichen. Unter Game Settings → Security **Enable Studio Access to API Services** aktivieren. Keine produktive Experience verwenden: Studio-Zugriff kann deren echte Daten verändern.
-5. Play starten. Wenn DataStore nicht erreichbar oder ein Profil noch durch einen anderen Server gesperrt ist, wird der Spieler sicherheitshalber getrennt. Es gibt keinen flüchtigen Fallback, der bestehende Daten überschreibt.
+Insel, Strecke, zehn Fahrzeuge, Egg-Stationen und zwölf Pet-Modelle sind editierbare Studio-Objekte im Build. Der Workflow führt alle Tests aus und lädt anschließend die vollständige `.rbxlx` mit `actions/upload-artifact@v4` hoch. Fehlende Datei: Workflow-Fehler über `if-no-files-found: error`.
 
-Der Workflow behält sämtliche Tests und den Rojo-Build bei. Danach lädt `actions/upload-artifact@v4` `build/BikeEvolutionSimulator.rbxlx` hoch; `if-no-files-found: error` lässt den Workflow bei fehlender Datei fehlschlagen.
+## Welt 1 durchspielen / manuelle Prüfreihenfolge
 
-## Spielen und in Studio testen
+1. **Insel:** Zentral spawnen, alle Wege ablaufen. Flache Grasoberfläche, natürliche Kontur (~180×180), Palmen, Büsche, Blumen, Felsen, Wasserfälle, Wege, Beleuchtung und drei getrennte Egg-Stationen prüfen. Trainingsreihe hinten, Race vorne, Garage seitlich, World-Portal in der Ecke und Rebirth-Station sind ausgeschildert. Die Premium-Lücke bleibt frei. Wasser/Wasserfälle sind dekorative Geometrie, keine Flüssigkeitssimulation.
+2. **Training:** Hinten auf Laufband 1 stellen und den ProximityPrompt per E/Tap auswählen. Automatisch ein Impuls/Sekunde; jeder gültige Training-Button-Klick/Tap ergänzt einen Impuls, maximal fünf/Sekunde. Basisgewinne 1/2/4/8/16. Weglaufen oder Tod beendet die Auswahl. Energy-Fenster zeigt aktuelles/nächstes Laufband, fehlende Energy und alternative Rebirth-Anforderung. Animationen erzeugen keine zusätzlichen Gewinne.
+3. **Rebirth:** Sidebar oder Rebirth-Station öffnen. Aktuellen/nächsten Multiplikator und Fortschritt prüfen. Abbrechen muss unverändert bleiben. Bestätigen bei genug Energy setzt ausschließlich Energy auf 0 und erhöht Rebirths um 1. Cash, Fahrzeuge und Pets bleiben erhalten. Ein höheres Laufband kann dadurch wieder gesperrt sein.
+4. **Cash verdienen:** Zur Race-Zone vorne gehen, **Race → Easy/Medium/Hard → Rennen starten**. Der ProximityPrompt startet Easy. Nach drei Sekunden fährt das ausgewählte Fahrzeug automatisch auf der 800-Studs-Fahrlinie. Fünf Bots haben feste Tempi. Platzierung folgt dem tatsächlichen Fortschritt bzw. Zielübertritt, nicht Zufall. Am Ziel abbremsen, Cash-Ergebnis sehen und sicher zur Insel zurückkehren. Energy bleibt erhalten. Auch Platz 6 erhält Cash, sodass das Spiel ohne Startguthaben funktioniert.
+5. **Garage:** Verdientes Cash für City Bike und weitere Fahrzeuge ausgeben, Besitzstatus prüfen und ausdrücklich **Ausrüsten** wählen. Nach dem nächsten Start muss genau dieses Fahrzeug erscheinen. 3D-Vorschau, Preis und Geschwindigkeitsfaktor werden pro Auswahl angezeigt. Käufe hängen nicht von World-Unlocks ab. Außerhalb von Rennen läuft der Spieler zu Fuß; keine manuelle Fahrsteuerung.
+6. **Eier:** Tropical/Jungle/Waterfall-Station öffnen oder **Pets → Eier öffnen**. Die vier möglichen Arten, Raritäten, Chancen, Boni und der Cash-Preis sind sichtbar. **Ei öffnen** zieht serverseitig Cash ab und vergibt genau ein Pet. Bei fehlendem Cash/voller Tasche darf nichts abgezogen werden. Das bestätigte Pet erscheint mit kurzer Reveal-Animation.
+7. **Pets:** Inventar öffnen, Pet-Vorschau/Boni prüfen, bis zu drei unterschiedliche Instanzen ausrüsten und wieder ablegen. Die drei aktiven Slots und Begleiter sind sichtbar. Ein viertes Equip muss scheitern. Training und Renn-Cash müssen sich entsprechend erhöhen. **Pet-Index** zeigt Entdeckungen, unbekannte Arten, Raritäten und Sammelfortschritt je Ei. Inventarlisten sind seitenweise auf 20 Einträge begrenzt.
+8. **Speichern:** Nach erfolgreichem Autosave oder normalem Verlassen erneut beitreten: Energy/Cash/Rebirths, gekaufte/aktive Fahrzeuge, Pet-Instanzen, Equip und Entdeckungen müssen erhalten bleiben. Training und laufende Rennen werden nicht als aktive Sitzung restauriert. Abbruch, Tod, Disconnect, fehlenden RootPart und mehrere parallele Rennteilnehmer separat testen.
+9. **Mobile/UI:** iPhone/iPad in Hoch-/Querformat und PC prüfen. Sidebar startet auf Smartphones kompakt, lässt sich aufklappen und scrollt bei kleinen Höhen mit ausreichenden Touch-Zielen. Safe Areas, CoreGui, Joystick und Jump dürfen nicht verdeckt werden. Settings für Animationen/Popups/Sound/Lautstärke wirken sofort, nur in der Sitzung. Garage/Pet-Viewports, Hover/Tap und Fortschrittsbalken prüfen. Popup-Anzahl ist begrenzt; Rebirth-Effekte werden durch Server-Feedback-IDs dedupliziert.
 
-- Spawn ist in der Inselmitte. Mit WASD/Joystick zur Trainingsreihe an der hinteren Felswand gehen. Die Grasoberfläche liegt überall auf Höhe 8 Studs.
-- Auf Laufband 1 stellen und den Roblox-Prompt **Trainieren** per E bzw. Tap auswählen. Das HUD zeigt die aktive Auswahl und den tatsächlichen Gewinn. Ohne weitere Eingabe gibt es einen Impuls pro Sekunde.
-- Der große **Training**-Button gibt bei jedem gültigen Klick/Tap einen zusätzlichen Impuls. Maximal fünf Klickimpulse/Sekunde sind erlaubt (0,2 Sekunden Cooldown). Ein aktiviertes Laufband bleibt erforderlich; ein beliebiger Bildschirmtap außerhalb des Buttons trainiert nicht.
-- Nach +1 Energy ist Laufband 2 zugänglich. Die ersten fünf normalen Stärken sind +1, +2, +4, +8, +16 vor Rebirth-Bonus. Es gibt keinen Kauf. Die Anzeigen an den Laufbändern nennen die aktuellen Energy-/Rebirth-Anforderungen.
-- Weglaufen oder Tod stoppt die Auswahl. Nach Respawn oder erneutem Beitritt muss ein Laufband neu ausgewählt werden; Energy/Cash/Rebirths bleiben im Profil erhalten.
-- **Rebirths** in der Sidebar öffnet die Vorschau mit aktuellem/nächstem Multiplikator und Fortschritt (anfangs benötigt: 1000 Energy). Abbrechen darf nichts ändern. Bestätigen setzt Energy auf 0 und erhöht Rebirths um 1: Multiplikator ×1 → ×1,5 → ×2 → ×2,5. Ein höheres Laufband kann dadurch wieder gesperrt werden.
-- Nach einem erfolgreichen Save verlassen und erneut beitreten. Energy, Cash und Rebirths müssen erhalten bleiben. Bei einem abrupten Serverstopp können noch ungespeicherte Änderungen verloren gehen.
-- **Garage** öffnet die rotierende Mountainbike-Vorschau; **Race** öffnet den funktionierenden Testmodus. **Pets/Worlds/Upgrades** sind klar bezeichnete Vorschauen ohne Käufe oder Belohnungen.
+**Noch nicht ausgeführt:** tatsächliche Studio-Playtests, Geräte-/Touch-/Audio-Abnahme, R15/R6-Körperkontakt, echte Motor6D-/Streaming-/Kamera-Replikation, reale DataStore-Migration/Throttling/Shutdown und Mehrspieler-Last. Für schnelle Rebirth-Prüfungen darf ausschließlich in der separaten Test-Experience ein Server-Debugger verwendet werden; ein unsicherer Debug-Schreibremote existiert nicht.
 
-**Manuelle Abnahme, noch nicht ausgeführt:** Play/Mehrspieler in Roblox Studio; Script Analysis im Studio-Projekt; Device Emulator auf iPhone/iPad in Hoch-/Querformat (Joystick, Jump, Tap, Safe Areas); reale ProximityPrompts, Character-Physik, Respawn und HUD; echte DataStore-/Throttling-/Shutdown-/Mehrserver-Integration. CLI-Tests und Roblox-API-Typprüfung ersetzen diese Laufzeitprüfungen nicht. Für eine schnelle Rebirth-Prüfung kann ausschließlich in der separaten Test-Experience ein Server-Debugger-Haltepunkt in der Trainingstransaktion verwendet werden; es existiert kein unsicherer Debug-Schreibremote.
+## Zentrale Regeln und vorläufiges Balancing
 
-## Lokale Entwicklung
+`src/shared/World1Content.luau` enthält alle neuen Fahrzeugpreise/Tempi, Egg-Preise/Chancen, Pet-Boni und Schwierigkeitstabellen. Diese Zahlen sind **vorläufig**; [Balancing-Notizen](docs/BALANCE.md) erklären das langfristige Ziel und die noch fehlende Validierung.
 
-Voraussetzungen für die getesteten CLI-Schritte: Linux x86_64, Python 3, curl und Git. `bootstrap.py` installiert **Luau 0.744**, **Rojo 7.4.4** und **luau-lsp 1.70.1** samt Roblox-Typdefinitionen vom selben Tag nach `.tools/`. Alle Downloads stammen aus den jeweiligen offiziellen GitHub-Releases/Quellrepositorys; HTTPS-Verifikation bleibt aktiv. Keine API-Schlüssel erforderlich.
+- Laufbandzugang: **Weltbesitz UND (aktuelle Energy ausreichend ODER Rebirths ausreichend)**. Kein Kauf und kein permanenter Laufband-Unlock. Laufband 1 verlangt 0/0, Laufband 2 provisorisch 1/1, danach Faktoren 4 bzw. 3.
+- Training: `Basisimpuls × (1 + Rebirths × 0.5) × PetEnergyBonus`. Rebirth benötigt aktuell `1000 × (Rebirths + 1)` Energy. Automatische und Klick-Cooldowns sind getrennt; keine Offline-/Nachholbursts.
+- Pets: `Bonus = 1 + Summe((Basis-Multiplikator − 1) × Variantenfaktor)` über maximal drei Equips. Energy und Cash werden getrennt berechnet. Normal=1, Golden=2, Rainbow=4. Beispiel: drei normale Pets mit Energy 1.1 ergeben insgesamt ×1.3, nicht ×1.331. Varianten skalieren den **Bonus über 1**, nicht den gesamten Basisfaktor.
+- Rennen: `(24 + min(28, log10(1+Energy) × 4)) × Fahrzeug-Speedfaktor`. Serverseitiger Snapshot beim Start; Fahrzeug-/Pet-Auswahl, Training und Rebirth sind während des Rennens gesperrt. Bots laufen zu den festen Tabellenwerten. Cash = Platzierungsbetrag × Weltfaktor × PetCashBonus. `RaceWorlds[1]` ist für spätere Welten erweiterbar; unbekannte Welten werden nicht ausgezahlt.
+- Pro Rennen fünf eigene sichtbare Bot-Fahrzeuge; Bots fremder paralleler Rennen werden lokal ausgeblendet. Reale Spieler bleiben sichtbar, sind aber keine Teilnehmer deiner Solo-Bot-Wertung. Player-Fahrlinie beträgt 800 Studs; dekorative Bot-Spuren sind seitlich versetzt.
+- Stabile IDs: 40 Fahrzeuge bleiben erhalten; 1–6 Fahrräder, 7–15 Mopeds, 16–27 Motorräder, 28–34 Supersportler, 35–40 Rennmaschinen. Nur 1–10 sind aktuell spielbar. Der 24-Egg-/96-Pet-Katalog bleibt bestehen; Welt 1 implementiert Egg-IDs 1–3 und Species 1–12.
+- Golden-Fusion 5 identische normale Pets → Golden (Maschine erst Welt 4); Rainbow-Fusion 3 identische Golden → Rainbow (erst Welt 5). Daten-/Bonusarchitektur ist vorbereitet; diese Maschinen sind bewusst nicht in Welt 1 aktiv.
+- Worlds/Upgrades sind als Vorschau gekennzeichnet. Weitere Welten bleiben im Katalog cashbasiert; sie sind noch nicht als spielbare Maps verfügbar. Es gibt keine vorgetäuschten Käufe oder freigeschalteten Inhalte.
+
+## Datenmigration, Serverautorität und Ausfälle
+
+**Schema v2:** `ActiveVehicle`, `DiscoveredPets`, `LastRaceReward` ergänzen die bestehenden Felder. Die [vor Implementierung dokumentierte Migration](docs/PROFILE_MIGRATION.md) beschreibt Defaults, Rollout und Rollback-Grenzen. v1 wird erst beim normalen Load unter `UpdateAsync` und Session-Lock übernommen. Guthaben, Rebirths, Inventar-IDs und Besitz bleiben erhalten. Aktives Startfahrzeug=1, Entdeckungen werden aus dem vorhandenen Inventar gewonnen, Receipt startet leer. v2-Migration ist idempotent; beschädigte/unbekannte Profile werden abgelehnt statt zurückgesetzt.
+
+Store **BikeEvolution_Player_v1** und Schlüssel **Player_<UserId>** bleiben unverändert (der Store-Name ist nicht die Schemaversion). Alte Server vor Rollout drainen: v1-Code kann v2 nicht laden. Keine automatische Downgrade-Löschung. Während dieses Auftrags wurden ausschließlich In-Memory-Fixtures genutzt, keine produktiven Daten gelesen oder verändert.
+
+Alle wirtschaftlichen Mutationen laufen durch die vorhandene serverseitige Copy/Validate/Commit-Transaktion. Ein gemeinsamer Token-Bucket begrenzt Prompts/Remotes; Training hat eigene Klick-/Auswahl-/Rebirth-Cooldowns, Hatch zusätzlich eine Sekunde Pause. Strikte Feld-Allowlist akzeptiert ausschließlich Intents und begrenzte IDs, niemals vom Client festgelegte Beträge, RNG, Speed, Platzierung oder Rewards. Wirtschaftliche Intents benötigen monoton steigende Request-IDs; Wiederholungen werden vor der Transaktion abgewiesen. Clientmeldungen vergeben keine Währungen.
+
+Race-UUID und Cash werden **in derselben Profiltransaktion** als `LastRaceReward` geschrieben. Ein Retry desselben Abschlusses kann nicht doppelt zahlen. Es gibt keinen Claim-Remote für angebliche Rennsiege. Ungültige Rennen, Disconnects, technische Abbrüche und Timeout zahlen nicht aus. Bei temporärem `Saving` wird die gültige Zielauszahlung bis zu zehn Sekunden wiederholt; danach wird ein nicht ausgezahlter Abschluss als solcher gemeldet.
+
+Autosave 60 Sekunden, Lease 180 Sekunden, UpdateAsync mit begrenzten Retries, Leave-/Shutdown-Recovery und Schutz vor alten Session-Writes bleiben erhalten. Während Save/Disconnect sind neue wirtschaftliche Änderungen gesperrt. Bei hartem Absturz können Änderungen seit dem letzten bestätigten Save verloren gehen; laufende Roblox-Requests lassen sich nicht abbrechen. Das Receipt verhindert doppelte Auszahlung, garantiert aber keine nachträgliche Zahlung nach einem ungespeicherten Serverabsturz. Wiederverbindung kann bis zum Lock-Ablauf blockiert sein.
+
+Numerische Grenzen: endliche Energy/Cash bis 1e300, ganzzahlige Rebirths bis 2^53−1. Sichere Addition/Multiplikation sättigen am Limit. IEEE-754 bedeutet oberhalb 2^53 keine exakte Einzel-Cash-/Energy-Einheit. Zentrale Anzeigeformatierung verändert keine gespeicherten Zahlen.
+
+## Projektstruktur und lokale Prüfungen
+
+Linux x86_64, Python 3, curl und Git genügen für die reproduzierbaren CLI-Schritte:
 
 ```sh
 git clone https://github.com/Eliaaaaas/BikeEvolutionSimulator.git
@@ -39,107 +64,30 @@ python3 tools/bootstrap.py
 python3 tools/test.py
 mkdir -p build
 .tools/rojo build default.project.json --output build/BikeEvolutionSimulator.rbxlx
-# Optional: mit Rojo Studio Plugin 7.4.4 in einer separaten Test-Experience synchronisieren
+# Optional mit Rojo Studio Plugin 7.4.4 in einer separaten Test-Experience:
 .tools/rojo serve default.project.json
 ```
 
-Auf Windows/macOS kann direkt das CI-Artifact geöffnet werden. Für Quellcodeentwicklung dort die entsprechenden offiziellen Tool-Releases installieren; `aftman.toml` pinnt Rojo. Das Bootstrap-Skript ist für Linux x86_64 ausgelegt. Der Build enthält die Insel bereits als Studio-Objekte; sie wird nicht erst beim Spielstart aus einem externen Modell geladen.
+Bootstrap pinnt Luau 0.744, Rojo 7.4.4 und luau-lsp 1.70.1 mit Roblox-Typdefinitionen vom selben Release. Downloads von offiziellen Repositories mit aktiver HTTPS-Prüfung. Windows/macOS können direkt den Studio-Artifact nutzen; CLI-Bootstrap wird unter Linux getestet.
 
-## Struktur
-
-| Pfad | Aufgabe |
+| Pfad | Funktion |
 | --- | --- |
-| `default.project.json` | Client/Server/Shared, Workspace mit World1, tropisches Licht |
-| `src/world/World1.rbxmx` | Vollständige editierbare Insel aus eingebauten Roblox-Parts |
-| `tools/build_world.py` | Deterministischer Generator der Map; nach Änderungen ausführen und Asset committen |
-| `src/shared/Config.luau` | Regeln, Grenzen, vorläufiges Balancing und Netzwerk-Cooldowns |
-| `src/shared/Catalog.luau`, `CatalogMetadata.luau` | 8 Welten, 40 Fahrzeuge, 40 Laufbänder, 24 Eier, 96 Pet-Arten und offene Inhalte |
-| `src/shared/Numbers.luau`, `Rules.luau` | Sichere Zahlenarithmetik, Rebirths und Laufband-/Kauf-/Fusionsregeln |
-| `src/shared/TrainingController.luau`, `RateLimiter.luau` | Testbare serverseitig instanziierte Trainingslogik und gemeinsame Spam-Grenze |
-| `src/server/GameplayService.luau` | Live-Charakter-/Abstandsprüfungen, Prompts und automatischer Takt |
-| `src/server/PlayerDataService.luau` | Serverseitiger Profilbesitz und validierte Copy/Commit-Transaktionen |
-| `src/server/Persistence.luau`, `SavePolicy.luau` | UpdateAsync, Locks, Autosave, Disconnect-/Shutdown-Recovery |
-| `src/server/RemoteService.luau`, `src/shared/Protocol.luau` | Begrenzte, validierte Intent-Remotes und eigene Snapshots |
-| `src/client/UI.luau`, `init.client.luau` | Mobile Oberfläche, Vorschauen, Rebirth-Bestätigung, serverbasierte Anzeigen |
-| `tests/` | Bestehende Phase-1-Tests sowie Training-, Lifecycle-, Sicherheits- und Map-Prüfungen |
+| `src/shared/World1Content.luau`, `Catalog.luau` | Zentraler World-1-Inhalt ohne Verschieben bestehender IDs |
+| `src/shared/Profile.luau`, `src/server/Persistence.luau` | Validiertes v1→v2, bestehende UpdateAsync-/Lock-Architektur |
+| `src/shared/EconomyController.luau`, `PetRules.luau` | Atomare Käufe, Hatch, Equip, RNG-Grenzen und Boni |
+| `src/shared/RaceController.luau`, `RaceRules.luau`, `src/server/RaceService.luau` | Kurs, fünf Bots, Ziele/Platzierung, Reward-Receipt, Fahrzeug-/Charakter-Cleanup |
+| `src/client/UI.luau`, `init.client.luau` | Sidebar, Garage-Kauf/-Auswahl, Inventar, Index, Eggs, Race-Ergebnis |
+| `src/client/PetFollowers.luau`, `Visuals.luau`, `AvatarPose.luau` | Lokale Begleiter, gemeinsame Fahrzeuganimation und prozedurale Fahrerpose |
+| `src/models/*.rbxmx` | Zehn strukturell unterschiedliche Fahrzeuge und zwölf unterscheidbare Pet-Arten |
+| `tools/build_world.py`, `build_race_assets.py`, `build_vehicle_fleet.py`, `build_pet_assets.py` | Deterministische, editierbare Primitive-Assets; `--check` erkennt veraltete Dateien |
+| `tests/` | Bestehende Suiten und World-1-Ökonomie-/Migrations-/Bot-/Assetprüfungen |
 
-## Insel und Inhalte
+Nach Änderungen an Generatoren diese ausführen und die erzeugten Assets mitcommitten. Keine kostenpflichtigen Modelle, Meshes oder erfundenen Asset-IDs. Audio referenziert ausschließlich nachgewiesene Roblox-Paketdateien (`volume_slider.ogg`, `action_jump.mp3`, `action_jump_land.mp3`, `action_get_up.mp3`), siehe [Client-Manifest a020070](https://github.com/MaximumADHD/Roblox-Client-Tracker/blob/a020070e2758a71b5d61cf692eee3704a5793011/rbxManifest.txt). Tatsächliche Wiedergabe auf iOS/PC bleibt zu prüfen.
 
-World1 hat eine unregelmäßige, etwa 180 × 180 Studs große Gras-/Sandkontur mit komplett gleicher Grasoberhöhe. Palmen, Felsen, Wasserfall-Geometrie und Wasser umgeben die begehbare Fläche. Trainingsreihe hinten, Race-Zone vorne, Garage/Eggs/World-Portal seitlich. Ein 20 Studs breiter Platz in der Trainingsmitte ist ausdrücklich für spätere Premium-Laufbänder reserviert und noch nicht nutzbar. Es werden keine kostenpflichtigen oder externen Mesh-/Textur-/Modellassets benötigt. Wasser und Wasserfälle sind dekorative Parts, keine Schwimmsimulation oder animierten Flüssigkeiten.
+## Prüfstand und Grenzen
 
-Die Map bleibt über `src/world/World1.rbxmx` im Studio editierbar. Für reproduzierbare Änderungen den Generator anpassen und `python3 tools/build_world.py` ausführen. Die Tests prüfen die generierte Quelldatei sowie flache Höhe, Inselgröße, Spawn, fünf Trainingszonen, Vorschau-Orte und Premium-Abstand.
+**90 Luau-Tests bestanden:** 35 Regeln/Persistenz, 9 Profil-Lifecycle, 12 Training/Sicherheit, 14 frühere Phase-2.1-Prüfungen, 15 World-1-Ökonomie/Migration und 5 RaceService-/BikeRig-Adaptertests. Alle bisherigen Suiten bleiben erhalten; Erwartungen für die ausdrücklich neuen Namen und Schema v2 wurden angepasst. Dazu deterministische Insel-/Strecken-/Fleet-/Pet-Strukturprüfungen, Luau-Kompilierung, Strict-Prüfung der reinen Module, Roblox-spezifische Typprüfung des gesamten Client-/Servercodes und Rojo-Build. Die letzten lokalen Prüfungen sind erfolgreich; der zugehörige CI-Lauf wird im PR verlinkt.
 
-## Regeln und noch offenes Balancing
+Die Adaptertests führen echten Code mit Engine-Doubles aus, keine Roblox-Physik oder GUI. **Nicht ausführbar hier:** Studio/Device-Emulator, Audio/IK/Kamera/Streaming, echte DataStore- und Lasttests. Kein Studio-Test wird als bestanden ausgegeben. Einfache R6-Posen haben keine separaten Knie/Ellenbogen; R15-IK kann für ungewöhnliche Körpermaße Tuning brauchen. Fahrer-/Fahrzeugbewegung ist servergesteuerte Kinematik, keine physikalische Bikesimulation.
 
-- Laufband `i`: Basisimpuls `2^(i-1)`. Benutzung kostet kein Cash. Jeder Impuls erfordert **Weltbesitz UND (aktuelle Energy ≥ EnergyRequirement ODER Rebirths ≥ RebirthRequirement)**. Die Berechtigung wird nicht dauerhaft gespeichert.
-- Laufband 1: Anforderungen 0/0. Noch nicht festgelegte Basisanforderungen sind provisorisch in Config: Laufband 2 = 1 Energy/1 Rebirth; danach Faktoren 4 und 3. Phase 2 nutzt ausschließlich IDs 1–5 in Welt 1; der Katalog hält weiterhin 40 Laufbänder mit 5 pro Welt vor.
-- Training: `Basisimpuls × (1 + Rebirths × 0,5)`. Automatische Impulse und manuelle Klicks haben unabhängige Cooldowns. Keine Offline-/Nachholbelohnungen; bei längeren Serverframes gibt es keine Belohnungsbursts.
-- Rebirth benötigt aktuell `1000 × (Rebirths + 1)` Energy. Diese Schwelle ist weiterhin vorläufig, zentral konfiguriert. UI-Bestätigung ist eine Bedienabsicherung; die tatsächliche Berechtigung entscheidet immer der Server.
-- Cash wird in dieser Phase weder erzeugt noch ausgegeben. Vorhandene Guthaben bleiben erhalten. Weitere Welten bleiben ausschließlich mit Cash freischaltbar; Bikes unabhängig von Welten kaufbar, sobald die späteren Kaufsysteme existieren.
-- Fahrzeugklassen: IDs 1–6 Fahrräder, 7–15 Mopeds, 16–27 Motorräder, 28–34 Supersportler, 35–40 Rennmaschinen. 24 Eier, 96 Pet-Arten, 3 Equip-Slots; Fusion 5 identische normale Pets → Golden, 3 identische Golden-Pets → Rainbow. Dies bleibt getestete Infrastruktur, ohne neue Pet-Spielsysteme.
-- Individuelle Namen, Raritäten, Multiplikatoren und Design-Metadaten werden pro stabiler ID in `CatalogMetadata` gepflegt. Unbekannte Felder bleiben `false`/`Pending`. Bestehende Preise, IDs und Zuordnungen wurden nicht durch neue Fantasiewerte ersetzt.
-
-## Sicherheit und Persistenz
-
-Client-Aktionen enthalten nur Version und Intent (`Select`, `Click`, `Stop`, `Rebirth`, `StartRace`, `AbortRace`), bei Auswahl eine ID 1–5. Zusätzliche Felder (Energy, UserId, Position, Betrag usw.) werden abgelehnt. Die echte Identität liefert Roblox. Ein gemeinsamer Token-Bucket begrenzt Prompts und RemoteEvents auf 12 Burst-Anfragen und 8 neue Tokens/Sekunde; zusätzlich gelten aktionsbezogene Cooldowns. Negative Rückmeldungen sind begrenzt; Spam wird ohne Antwort fallen gelassen. `GetSnapshot` bleibt auf eine Anfrage/Sekunde begrenzt. Schreibversuche an den Server→Client-Events haben keinen Handler.
-
-Der Server prüft ein lebendes Charaktermodell, die ausgewählte Trainingszone, horizontale Belt-Grenzen plus 1 Stud Toleranz und höchstens 6 Studs Höhenabweichung. Weglaufen, Tod und verlorener Zugang stoppen die Auswahl. Keine vom Client angegebenen Mengen, Zeiten oder Weltrechte werden übernommen. Roblox-Charakterbewegung ist teilweise clientgesteuert: dies ist kein vollständiges Anti-Teleport-/Anti-Cheat-System, die Belohnungsrate bleibt aber auch bei Positionsmanipulation serverseitig begrenzt.
-
-Die serverseitige `change`-API prüft Lease, Player-Zugehörigkeit, Closing-/Saving-Status, erstellt eine isolierte Kopie, validiert das Resultat und übernimmt es atomar. Ungültige/fehlgeschlagene Transaktionen haben keine Teilwirkung. Trainingsaktionen können während eines laufenden Saves kurzfristig mit `Saving` abgelehnt werden; es gibt dann keine nachträgliche Belohnung. Vor Disconnect wird der Profilzustand für weitere Änderungen gesperrt. Shared-Module sind öffentlich lesbar; nur die serverseitige Instanz mit echtem Datenservice hat Autorität.
-
-**Keine Bestandsmigration:** Store `BikeEvolution_Player_v1`, Schlüssel `Player_<UserId>` und Schema v1 bleiben unverändert. Energy/Cash/Rebirths und vorhandene Inventare werden regulär weitergeladen; es gibt keinen Rejoin-Reset. Session-Locks, UpdateAsync, Autosave alle 60 Sekunden, Lease von 180 Sekunden und bis zu 3 Backend-Versuche mit 2/4 Sekunden Pause bleiben erhalten. Höhere/unbekannte oder beschädigte Schemas werden nicht durch Defaults ersetzt.
-
-Vorübergehende Autosave-Ausfälle behalten den In-Memory-Stand für weitere Versuche. Disconnect-Recovery wiederholt bis zur Lease-/Shutdown-Grenze. Beim Shutdown beträgt das Startfenster 24 Sekunden, der äußere Wait maximal 25 Sekunden. Alte Sitzungen dürfen nach Lease-Übernahme keine neueren Daten überschreiben. WriteId-Belege erkennen verlorene Release-Bestätigungen auch über Retry-Batches. `[BikeData]`-Logs enthalten Schlüssel/Versuch/Fehler, keine Profilinhalte.
-
-**Verbleibende Risiken:** Bei hartem Serverabsturz kann BindToClose ausbleiben. Änderungen seit dem letzten bestätigten Save können verloren gehen; laufende DataStore-Aufrufe lassen sich nicht abbrechen. Dauerhafte Plattformausfälle verhindern eine garantierte Speicherung. Nach fehlgeschlagener Freigabe kann Rejoin bis zum Lease-Ablauf blockiert sein. Für Live-Betrieb fehlen Lasttests und ein Admin-/Backup-Recovery-Werkzeug. Während der Entwicklung wurden ausschließlich In-Memory-Teststores verwendet, keine produktiven Daten gelesen oder geändert.
-
-## Zahlen und Prüfstand
-
-`Numbers` definiert zentral Energy/Cash bis 1e300 und ganzzahlige Rebirths bis 9007199254740991 (`2^53−1`). Config, Profilvalidierung und Rebirth-Regeln verwenden dieselben Grenzen. Addition/Multiplikation sättigen endlich; NaN/Unendlich sind ungültig. Oberhalb `2^53` sind Energy/Cash als IEEE-754-Doubles nicht mehr auf jede einzelne Einheit genau. Rebirth-Zähler bleiben exakt inkrementierbar; am Maximum ist kein weiterer Rebirth erlaubt.
-
-Der Test-Runner führt alle bisherigen Tests weiter und ergänzt Training, Klick-Cooldowns, Belt-Abstände, Payload-Manipulation, Spam-Budget, Rebirth-Zugangsverlust und Persistenz nach Training/Rebirth/erneutem Beitritt. **74 Luau-Tests bestehen** (35 Regeln/Persistenz, 9 Profil-Lifecycle, 12 Training/Sicherheit, 14 Phase-2.1-Regeln, 4 echte RaceService-/BikeRig-Adaptertests mit Engine-Doubles), zusätzlich deterministische Map- und XML-Strukturprüfungen. Alle Produktionsdateien werden mit Luau kompiliert. Reine Module werden im Strict-Modus geprüft; **luau-lsp analysiert zusätzlich den gesamten Client-/Servercode mit Rojo-Sourcemap und gepinnten Roblox-API-Typen**. Gefundene Syntax-/Typfehler wurden behoben; der abschließende Lauf und der Rojo-Build sind erfolgreich.
-
-LSPs Hinweis zur fehlenden Dateiwatch-Registrierung betrifft nur den CLI-Modus, nicht die Analyse. Nicht verifiziert sind die oben aufgeführten Studio-/Geräte-/Live-Integrationsprüfungen. Insbesondere ist „Build erfolgreich“ kein Nachweis eines durchgeführten Studio-Playtests.
-
-
-## Sidebar, Trainingseffekte und Einstellungen testen
-
-1. Links die farbigen Energy-/Cash-/Rebirths- und Navigationsbuttons prüfen. Auf Smartphones startet die Sidebar kompakt; ☰ klappt sie auf. Auf kleinen Bildschirmen scrollt die Liste bei voller Touch-Zielgröße, statt alle Buttons winzig zu skalieren. Safe Areas und Platz für Joystick/Jump werden berücksichtigt. Auf PC Hover, Klick-Aufleuchten und aktive Kontur prüfen.
-2. **Energy** öffnet aktuelles Laufband, tatsächlichen Impuls, nächstes Laufband, fehlende Energy, alternative Rebirth-Anforderung und Fortschrittsbalken. Zugang erfordert weiterhin die jeweilige Welt; die fünf aktuellen Laufbänder gehören zu Welt 1.
-3. Auf einem Laufband trainieren. Nur nach einer **serverbestätigten Änderung** erscheinen Energy-Zahlen. Der Anzeige-Formatter nutzt K/M/B/T/Qa/… und danach wissenschaftliche Notation (z. B. 1.5K, 250K, 1M). Gespeicherte Zahlen werden nicht umformatiert. Höchstens sechs Popups leben gleichzeitig.
-4. **Rebirths**: aktuelle Rebirths, ×1 → ×1,5 usw., benötigte Energy und Balken prüfen. Bestätigen oder abbrechen. Nach bestätigtem Rebirth erscheint kurz der neue Multiplikator; wiederholte Feedback-IDs lösen keinen zweiten Effekt aus.
-5. **Settings**: Animationen, Energy-Popups und Sounds jeweils aus-/einschalten, Lautstärke verändern und Sidebar umschalten. Änderungen wirken sofort; sie werden ausschließlich in dieser Sitzung gehalten, nicht ins Profil geschrieben. Animationen aus stoppt auch Garage-Rotation und prozedurale Avatar-/Bike-Effekte; die autoritative Rennfahrt läuft weiter.
-6. Training verlassen und erneut aufnehmen: prozedurale Laufbewegung startet/endet weich, ohne Animation-Asset und ohne zusätzliche Belohnung. R15- und R6-Avatare getrennt prüfen.
-
-## Mountainbike-Test-Rennen starten
-
-1. **Garage** zeigt Mountainbike, ID 1, kostenloses und ausgerüstetes Startbike. Das eigentliche 3D-Modell liegt schon in der Place unter `ReplicatedStorage/Vehicles/Mountainbike`: offener Rahmen, zwei Räder mit Profilsegmenten/Felgen/Speichen, Gabel, Lenker mit Griffen, Sattel, Kurbeln und Pedale. Kein kostenpflichtiges Modell und kein VehicleSeat.
-2. Zur Race-Zone vorne bei `(0, 8, 63)` gehen. **Race → Mountainbike-Test starten** oder den ProximityPrompt verwenden. Start aus der Ferne muss abgelehnt werden. Die Brücke verbindet Insel und externe Strecke; Start-/Ziellinien und Streckenmarkierungen sind in Studio sichtbar.
-3. Bike wird bereitgestellt, Fahrer positioniert, drei Sekunden Countdown. Danach automatische Beschleunigung und Führung entlang der etwa 800 Studs langen Kurve. **Keine Gas-/Brems-/Lenksteuerung.** Die provisional konfigurierte Geschwindigkeit beträgt `24 + min(28, log10(1+Energy)*4)` Studs/Sekunde, also 24–52, ausschließlich vom Server aus dem Profil beim Start berechnet.
-4. Räder und Pedale müssen geschwindigkeitsabhängig laufen und im Countdown stillstehen. Lenker und Rahmen neigen sich dezent in Kurven. R15 nutzt prozedurale Hand-/Fuß-IK; R6 eine einfachere Gelenkpose. Eine gemeinsame lokale Animationsverbindung ist nur bei nahen aktiven Avataren/Bikes oder geöffneter Garage aktiv. Entfernte Avatare über 230 Studs werden visuell ausgelassen.
-5. Vor dem Ziel bremst das Bike ab und hält kurz an; danach verschwindet es, Spieler steht bei `(0,12,50)` wieder auf der Insel, WalkSpeed/AutoRotate/PlatformStand/Anchored werden auf die vorherigen Werte gesetzt. **Energy und Cash sind unverändert**; es gibt keine Bots und keine Belohnung. Während des Rennens werden Training und Rebirth abgelehnt.
-6. **Race → Rennen abbrechen**, Charaktertod, Respawn/Disconnect und zwei gleichzeitige Spieler separat prüfen. Mehrfachstart derselben Person ist gesperrt, erneuter Start hat 2 Sekunden Cooldown. Fehler/Timeout führen zur Rücksetzung; bei Tod wird nicht versucht, den toten Charakter zu teleportieren. Laufende Rennen/ausgewählte Trainingsgeräte sind sitzungsbezogen, nicht Teil des DataStores.
-
-## Neue Module und Asset-Pflege (2.1)
-
-| Pfad | Aufgabe |
-| --- | --- |
-| `src/shared/Format.luau`, `Presentation.luau`, `ClientState.luau` | Anzeigeformat, Fortschritt/Rebirth-Vorschau, reine sitzungsbezogene Settings-/Dedup-Regeln |
-| `src/client/Icons.luau`, `UI.luau` | Eigene Part-/Text-Widget-Icons ohne externe Bilder, animierte Sidebar, Dialoge und Garage-Viewport |
-| `src/client/Audio.luau`, `Effects.luau` | Begrenzte Sound-/Popup-Pools; Effekte nur aus bestätigten Serverereignissen |
-| `src/client/AvatarPose.luau`, `Visuals.luau` | Prozedurale Avatar-IK/Gelenkpose, Wheels/Pedals/Steering/Lean, gemeinsame bedarfsgesteuerte lokale Schleife |
-| `src/models/Mountainbike.rbxmx`, `src/shared/BikeRig.luau` | Vollständige Bike-Geometrie und fünf Motorgruppen mit verschweißten Teilen |
-| `src/world/TestCourse.rbxmx`, `CourseData.luau`, `RaceCourse.luau` | Statische Strecke und identische generierte Führungspunkte, binäre Distanzsuche |
-| `src/shared/RaceController.luau`, `src/server/RaceService.luau` | Testbare Rennzustände und echte serverseitige Bewegungs-/Rücksetzungsadapter |
-| `tools/build_race_assets.py` | Deterministischer Generator von Bike, Strecke und CourseData; `--check` prüft Drift |
-| `tests/phase21.spec.luau`, `race_lifecycle.spec.luau`, `race_assets_test.py` | Neue Anzeige-/Renn-/Adapter- und Assetprüfungen |
-
-Nach Änderungen am Asset-Generator `python3 tools/build_race_assets.py` ausführen und alle drei erzeugten Dateien committen. Rennstatus, visuelle Winkel, temporäre Bikes und Settings verwenden **kein neues DataStore-Schema**. Startfahrzeug 1 war bereits in jedem gültigen Profil vorhanden; nur sein explizit vorgegebener Katalogname Mountainbike wurde ergänzt.
-
-## Audioquellen und überprüfte Grenzen
-
-Sounds verwenden ausschließlich die mit Roblox ausgelieferten lokalen Ressourcen `rbxasset://sounds/volume_slider.ogg`, `action_jump.mp3`, `action_jump_land.mp3` und `action_get_up.mp3`. Dateinamen wurden im Client-Manifest [Roblox-Client-Tracker, Revision a020070](https://github.com/MaximumADHD/Roblox-Client-Tracker/blob/a020070e2758a71b5d61cf692eee3704a5793011/rbxManifest.txt) nachgewiesen. Es werden keine Audio-IDs erfunden und keine Audiodateien weiterverteilt. Cues haben unterschiedliche Lautstärke-/Pitch-Einstellungen und eine begrenzte Lebensdauer. Die tatsächliche Wiedergabe auf Desktop/iOS muss in Studio/Client geprüft werden; das Manifest ist kein Hörtest.
-
-**Automatisiert geprüft:** alle bisherigen Tests, Formatierung, Settings/Sidebar-Zustandsdaten, Fortschritts-/Rebirth-Vorschau, erlaubtes Startbike, Kurslänge und Führung, Rennstart/Ziel/Abbruch/Timeout/Mehrfachstart, parallele Zustände, unveränderte Währungen und dedupliziertes Belohnungsfeedback. Die echten BikeRig-/RaceService-Funktionen laufen zusätzlich mit Engine-Doubles und prüfen Motoraufbau, Rücktransport, Steuerungswiederherstellung und Aufräumen sogar bei entferntem RootPart (dann wird ein sicherer Charakter-Respawn angefordert). Diese Doubles bilden CFrame-Translation ab, keine Roblox-Physik oder IK. Syntax, Pure-Luau- und Roblox-API-Typprüfung sowie Rojo-Build bestehen. Während der Implementierung gefundene Syntax-/Optionalwertfehler wurden korrigiert.
-
-**Noch nicht in Roblox Studio getestet:** tatsächliche Spielbarkeit/Rendering, iPhone-/iPad-/Windows-Layout und CoreGui, Audio, R15-IK- und R6-Körperhaltung, Sitz-/Hand-/Fußkontakt bei verschiedenen Avatargrößen, Default-Animate-Übergänge, reale Motor6D-Replikation/Netzwerklatenz, Kamera, Mehrspielerlast und echte DataStore-Integration. Vollständige Studio-Abnahme ist vor Merge nötig. Die Fahrt ist absichtlich servergesteuerte Kinematik, keine physikalische Fahrrad-/Kollisionssimulation. R6 hat keine getrennten Knie/Ellenbogen; dessen Bewegung ist stilisiert und erreicht nicht die R15-IK-Genauigkeit. Ungewöhnliche R15-Körperproportionen benötigen gegebenenfalls Pose-Tuning. Es existiert kein vollständiges Anti-Teleport-System; Rennwährungen bleiben aber unverändert und Trainingsraten begrenzt.
+Mobile-Vorkehrungen: kurze Pet-Modelle (<25 Teile), maximal drei sichtbare Begleiter pro Spieler mit Distanz-Culling, seitenweises Inventar, begrenzte Effekte, bedarfsgesteuerte gemeinsame Animationen, Welt-Streaming, atomar gestreamte Rennmodelle, feste Heimatinsel. Inventardaten werden nur bei Änderung übertragen; reine Energy-Ticks versenden nicht ständig alle Pet-Instanzen. Reale Frameraten und Netzwerk-/Serverlast bei vielen gleichzeitigen Rennen müssen vor Veröffentlichung gemessen werden. Ein vollständiges Anti-Teleport-System und ein Admin-Backup-Recovery-Werkzeug sind nicht Teil dieses Builds.
