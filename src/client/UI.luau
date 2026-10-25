@@ -19,7 +19,7 @@ local function text(parent:Instance,value:string,height:number):any
  return make("TextLabel",parent,{Size=UDim2.new(1,-16,0,height),BackgroundTransparency=1,Text=value,TextWrapped=true,TextColor3=white,TextSize=16,Font=Enum.Font.GothamBold,LayoutOrder=0})
 end
 function UI.new(playerGui:Instance,settings:any,audio:any):any
- local gui=make("ScreenGui",playerGui,{Name="PalmBaySidebar",ResetOnSpawn=false,ScreenInsets=Enum.ScreenInsets.DeviceSafeInsets,ZIndexBehavior=Enum.ZIndexBehavior.Sibling})
+ local gui=make("ScreenGui",playerGui,{Name="PalmBaySidebar",ResetOnSpawn=false,ScreenInsets=Enum.ScreenInsets.CoreUISafeInsets,ZIndexBehavior=Enum.ZIndexBehavior.Sibling})
  local root=make("Frame",gui,{Size=UDim2.new(1,-16,1,-16),Position=UDim2.fromOffset(8,8),BackgroundTransparency=1})
  local sidebar=make("Frame",root,{Size=UDim2.fromOffset(210,535),Position=UDim2.fromOffset(0,4),BackgroundColor3=Color3.fromRGB(17,89,112),BackgroundTransparency=0.14,BorderSizePixel=0})
  corner(sidebar,18);make("UIStroke",sidebar,{Color=white,Thickness=1,Transparency=0.65})
@@ -37,6 +37,8 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
  end
  local sidebarHeight=535
  local generation=0
+ local messageUntil=0
+ local messageText=""
  local api:any={Settings=settings,Buttons=buttons,Snapshot=nil,Viewport=nil,OnAction=function() end,OnSetting=function() end,OnMenu=function() end,Difficulty="Easy"}
  for i,name in ipairs({"Energy","Cash","Rebirths","Garage","Pets","Race","Worlds","Upgrades","Settings"}) do
   local button=make("TextButton",list,{Name=name,LayoutOrder=i,Size=UDim2.new(1,-4,0,47),BackgroundColor3=palette[name],BackgroundTransparency=0.08,BorderSizePixel=0,Text="",AutoButtonColor=false})
@@ -56,7 +58,7 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
  end
  local training=make("TextButton",root,{AnchorPoint=Vector2.new(1,1),Size=UDim2.fromOffset(225,54),Position=UDim2.new(1,-8,1,-142),Text="ϟ TRAINIEREN",Font=Enum.Font.GothamBold,TextSize=17,TextColor3=white,BackgroundColor3=palette.Energy,BorderSizePixel=0});corner(training,15)
  local status=make("TextLabel",root,{AnchorPoint=Vector2.new(1,1),Size=UDim2.fromOffset(225,58),Position=UDim2.new(1,-8,1,-200),BackgroundColor3=Color3.fromRGB(20,111,128),BackgroundTransparency=0.2,Text="Daten werden geladen …",TextWrapped=true,TextColor3=white,TextSize=13,Font=Enum.Font.GothamBold});corner(status,12)
- training.Activated:Connect(function() audio.play("Button");api.OnAction("Training") end)
+ training.Activated:Connect(function() if api.Snapshot and api.Snapshot.Race and api.Snapshot.Race.Phase~="Idle" then return end;audio.play("Button");api.OnAction("Training") end)
  local overlay=make("TextButton",root,{Visible=false,Size=UDim2.fromScale(1,1),BackgroundColor3=Color3.fromRGB(12,51,68),BackgroundTransparency=0.3,Text="",AutoButtonColor=false,ZIndex=20})
  local window=make("Frame",overlay,{AnchorPoint=Vector2.new(0.5,0.5),Size=UDim2.new(0.9,0,0.85,0),Position=UDim2.fromScale(0.5,0.5),BackgroundColor3=Color3.fromRGB(25,116,139),BorderSizePixel=0,ZIndex=21});corner(window,20)
  make("UISizeConstraint",window,{MaxSize=Vector2.new(560,560),MinSize=Vector2.new(240,200)})
@@ -102,12 +104,16 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
  end
  toggle.Activated:Connect(function() audio.play("Button");api.collapse(not settings.Collapsed) end)
  local function hide()
+  api.Closing=true
   local token=generation
+  api.Viewport=nil
   tween(window,{Position=UDim2.fromScale(0.5,0.53)},0.12)
   task.delay(if settings.Animations then 0.12 else 0,function() if generation==token then overlay.Visible=false;api.Viewport=nil end end)
  end
  close.Activated:Connect(hide)
  function api.open(name:string)
+  api.Closing=false
+  content.CanvasPosition=Vector2.zero
   api.CurrentMenu=name
   generation+=1
   clear();notice.Text="";heading.Text=name;overlay.Visible=true;window.Position=UDim2.fromScale(0.5,0.53);tween(window,{Position=UDim2.fromScale(0.5,0.5)})
@@ -185,7 +191,7 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
   elseif name=="Rebirths" and snap then
    local p=Presentation.rebirth(snap)
    api.RebirthInfo=row("",110);api.RebirthBar=bar(p.Ratio)
-   api.RebirthConfirm=command("Rebirth bestätigen",function() api.OnAction("Rebirth");hide() end)
+   api.RebirthConfirm=command("Rebirth bestätigen",function() if api.Snapshot and Presentation.rebirth(api.Snapshot).Allowed then api.OnAction("Rebirth");hide() end end)
    command("Abbrechen",hide)
   elseif name=="Energy" and snap then
    api.TrainingInfo=row("",125);api.TrainingBar=bar(0)
@@ -200,7 +206,7 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
    if api.LastRaceResult then row("Ergebnis "..(api.LastRaceResult.Difficulty or "")..": Platz "..(api.LastRaceResult.Place or "—").." • +"..Format.number(api.LastRaceResult.Reward or 0).." Cash",50) end
    command("Rennen starten / erneut starten",function() api.OnAction("StartRace",{Difficulty=api.Difficulty});hide() end)
    command("Rennen abbrechen",function() api.OnAction("AbortRace");hide() end)
-  elseif name=="Cash" then row("Cash wird erhalten, im Test-Rennen aber weder verbraucht noch vergeben.",80)
+  elseif name=="Cash" then row("Verdiene Cash in Rennen gegen fünf Bots. Die Platzierung und Schwierigkeit bestimmen deine Belohnung; ausgerüstete Pets erhöhen sie. Kaufe damit Fahrzeuge oder öffne Eier.",130)
   else row(name.." • VORSCHAU\nDieser Bereich ist noch nicht spielbar. Keine Käufe oder Belohnungen.",90) end
   api.update(api.Snapshot)
  end
@@ -208,26 +214,29 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
   if not snap then return end
   local oldRevision=if api.Snapshot then api.Snapshot.InventoryRevision else nil
   api.Snapshot=snap
-  if oldRevision~=nil and snap.InventoryRevision~=oldRevision and overlay.Visible and (api.CurrentMenu=="Garage" or api.CurrentMenu=="Pets" or api.CurrentMenu=="Pet" or api.CurrentMenu=="Index") then
+  if oldRevision~=nil and snap.InventoryRevision~=oldRevision and overlay.Visible and not api.Closing and (api.CurrentMenu=="Garage" or api.CurrentMenu=="Pets" or api.CurrentMenu=="Pet" or api.CurrentMenu=="Index") then
    api.open(api.CurrentMenu)
   end
   for _,name in ipairs({"Energy","Cash","Rebirths"}) do labels[name].Text=(if settings.Collapsed then "" else name.."\n")..Format.number(snap[name]) end
   local p=Presentation.training(snap)
   local info="Laufband "..p.Current.." • +"..Format.number(p.Gain).."/Impuls\n"..(if p.Complete then "Alle fünf Insel-Laufbänder verfügbar." else "Nächstes: "..p.Next.." • fehlen "..Format.number(p.Missing).." Energy\nODER "..Format.number(p.RebirthRequirement).." Rebirths (Weltzugang nötig)")
-  status.Text=if snap.Race and snap.Race.Phase~="Idle" then "TEST-RENNEN • "..snap.Race.Phase.."\n"..(if snap.Race.Phase=="Countdown" then tostring(snap.Race.Countdown) else Format.number(snap.Race.Speed).." Studs/Sek.") else "×"..Format.number(snap.TrainingMultiplier).." • "..info
-  training.Text=if snap.SelectedTreadmill==0 then "ϟ TRAINIEREN" else "+"..Format.number(snap.ImpulseGain).." ϟ TIPPEN"
+  local racing=snap.Race and snap.Race.Phase~="Idle"
+  status.Text=if racing then (snap.Race.Difficulty or "Easy").." • Platz "..(snap.Race.Place or 1).." / 6\n"..(if snap.Race.Phase=="Countdown" then "Start in "..snap.Race.Countdown else math.floor(snap.Race.Progress*100).." % • "..Format.number(snap.Race.Speed).." Studs/Sek.") else "×"..Format.multiplier(snap.TrainingMultiplier).." • "..info
+  if os.clock()<messageUntil then status.Text=messageText end
+  training.Text=if racing then "🏁 RENNEN" elseif snap.SelectedTreadmill==0 then "ϟ TRAINIEREN" else "+"..Format.number(snap.ImpulseGain).." ϟ TIPPEN"
+  training.Active=not racing;training.AutoButtonColor=not racing
   if api.TrainingInfo and api.TrainingInfo.Parent then api.TrainingInfo.Text=info;tween(api.TrainingBar,{Size=UDim2.fromScale(p.Ratio,1)}) end
   if api.RebirthInfo and api.RebirthInfo.Parent then
-   local r=Presentation.rebirth(snap);api.RebirthInfo.Text="Rebirths: "..Format.number(r.Current).."\nMultiplikator ×"..Format.number(r.Multiplier).." → ×"..Format.number(r.NextMultiplier).."\nBenötigt: "..Format.number(r.Requirement).." Energy\nEnergy wird auf 0 gesetzt. Laufbandzugang kann entfallen."
-   tween(api.RebirthBar,{Size=UDim2.fromScale(r.Ratio,1)});api.RebirthConfirm.Text=if r.Allowed then "Rebirth bestätigen" else "Noch nicht genug Energy"
+   local r=Presentation.rebirth(snap);api.RebirthInfo.Text="Rebirths: "..Format.number(r.Current).."\nMultiplikator ×"..Format.multiplier(r.Multiplier).." → ×"..Format.multiplier(r.NextMultiplier).."\nBenötigt: "..Format.number(r.Requirement).." Energy\nEnergy wird auf 0 gesetzt. Laufbandzugang kann entfallen."
+   tween(api.RebirthBar,{Size=UDim2.fromScale(r.Ratio,1)});api.RebirthConfirm.Text=if r.Allowed then "Rebirth bestätigen" else "Noch nicht genug Energy";api.RebirthConfirm.Active=r.Allowed;api.RebirthConfirm.AutoButtonColor=r.Allowed
   end
   if api.RaceInfo and api.RaceInfo.Parent then
-   local race=snap.Race or {Phase="Idle",Progress=0};api.RaceInfo.Text="Mountainbike Test\n"..race.Phase.." • Platz "..(race.Place or "—").." / 6 • "..math.floor(race.Progress*100).." %"
+   local race=snap.Race or {Phase="Idle",Progress=0};api.RaceInfo.Text=(race.Difficulty or "Easy").." • "..(Catalog.Vehicles[snap.ActiveVehicle or 1].Name or "Fahrzeug").."\n"..race.Phase.." • Platz "..(race.Place or "—").." / 6 • "..math.floor(race.Progress*100).." %"
    tween(api.RaceBar,{Size=UDim2.fromScale(race.Progress,1)})
   end
  end
  api.Status=status
- function api.message(value:string) status.Text=value;notice.Text=value end
+ function api.message(value:string) messageText=value;messageUntil=os.clock()+4;status.Text=value;notice.Text=value end
  function api.refreshSettings()
   if not settings.Animations then
    for object,t in pairs(activeTweens) do t:Cancel();activeTweens[object]=nil end

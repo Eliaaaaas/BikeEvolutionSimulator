@@ -21,6 +21,7 @@ local ui=UI.new(Players.LocalPlayer:WaitForChild("PlayerGui"),settings,audio)
 local effects=Effects.new(ui.Gui,settings)
 local visuals=Visuals.new(settings,ui)
 PetFollowers.new(settings,ui.Gui)
+require(script.IslandEffects).new(settings,ui.Gui)
 ui.OnSetting=function() audio.refresh();effects.refresh();ui.refreshSettings();visuals.refresh() end
 local remotes=ReplicatedStorage:WaitForChild(Config.Network.Folder)
 local action=remotes:WaitForChild("Action") :: RemoteEvent
@@ -48,9 +49,9 @@ ui.OnAction=function(kind:string,fields:any?)
 end
 local function render(data:any):boolean
  if not Protocol.validSnapshot(data) or type(data.SelectedTreadmill)~="number" then return false end
- if snapshot then
-  for _,key in ipairs({"Pets","EquippedPets","DiscoveredPets","OwnedVehicles"}) do if data[key]==nil then data[key]=snapshot[key] end end
- end
+ local merged=State.snapshot(snapshot,data)
+ if not merged then return false end
+ data=merged
  requestId=math.max(requestId,data.LastRequestId or 0)
  local progress=Presentation.training(data).Ratio
  if snapshot and progress>=1 and lastProgress<1 then audio.play("Unlock") end
@@ -58,7 +59,7 @@ local function render(data:any):boolean
 end
 local snapshotEvent=remotes:WaitForChild("SnapshotChanged") :: RemoteEvent
 snapshotEvent.OnClientEvent:Connect(render)
-local errors={TooFar="Stelle dich auf dein Laufband.",Locked="Energy- oder Rebirth-Anforderung fehlt.",NotReady="Daten noch nicht bereit.",Saving="Speichern läuft – kurz warten.",NoTreadmill="Bitte zuerst ein Laufband auswählen.",NotEnoughEnergy="Nicht genug Energy.",NotAlive="Aktion nur mit lebendem Charakter.",AlreadyRacing="Während des Rennens nicht verfügbar.",RaceUnavailable="Gehe zur Race-Zone vorne auf der Insel.",NotEnoughCash="Nicht genug Cash.",AlreadyOwned="Dieses Fahrzeug gehört dir bereits.",InventoryFull="Pet-Inventar voll.",EquipLimit="Maximal drei Pets ausrüstbar.",DuplicateRequest="Diese Anfrage wurde bereits verarbeitet."}
+local errors={TooFar="Stelle dich auf dein Laufband.",Locked="Energy- oder Rebirth-Anforderung fehlt.",NotReady="Daten noch nicht bereit.",Saving="Speichern läuft – kurz warten.",NoTreadmill="Bitte zuerst ein Laufband auswählen.",NotEnoughEnergy="Nicht genug Energy.",NotAlive="Aktion nur mit lebendem Charakter.",AlreadyRacing="Während des Rennens nicht verfügbar.",RaceUnavailable="Gehe zur Race-Zone vorne auf der Insel.",NotEnoughCash="Nicht genug Cash.",AlreadyOwned="Dieses Fahrzeug gehört dir bereits.",InventoryFull="Pet-Inventar voll.",EquipLimit="Maximal drei Pets ausrüstbar.",DuplicateRequest="Diese Anfrage wurde bereits verarbeitet.",ServiceUnavailable="Aktion vorübergehend nicht verfügbar. Bitte erneut versuchen."}
 local resultEvent=remotes:WaitForChild("ActionResult") :: RemoteEvent
 resultEvent.OnClientEvent:Connect(function(result)
  if type(result)=="table" and result.Error=="Cooldown" and (result.Action=="StartRace" or result.Action=="Hatch") then ui.message("Bitte kurz warten und dann erneut versuchen.") end

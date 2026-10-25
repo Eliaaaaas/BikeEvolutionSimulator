@@ -27,7 +27,7 @@ function Effects.new(gui:ScreenGui,settings:any):any
   task.delay(if reward then 1.8 else 0.9,function() local i=table.find(live,label);if i then table.remove(live,i);label:Destroy() end end)
  end
  function api.training(amount:number) if settings.Popups then show("+"..Format.number(amount).." ϟ",false) end end
- function api.rebirth(rebirths:number) show("REBIRTH!\nMultiplikator ×"..Format.number(1+rebirths*0.5),true) end
+ function api.rebirth(rebirths:number) show("REBIRTH!\nMultiplikator ×"..Format.multiplier(1+rebirths*0.5),true) end
  function api.refresh() if not settings.Popups or not settings.Animations then clear() end end
  return api
 end
