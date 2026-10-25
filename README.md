@@ -23,6 +23,14 @@ In Studio einen eigenen **veröffentlichten Test-Place** öffnen, über das Rojo
 
 Play starten. Links oben erscheinen Energy, Cash und Rebirths. Ein Respawn erhält das HUD. Stoppen und erneut starten prüft das Laden des gespeicherten Profils. Eine eigene Weltkarte ist noch nicht enthalten.
 
+## Roblox-Studio-Datei herunterladen
+
+1. Im Repository [Actions → Validate Luau foundation](https://github.com/Eliaaaaas/BikeEvolutionSimulator/actions/workflows/validate.yml) öffnen und einen erfolgreichen Lauf für `feat/phase-1-luau-foundation` auswählen.
+2. Unten unter **Artifacts** auf **BikeEvolutionSimulator-Studio** klicken (GitHub-Anmeldung erforderlich) und die ZIP-Datei herunterladen.
+3. ZIP entpacken und `BikeEvolutionSimulator.rbxlx` in Roblox Studio über **File → Open from File…** öffnen. Für diesen Download sind weder Rojo noch die lokalen CLI-Werkzeuge nötig.
+
+Das Artifact wird nach erfolgreichen Tests und Rojo-Build hochgeladen; fehlt die erwartete Datei, schlägt der Workflow fehl. Für Playtests mit gespeicherten Profilen die Datei in einer separaten Test-Experience veröffentlichen und den oben beschriebenen DataStore-Zugriff aktivieren.
+
 ## Struktur
 
 | Pfad | Aufgabe |

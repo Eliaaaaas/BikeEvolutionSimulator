@@ -17,3 +17,9 @@ jobs:
         run: |
           mkdir -p build
           .tools/rojo build default.project.json --output build/BikeEvolutionSimulator.rbxlx
+      - name: Upload Roblox Studio place
+        uses: actions/upload-artifact@v4
+        with:
+          name: BikeEvolutionSimulator-Studio
+          path: build/BikeEvolutionSimulator.rbxlx
+          if-no-files-found: error
