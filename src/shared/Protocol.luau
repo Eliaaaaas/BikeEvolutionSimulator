@@ -16,9 +16,9 @@ local function integer(value:any,max:number):boolean
 end
 function Protocol.validAction(payload:any):boolean
  if type(payload)~="table" or payload.Version~=1 then return false end
- local specifications:any={Select={TreadmillId=5},BuyVehicle={VehicleId=10},EquipVehicle={VehicleId=10},Hatch={EggId=3},EquipPet={PetId=true},UnequipPet={PetId=true}}
+ local specifications:any={Select={TreadmillId=5},BuyVehicle={VehicleId=10},EquipVehicle={VehicleId=10},Hatch={EggId=3},EquipPet={PetId=true},UnequipPet={PetId=true},EquipBest={},UnequipAll={}}
  local spec=specifications[payload.Action]
- local economic=payload.Action=="BuyVehicle" or payload.Action=="EquipVehicle" or payload.Action=="Hatch" or payload.Action=="EquipPet" or payload.Action=="UnequipPet"
+ local economic=payload.Action=="BuyVehicle" or payload.Action=="EquipVehicle" or payload.Action=="Hatch" or payload.Action=="EquipPet" or payload.Action=="UnequipPet" or payload.Action=="EquipBest" or payload.Action=="UnequipAll"
  local allowed:any={Version=true,Action=true}
  if spec then for key,max in pairs(spec) do
   allowed[key]=true

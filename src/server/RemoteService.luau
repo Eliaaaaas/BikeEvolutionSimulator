@@ -26,6 +26,7 @@ function RemoteService.start(gameplay: any)
   return if snapshot then {Ok=true,Data=snapshot} else {Ok=false,Error=gameplay.status(player)}
  end
  local lastFeedback: {[Player]: number} = {}
+ local previous: {[Player]: any} = {}
  remotes.Action.OnServerEvent:Connect(function(player: Player, payload: any)
   local ok, reason = gameplay.handle(player, payload)
   -- No amplification: silently drop floods, throttle negative feedback too.
@@ -33,9 +34,12 @@ function RemoteService.start(gameplay: any)
   if not ok and lastFeedback[player] and os.clock() - (lastFeedback[player] or 0) < 0.5 then return end
   lastFeedback[player] = os.clock()
   local actionName=if type(payload)=="table" and type(payload.Action)=="string" and #payload.Action<=20 then payload.Action else ""
+  if ok and (actionName=="EquipBest" or actionName=="UnequipAll" or actionName=="EquipPet" or actionName=="UnequipPet" or actionName=="Hatch") then
+   local snapshot=gameplay.snapshot(player,true)
+   if snapshot then previous[player]=snapshot;remotes.SnapshotChanged:FireClient(player,snapshot) end
+  end
   remotes.ActionResult:FireClient(player, {Ok=ok,Error=reason,Action=actionName})
  end)
- local previous: {[Player]: any} = {}
  Players.PlayerRemoving:Connect(function(player) lastRequest[player]=nil;lastFeedback[player]=nil;previous[player]=nil end)
  -- SnapshotChanged and ActionResult deliberately have no OnServerEvent handlers.
  folder.Parent = ReplicatedStorage

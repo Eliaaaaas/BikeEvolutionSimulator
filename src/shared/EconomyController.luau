@@ -42,11 +42,16 @@ function E.handle(self:any,player:any,payload:any): (boolean,string?)
    if not species or not instanceId or data.Pets[instanceId] then return false end
    data.Cash-=egg.CashCost;data.Pets[instanceId]={SpeciesId=species,Variant="Normal"}
    if not table.find(data.DiscoveredPets,species) then table.insert(data.DiscoveredPets,species) end
+   PetRules.equipHatched(data,instanceId)
    result={Kind="Hatched",SpeciesId=species,PetId=instanceId,EggId=payload.EggId}
   elseif kind=="EquipPet" then
-   if not data.Pets[payload.PetId] or table.find(data.EquippedPets,payload.PetId) then return false end
+   if not PetRules.stats(data.Pets[payload.PetId]) then rejection="PetUnavailable";return false end
+   if table.find(data.EquippedPets,payload.PetId) then return false end
    if #data.EquippedPets>=Config.Rules.EquipSlots then rejection="EquipLimit";return false end
    table.insert(data.EquippedPets,payload.PetId)
+  elseif kind=="EquipBest" or kind=="UnequipAll" then
+   data.EquippedPets=if kind=="EquipBest" then PetRules.best(data) else {}
+   result={Kind="PetEquipmentChanged",Action=kind,EquippedCount=#data.EquippedPets}
   elseif kind=="UnequipPet" then
    local index=table.find(data.EquippedPets,payload.PetId);if not index then return false end
    table.remove(data.EquippedPets,index)

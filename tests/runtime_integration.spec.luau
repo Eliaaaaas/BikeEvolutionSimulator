@@ -75,7 +75,7 @@ test("complete wired gameplay: train, rebirth, race, buy, equip, hatch, pets and
  e.UI.VehicleId=2;e.UI.open("Garage");e.press("Kaufen");e.press("Ausrüsten");assert(e.Data.read(e.Player).ActiveVehicle==2)
  e.race();assert(e.UI.LastRaceResult.Reward>0)
  e.UI.EggId=1;e.UI.open("Egg");e.press("Ei öffnen");local profile=e.Data.read(e.Player);local petId=next(profile.Pets);assert(petId)
- e.UI.PetId=petId;e.UI.open("Pet");e.press("Ausrüsten");assert(e.UI.Snapshot.PetEnergyBonus>1 and e.UI.Snapshot.PetCashBonus>1)
+ assert(e.Data.read(e.Player).EquippedPets[1]==petId);e.UI.PetId=petId;e.UI.open("Pet");e.press("Ablegen");e.press("Ausrüsten");assert(e.UI.Snapshot.PetEnergyBonus>1 and e.UI.Snapshot.PetCashBonus>1)
  e.onBelt(1);local before=e.Data.snapshot(e.Player).Energy;e.action("Training");assert(e.Data.snapshot(e.Player).Energy-before>1.5)
  local saved=e.Data.read(e.Player);e.Player.Parent=nil;e.Players.PlayerRemoving:Fire(e.Player);e.advance(1)
  e.Player.Parent=e.Players;e.Players.PlayerAdded:Fire(e.Player);e.advance(.1)
@@ -175,5 +175,41 @@ test("V2 sidebar keeps full Rebirth preview, cancel and authoritative confirmati
  local profile=e.Data.snapshot(e.Player)
  assert(profile.Energy==0 and profile.Rebirths==1 and profile.Cash==123)
  assert(e.UI.ResourceValues.Energy.Text=="0" and e.UI.ResourceValues.Rebirths.Text=="1" and e.UI.ResourceValues.Cash.Text=="123")
+end)
+test("V3 actual Equip Best button updates confirmed bonuses immediately and Unequip All survives rejoin",function()
+ local e=integration(true)
+ assert(e.Data.change(e.Player,function(profile)
+  profile.Pets={a={SpeciesId=1,Variant="Normal"},b={SpeciesId=4,Variant="Golden"},c={SpeciesId=12,Variant="Rainbow"},d={SpeciesId=10,Variant="Normal"}}
+  profile.DiscoveredPets={1,4,10,12};profile.EquippedPets={"a"};return true
+ end,true));e.advance(.3)
+ e.UI.Buttons.Pets.Activated:Fire()
+ local button
+ for _,node in ipairs(e.UI.Gui:GetDescendants()) do if node:IsA("TextButton") and node.Text=="⚡ EQUIP BEST" then button=node;break end end
+ assert(button);button.Activated:Fire() -- No scheduler advance: server confirmation sends the new inventory now.
+ assert(table.concat(e.Data.read(e.Player).EquippedPets,",")=="c,b,d")
+ assert(#e.UI.Snapshot.EquippedPets==3 and math.abs(e.UI.Snapshot.PetEnergyBonus-9.25)<1e-9 and math.abs(e.UI.Snapshot.PetCashBonus-6.9)<1e-9)
+ assert(e.UI.Snapshot.Pets.a and e.UI.Snapshot.Pets.b and e.UI.Snapshot.Pets.c and e.UI.Snapshot.Pets.d)
+ e.press("UNEQUIP ALL");e.advance(2)
+ assert(#e.Data.read(e.Player).EquippedPets==0 and e.UI.Snapshot.PetEnergyBonus==1 and e.UI.Snapshot.PetCashBonus==1)
+ e.Player.Parent=nil;e.Players.PlayerRemoving:Fire(e.Player);e.advance(1)
+ e.Player.Parent=e.Players;e.Players.PlayerAdded:Fire(e.Player);e.advance(.1)
+ local loaded=e.Data.read(e.Player);assert(loaded and #loaded.EquippedPets==0 and loaded.Pets.c.Variant=="Rainbow")
+end)
+test("V3 actual hatch buttons auto-fill only new pets and never replace full or manually emptied slots",function()
+ local e=integration(true)
+ assert(e.Data.change(e.Player,function(profile) profile.Cash=10000;return true end));e.advance(.3)
+ local first={}
+ for i=1,4 do
+  e.UI.EggId=1;e.UI.open("Egg");e.press("Ei öffnen");e.advance(1)
+  assert(#e.UI.Snapshot.EquippedPets==math.min(i,3))
+  local pets=0;for _ in pairs(e.Data.read(e.Player).Pets) do pets+=1 end;assert(pets==i)
+  if i==3 then first=table.clone(e.UI.Snapshot.EquippedPets) end
+ end
+ assert(table.concat(first,",")==table.concat(e.UI.Snapshot.EquippedPets,","))
+ assert(math.abs(e.UI.Snapshot.PetEnergyBonus-1.3)<1e-9 and math.abs(e.UI.Snapshot.PetCashBonus-1.15)<1e-9)
+ e.UI.Buttons.Pets.Activated:Fire();e.press("UNEQUIP ALL");e.advance(2)
+ assert(#e.UI.Snapshot.EquippedPets==0)
+ e.UI.EggId=1;e.UI.open("Egg");e.press("Ei öffnen")
+ assert(#e.UI.Snapshot.EquippedPets==1 and not table.find(first,e.UI.Snapshot.EquippedPets[1]))
 end)
 print(string.format("%d actual runtime wiring tests passed (engine doubles; NOT Roblox Studio)",count))

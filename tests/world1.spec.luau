@@ -49,7 +49,8 @@ test("hatch deducts cash exactly once, records index, equips three unique pets",
  local e,get,advance=fixture();local before=get().Cash
  for i=1,4 do assert(e:handle("p",{Action="Hatch",EggId=1,RequestId=i}));advance(1.1) end
  assert(get().Cash==before-400 and #get().DiscoveredPets==1)
- for i=1,3 do assert(e:handle("p",{Action="EquipPet",PetId="pet-"..i,RequestId=4+i})) end
+ for i=1,3 do assert(get().EquippedPets[i]=="pet-"..i) end
+ assert(not e:handle("p",{Action="EquipPet",PetId="pet-1",RequestId=5}))
  assert(not e:handle("p",{Action="EquipPet",PetId="pet-4",RequestId=8}))
  assert(#get().EquippedPets==3)
  assert(e:handle("p",{Action="UnequipPet",PetId="pet-2",RequestId=9}));assert(#get().EquippedPets==2)

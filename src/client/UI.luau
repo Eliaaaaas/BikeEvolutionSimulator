@@ -152,6 +152,11 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
    for vehicleId=1,10 do local v=Catalog.Vehicles[vehicleId];command(v.Name.." • "..Format.number(v.CashCost).." Cash",function() api.VehicleId=vehicleId;api.open("Garage") end) end
   elseif name=="Pets" and snap then
    row("Pets • "..#(snap.EquippedPets or {}).." / 3 ausgerüstet\nEnergy ×"..Format.multiplier(snap.PetEnergyBonus or 1).." • Cash ×"..Format.multiplier(snap.PetCashBonus or 1),65)
+   local best=command("⚡ EQUIP BEST",function() api.OnAction("EquipBest") end)
+   best.BackgroundColor3=Color3.fromRGB(19,162,127)
+   make("UIGradient",best,{Color=ColorSequence.new(Color3.fromRGB(132,255,137),Color3.fromRGB(87,210,255)),Rotation=20})
+   row("Einmalig die drei besten Pets • Energy und Cash gleich gewichtet",35)
+   command("UNEQUIP ALL",function() api.OnAction("UnequipAll") end)
    local activeNames={}
    for _,id in ipairs(snap.EquippedPets or {}) do local pet=snap.Pets[id];if pet then table.insert(activeNames,Catalog.Pets[pet.SpeciesId].Name or "Unbekannt") end end
    row("Slots: "..(if #activeNames==0 then "leer / leer / leer" else table.concat(activeNames," / ")),50)

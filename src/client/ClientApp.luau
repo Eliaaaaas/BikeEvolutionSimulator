@@ -32,7 +32,7 @@ local requestId=0
 local function send(kind:string,fields:any?)
  if not snapshot then return end
  local payload=fields or {};payload.Version=1;payload.Action=kind
- if kind=="BuyVehicle" or kind=="EquipVehicle" or kind=="Hatch" or kind=="EquipPet" or kind=="UnequipPet" then requestId+=1;payload.RequestId=requestId end
+ if kind=="BuyVehicle" or kind=="EquipVehicle" or kind=="Hatch" or kind=="EquipPet" or kind=="UnequipPet" or kind=="EquipBest" or kind=="UnequipAll" then requestId+=1;payload.RequestId=requestId end
  action:FireServer(payload)
 end
 ui.OnMenu=function(name:string)
@@ -62,7 +62,7 @@ local function render(data:any):boolean
 end
 local snapshotEvent=remotes:WaitForChild("SnapshotChanged") :: RemoteEvent
 snapshotEvent.OnClientEvent:Connect(render)
-local errors={TooFar="Stelle dich auf dein Laufband.",Locked="Energy- oder Rebirth-Anforderung fehlt.",NotReady="Daten noch nicht bereit.",Saving="Speichern läuft – kurz warten.",NoTreadmill="Bitte zuerst ein Laufband auswählen.",NotEnoughEnergy="Nicht genug Energy.",NotAlive="Aktion nur mit lebendem Charakter.",AlreadyRacing="Während des Rennens nicht verfügbar.",RaceUnavailable="Gehe zur Race-Zone vorne auf der Insel.",NotEnoughCash="Nicht genug Cash.",AlreadyOwned="Dieses Fahrzeug gehört dir bereits.",InventoryFull="Pet-Inventar voll.",EquipLimit="Maximal drei Pets ausrüstbar.",DuplicateRequest="Diese Anfrage wurde bereits verarbeitet.",ServiceUnavailable="Aktion vorübergehend nicht verfügbar. Bitte erneut versuchen."}
+local errors={TooFar="Stelle dich auf dein Laufband.",Locked="Energy- oder Rebirth-Anforderung fehlt.",NotReady="Daten noch nicht bereit.",Saving="Speichern läuft – kurz warten.",NoTreadmill="Bitte zuerst ein Laufband auswählen.",NotEnoughEnergy="Nicht genug Energy.",NotAlive="Aktion nur mit lebendem Charakter.",AlreadyRacing="Während des Rennens nicht verfügbar.",RaceUnavailable="Gehe zur Race-Zone vorne auf der Insel.",NotEnoughCash="Nicht genug Cash.",AlreadyOwned="Dieses Fahrzeug gehört dir bereits.",InventoryFull="Pet-Inventar voll.",EquipLimit="Maximal drei Pets ausrüstbar.",DuplicateRequest="Diese Anfrage wurde bereits verarbeitet.",PetUnavailable="Dieses Pet ist nicht verfügbar oder noch gesperrt.",ServiceUnavailable="Aktion vorübergehend nicht verfügbar. Bitte erneut versuchen."}
 local resultEvent=remotes:WaitForChild("ActionResult") :: RemoteEvent
 resultEvent.OnClientEvent:Connect(function(result)
  if type(result)=="table" and result.Error=="Cooldown" and (result.Action=="StartRace" or result.Action=="Hatch") then ui.message("Bitte kurz warten und dann erneut versuchen.") end
@@ -78,6 +78,7 @@ feedbackEvent.OnClientEvent:Connect(function(event)
  elseif event.Kind=="InteractionError" then ui.message(errors[event.Error] or "Station nicht verfügbar: "..tostring(event.Error))
  elseif event.Kind=="OpenEgg" then ui.EggId=event.EggId;ui.open("Egg")
  elseif event.Kind=="OpenMenu" then ui.open(event.Menu)
+ elseif event.Kind=="PetEquipmentChanged" then audio.play("Success");ui.message(if event.Action=="EquipBest" then "Die besten verfügbaren Pets sind ausgerüstet." else "Alle Pets wurden abgelegt.")
  elseif event.Kind=="Purchase" then audio.play("Success")
  elseif event.Kind=="RaceStarted" then ui.LastRaceResult=nil
  elseif event.Kind=="RaceEnded" then
