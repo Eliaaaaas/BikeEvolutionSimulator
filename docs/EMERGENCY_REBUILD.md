@@ -1,5 +1,7 @@
 # World 1 Emergency Rebuild — keine Studio-Abnahme
 
+> V4.1 ersetzt die frühere Fußbewegungs-/Trainingsrad-Regel: [Permanentes Bike-System](PERMANENT_BIKE_V41.md). Spieler bleiben auf genau einem Bike; Garage öffnet automatisch im Halbkreis ohne E-Prompt. Historische Beschreibungen sind entsprechend überholt.
+
 Der vorherige Build ist aufgrund des Spielerfeedbacks **nicht abgenommen**. Dieser Stand behebt konkrete Fehler und bereitet einen erneuten Test vor. Roblox Studio ist in der Cloud-Umgebung nicht ausführbar. Alle untenstehenden Studio-Fälle sind **NICHT AUSGEFÜHRT**. Ein grüner CI-Lauf ist kein Spielbarkeitsnachweis.
 
 ## Befunde und Grenzen der Ursachenanalyse

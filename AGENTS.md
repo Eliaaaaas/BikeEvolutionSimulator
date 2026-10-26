@@ -18,3 +18,9 @@ V4 hat Vorrang vor historischen V3-Anweisungen: [docs/VISUAL_OVERHAUL_V4.md](doc
 Keine aktive Trainings-BillboardGui oder TrainingGain-Attributbindung wieder einführen.
 Die sieben Sidebar-Menüs heißen Garage, Pets, Race, Worlds, Rebirths, Shop, Settings.
 Neue ZIP-Ausgabe heißt BikeEvolutionSimulator-V4; der bestehende Studio-Artifact bleibt erhalten.
+
+V4.1 hat Vorrang: [docs/PERMANENT_BIKE_V41.md](docs/PERMANENT_BIKE_V41.md).
+Spieler bleiben in allen normalen Zuständen auf genau einem serverseitig montierten Bike.
+Keine Fußsteuerung, keine separaten Trainingsräder und kein Garage-E-Prompt wieder einführen.
+Rennen verwenden dasselbe Spieler-Modell; danach wird ausschließlich die manuelle Steuerung restauriert.
+Garage öffnet einmal pro Einfahrt in den Halbkreis; neue Ausgabe BikeEvolutionSimulator-V4.1.

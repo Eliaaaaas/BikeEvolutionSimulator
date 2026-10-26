@@ -1,5 +1,7 @@
 # Palm Bay — Visual Overhaul V4
 
+> V4.1 ersetzt die frühere Fußbewegungs-/Trainingsrad-Regel: [Permanentes Bike-System](PERMANENT_BIKE_V41.md). Spieler bleiben auf genau einem Bike; Garage öffnet automatisch im Halbkreis ohne E-Prompt. Historische Beschreibungen sind entsprechend überholt.
+
 V4 überarbeitet die bestehende Welt auf `feat/phase-2-training-world` in Draft PR #2. Keine separate Demo, keine Merges, kein Roblox-Publish. Dieser Bericht hat bei visuellen Vorgaben Vorrang vor dem historischen V3-Bericht.
 
 ## Änderungen
