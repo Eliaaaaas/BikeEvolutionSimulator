@@ -1,5 +1,7 @@
 # UI & Training Overhaul V3
 
+> Historischer V3-Stand. [V4](VISUAL_OVERHAUL_V4.md) ersetzt die hier beschriebene Trainings-BillboardGui vollständig durch deren Entfernung und ersetzt Upgrades durch Shop. Die übrigen Eingabe- und Sicherheitsregeln bleiben gültig.
+
 Dieser Stand setzt den angehängten schriftlichen Auftrag und den Zusatz zur vollständigen HUD-Bereinigung um. Die erwähnten Screenshots lagen hier nicht vor. Der Vertrag Visual Upgrade V2 bleibt für die unteren rechten Ressourcenanzeigen verbindlich.
 
 ## Entfernte Oberfläche und Weltobjekte

@@ -13,3 +13,8 @@ Zusätzlich [docs/UI_TRAINING_OVERHAUL_V3.md](docs/UI_TRAINING_OVERHAUL_V3.md) b
 UI-Regressionen über `python3 tools/test.py` prüfen. Engine-Doubles und erfolgreiche
 Rojo-Builds sind keine Roblox-Studio-Abnahme; nicht ausgeführte Studio-Tests klar
 kennzeichnen.
+
+V4 hat Vorrang vor historischen V3-Anweisungen: [docs/VISUAL_OVERHAUL_V4.md](docs/VISUAL_OVERHAUL_V4.md).
+Keine aktive Trainings-BillboardGui oder TrainingGain-Attributbindung wieder einführen.
+Die sieben Sidebar-Menüs heißen Garage, Pets, Race, Worlds, Rebirths, Shop, Settings.
+Neue ZIP-Ausgabe heißt BikeEvolutionSimulator-V4; der bestehende Studio-Artifact bleibt erhalten.
