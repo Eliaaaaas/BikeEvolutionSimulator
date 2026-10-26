@@ -63,7 +63,7 @@ local function engine()
   function methods:FireServer(payload) self.OnServerEvent:Fire(e.Player,payload) end
   function methods:FireClient(player,payload) assert(player==e.Player);self.OnClientEvent:Fire(payload) end
   function methods:InvokeServer(payload) return self.OnServerInvoke(e.Player,payload) end
-  self=setmetatable({},{__index=function(_,k) return methods[k] or properties[k] or (if k=="_children" then children else methods.FindFirstChild(self,k)) end,__newindex=function(_,k,v)
+  self=setmetatable({},{__index=function(_,k) if methods[k]~=nil then return methods[k] end;if properties[k]~=nil then return properties[k] end;return if k=="_children" then children else methods.FindFirstChild(self,k) end,__newindex=function(_,k,v)
    if k=="Parent" then
     if properties.Parent then local i=table.find(properties.Parent._children,self);if i then table.remove(properties.Parent._children,i) end end
     if v then table.insert(v._children,self) end

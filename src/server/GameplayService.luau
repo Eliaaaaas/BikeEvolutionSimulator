@@ -118,7 +118,6 @@ function Service.new(dataService: any): any
   end
   for id=1,3 do menuPrompt(island:WaitForChild("EggStation_"..id):WaitForChild("Egg") :: BasePart,Catalog.Eggs[id].Name,{Kind="OpenEgg",EggId=id}) end
   menuPrompt(island:WaitForChild("GaragePreview"):WaitForChild("Platform") :: BasePart,"Garage",{Kind="OpenMenu",Menu="Garage"})
-  menuPrompt(island:WaitForChild("RebirthStation"):WaitForChild("RebirthOrb") :: BasePart,"Rebirth",{Kind="OpenMenu",Menu="Rebirths"})
   race.request=function(player) result.interact(player,{Version=1,Action="StartRace"}) end
   race.run()
   for id=1,5 do

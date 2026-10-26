@@ -130,7 +130,7 @@ for i,(x,color) in enumerate(zip(xs,colors),1):
 part(training,'PremiumReserved',(20,.12,17),(3,8.08,-51),(240,208,120),collide=False)
 plaque(training,'PREMIUM / FUTURE',(3,14,-60),22,(167,119,40))
 # Paths made of individual offset pavers, with wide visible links between every station.
-for x,z,dx,dz,count in [(0,-4,0,-3.6,11),(0,7,0,3.6,16),(-7,0,-3.6,0,13),(7,0,3.6,0,13),(48,-18,0,3.6,14),(-25,8,0,3.6,5)]:
+for x,z,dx,dz,count in [(0,-4,0,-3.6,11),(0,7,0,3.6,16),(-7,0,-3.6,0,13),(7,0,3.6,0,13),(48,-18,0,3.6,14)]:
  for n in range(count):
     px,pz=x+dx*n,z+dz*n
     part(model,'PathPaver',(7.4,.08,3.1) if dx==0 else (3.1,.08,7.4),(px,8.045,pz),(237+(n%2)*6,221,181),1296,False,yaw=(n%3-1)*2)
@@ -178,12 +178,6 @@ for id,(z,color,title,price) in enumerate([(-18,(255,205,61),'TROPICAL',100),(5,
     part(station,'Canopy',(14,1,10),(60,17,z+3),color)
     plaque(station,f'{title} EGG / {price} CASH',(60,16.2,z-2),17,color,2.5)
     plaque(station,'E / TAP TO OPEN',(60,9.8,z-6),13,(21,97,114),1.2)
-rebirth,_=item(model,'Model','RebirthStation')
-part(rebirth,'Platform',(13,.35,13),(-27,8.175,29),(23,100,120))
-part(rebirth,'RebirthOrb',(3.2,3.2,3.2),(-27,11.5,29),(255,221,82),288,False,shape=0)
-for i in range(10):
-    a=i*math.tau/10;part(rebirth,'OrbitCrystal',(.6,1.2,.6),(-27+math.sin(a)*3.1,11.3+math.cos(a)*1.5,29+math.cos(a)*3.1),(72,239,212),288,False,yaw=i*36)
-plaque(rebirth,'REBIRTH / +0.5x FOREVER',(-27,17,32),22,(35,166,180),3)
 # Cohesive clusters, curved palm silhouettes, blossoms with stems and petals.
 decor,_=item(model,'Folder','TropicalDecor')
 locations=[(-70,-28),(70,-33),(-67,40),(58,56),(-25,68),(31,70),(-75,-5),(73,-2),(-42,-69),(31,-72),(-9,72),(45,48)]

@@ -69,7 +69,7 @@ test("complete wired gameplay: train, rebirth, race, buy, equip, hatch, pets and
   e.onBelt(id)
  end
  while e.Data.snapshot(e.Player).Energy<1000 do e.advance(1.05) end
- e.advance(.3);e.UI.open("Rebirths");e.press("Rebirth bestätigen");assert(e.Data.snapshot(e.Player).Rebirths==1 and e.Data.snapshot(e.Player).Energy==0)
+ e.advance(.3);e.UI.Buttons.Rebirths.Activated:Fire();e.press("Rebirth bestätigen");assert(e.Data.snapshot(e.Player).Rebirths==1 and e.Data.snapshot(e.Player).Energy==0)
  while e.Data.snapshot(e.Player).Cash<350 do e.race() end
  assert(e.Data.snapshot(e.Player).Cash>=350)
  e.UI.VehicleId=2;e.UI.open("Garage");e.press("Kaufen");e.press("Ausrüsten");assert(e.Data.read(e.Player).ActiveVehicle==2)
@@ -120,5 +120,60 @@ test("explicit Stop remains effective until leaving and re-entering the belt",fu
  assert(e.Data.snapshot(e.Player).Energy==before and e.UI.Snapshot.SelectedTreadmill==0)
  e.Root.CFrame=e.CFrame.new(0,11,0);e.advance(.4);e.onBelt(1)
  assert(e.UI.Snapshot.SelectedTreadmill==1 and e.Data.snapshot(e.Player).Energy>before)
+end)
+test("V2 HUD binds confirmed resources without sidebar duplicates or background tiles",function()
+ local e=integration(true)
+ local hud=e.UI.ResourceHUD
+ assert(hud.BackgroundTransparency==1 and hud.BorderSizePixel==0 and hud.AnchorPoint.X==1 and hud.AnchorPoint.Y==1)
+ assert(hud.Position[1]==1 and hud.Position[3]==1)
+ assert(#hud:GetChildren()==3)
+ for _,name in ipairs({"Energy","Cash","Rebirths"}) do
+  local row=hud:FindFirstChild(name.."Status")
+  assert(row.BackgroundTransparency==1 and row.BorderSizePixel==0 and e.UI.ResourceValues[name].Text=="0")
+  assert(row:FindFirstChild(name.."Icon") and row.Value.BackgroundTransparency==1)
+ end
+ for _,child in ipairs(hud:GetDescendants()) do assert(not child:IsA("UIStroke"),"HUD must have no visible frames") end
+ assert(hud.CashStatus.CashIcon:FindFirstChild("Coin"))
+ assert(hud.EnergyStatus.EnergyIcon.Symbol.Text=="ϟ" and hud.RebirthsStatus.RebirthsIcon.Symbol.Text=="↻")
+ assert(e.Data.change(e.Player,function(profile) profile.Energy=1.5e12;profile.Cash=2.5e9;profile.Rebirths=1234;return true end))
+ assert(e.UI.ResourceValues.Energy.Text=="0","No optimistic resource values")
+ e.advance(.3)
+ assert(e.UI.ResourceValues.Energy.Text=="1.5T" and e.UI.ResourceValues.Cash.Text=="2.5B" and e.UI.ResourceValues.Rebirths.Text=="1.2K")
+ for _,collapsed in ipairs({true,false,true}) do
+  e.UI.collapse(collapsed)
+  for _,name in ipairs({"Energy","Cash","Rebirths"}) do
+   local label=e.UI.Buttons[name]:FindFirstChildOfClass("TextLabel")
+   assert(label.Text==name and label.Visible==not collapsed)
+  end
+ end
+end)
+test("V2 compact HUD uses safe insets and reserves touch jump space in both orientations",function()
+ local e=integration(true);local root=e.UI.ResourceHUD.Parent
+ assert(e.UI.Gui.ScreenInsets==e.Enum.ScreenInsets.CoreUISafeInsets)
+ e.Game:GetService("UserInputService").TouchEnabled=true
+ root.AbsoluteSize=e.Vector2.new(375,680);root:GetPropertyChangedSignal("AbsoluteSize"):Fire()
+ assert(e.UI.ResourceHUD.Size[1]==154 and e.UI.ResourceHUD.Size[2]==90)
+ assert(e.UI.ResourceHUD.Position[2]==-8 and e.UI.ResourceHUD.Position[4]==-130)
+ assert(e.UI.ResourceValues.Energy.TextSize==22)
+ root.AbsoluteSize=e.Vector2.new(820,330);root:GetPropertyChangedSignal("AbsoluteSize"):Fire()
+ assert(e.UI.ResourceHUD.Position[2]==-138 and e.UI.ResourceHUD.Position[4]==-8)
+ local copies=0;for _,node in ipairs(e.UI.Gui:GetDescendants()) do if node.Name=="ResourceHUD" then copies+=1 end end;assert(copies==1)
+end)
+test("V2 sidebar keeps full Rebirth preview, cancel and authoritative confirmation without a stand",function()
+ local e=integration(true)
+ assert(not e.Workspace.World1:FindFirstChild("RebirthStation"))
+ e.UI.Buttons.Rebirths.Activated:Fire()
+ assert(e.UI.CurrentMenu=="Rebirths" and not e.UI.RebirthConfirm.Active)
+ e.press("Noch nicht genug Energy");assert(e.Data.snapshot(e.Player).Rebirths==0)
+ assert(e.Data.change(e.Player,function(profile) profile.Energy=1000;profile.Cash=123;return true end));e.advance(.3)
+ assert(e.UI.RebirthConfirm.Active)
+ assert(string.find(e.UI.RebirthInfo.Text,"×1 → ×1.5",1,true) and string.find(e.UI.RebirthInfo.Text,"1000",1,true)==nil)
+ -- The normal formatter abbreviates the 1000-Energy requirement to 1K.
+ assert(string.find(e.UI.RebirthInfo.Text,"1K Energy",1,true))
+ e.press("Abbrechen");assert(e.Data.snapshot(e.Player).Energy==1000 and e.Data.snapshot(e.Player).Rebirths==0)
+ e.UI.Buttons.Rebirths.Activated:Fire();e.press("Rebirth bestätigen")
+ local profile=e.Data.snapshot(e.Player)
+ assert(profile.Energy==0 and profile.Rebirths==1 and profile.Cash==123)
+ assert(e.UI.ResourceValues.Energy.Text=="0" and e.UI.ResourceValues.Rebirths.Text=="1" and e.UI.ResourceValues.Cash.Text=="123")
 end)
 print(string.format("%d actual runtime wiring tests passed (engine doubles; NOT Roblox Studio)",count))

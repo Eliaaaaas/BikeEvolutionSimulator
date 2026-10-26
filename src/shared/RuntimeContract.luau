@@ -4,7 +4,7 @@ local Contract={}
 Contract.Paths={
  {"Workspace","World1","IslandSpawn"},{"Workspace","World1","Training"},
  {"Workspace","World1","GaragePreview","Platform"},{"Workspace","World1","RacePreview","Platform"},
- {"Workspace","World1","RebirthStation","RebirthOrb"},{"Workspace","TestCourse","Road_0"},
+ {"Workspace","TestCourse","Road_0"},
 }
 for id=1,5 do table.insert(Contract.Paths,{"Workspace","World1","Training","Treadmill_"..id,"Zone"}) end
 for id=1,3 do table.insert(Contract.Paths,{"Workspace","World1","EggStation_"..id,"Egg"}) end
@@ -23,7 +23,7 @@ function Contract.inspect(root:any):{string}
   local current=root
   for _,name in ipairs(path) do current=current:FindFirstChild(name);if not current then break end end
   if not current then table.insert(errors,table.concat(path,"/"))
-  elseif table.find({"Zone","Root","Pivot","Platform","Egg","RebirthOrb","Road_0","IslandSpawn"},path[#path]) and not current:IsA("BasePart") then
+  elseif table.find({"Zone","Root","Pivot","Platform","Egg","Road_0","IslandSpawn"},path[#path]) and not current:IsA("BasePart") then
    table.insert(errors,table.concat(path,"/").." is not a BasePart")
   end
  end

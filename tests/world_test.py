@@ -22,7 +22,8 @@ for i in range(1,6):
  assert position(zone)[2]<-40
  assert zone.find("Properties/bool[@name='CanCollide']").text=='false'
 assert size(by_name['PremiumReserved'])[0]>=20
-for required in ['Ocean','Waterfall','GaragePreview','EggStation_1','EggStation_2','EggStation_3','RebirthStation','WorldPreview','RacePreview']:assert required in by_name
+for required in ['Ocean','Waterfall','GaragePreview','EggStation_1','EggStation_2','EggStation_3','WorldPreview','RacePreview']:assert required in by_name
+assert not any('rebirth' in name(i).lower() for i in items), 'Physical Rebirth objects must remain removed'
 assert position(by_name['RacePreview'].find('Item'))[2]>40
 assert not any(i.attrib['class'] in ['MeshPart','SpecialMesh','Decal','Texture','Script','LocalScript'] for i in items)
 print('World asset checks passed: flat ~180x180 island, centered spawn, 5 belts, premium gap, previews, no external assets')

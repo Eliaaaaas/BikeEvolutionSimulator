@@ -42,6 +42,7 @@ for id in range(1,6):
  belt=path('Workspace','World1','Training',f'Treadmill_{id}')
  for component in ['Zone','Belt','NeonEdge','Console','BeltStripe_0']:assert child(belt,component) is not None
 for id in range(1,4):path('Workspace','World1',f'EggStation_{id}','Egg')
+assert not any('rebirth' in name(n).lower() for n in path('Workspace','World1').iter('Item')), 'V2 forbids a physical Rebirth stand'
 for n in root.iter('Item'):assert n.attrib['class'] not in ['VehicleSeat','MeshPart','SpecialMesh']
 world_parts=[n for n in path('Workspace','World1').iter('Item') if n.attrib['class'] in ['Part','SpawnLocation']]
 assert len(world_parts)<2800,len(world_parts)

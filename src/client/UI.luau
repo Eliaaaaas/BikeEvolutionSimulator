@@ -40,6 +40,15 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
  local messageUntil=0
  local messageText=""
  local api:any={Gui=gui,Settings=settings,Buttons=buttons,Snapshot=nil,Viewport=nil,OnAction=function() end,OnSetting=function() end,OnMenu=function() end,Difficulty="Easy"}
+ -- V2 contract: this transparent container lays out free-standing icons and values only.
+ local resourceHUD=make("Frame",root,{Name="ResourceHUD",AnchorPoint=Vector2.new(1,1),Position=UDim2.new(1,-8,1,-8),Size=UDim2.fromOffset(190,108),BackgroundTransparency=1,BorderSizePixel=0})
+ local resourceValues:any={};local resourceRows:any={};local resourceIcons:any={}
+ for i,name in ipairs({"Energy","Cash","Rebirths"}) do
+  local holder=make("Frame",resourceHUD,{Name=name.."Status",Size=UDim2.new(1,0,0,36),Position=UDim2.fromOffset(0,(i-1)*36),BackgroundTransparency=1,BorderSizePixel=0})
+  local icon=Icons.resource(holder,name);resourceIcons[name]=icon;resourceRows[name]=holder
+  resourceValues[name]=make("TextLabel",holder,{Name="Value",Position=UDim2.fromOffset(40,0),Size=UDim2.new(1,-40,1,0),BackgroundTransparency=1,BorderSizePixel=0,Text="—",TextColor3=white,TextSize=27,Font=Enum.Font.GothamBold,TextXAlignment=Enum.TextXAlignment.Left,TextStrokeColor3=Color3.fromRGB(14,45,61),TextStrokeTransparency=0.25,TextWrapped=false})
+ end
+ api.ResourceHUD=resourceHUD;api.ResourceValues=resourceValues
  for i,name in ipairs({"Energy","Cash","Rebirths","Garage","Pets","Race","Worlds","Upgrades","Settings"}) do
   local button=make("TextButton",list,{Name=name,LayoutOrder=i,Size=UDim2.new(1,-4,0,47),BackgroundColor3=palette[name],BackgroundTransparency=0.08,BorderSizePixel=0,Text="",AutoButtonColor=false})
   corner(button,12);make("UIGradient",button,{Color=ColorSequence.new(white,Color3.fromRGB(185,226,241)),Rotation=32})
@@ -101,12 +110,7 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
   State.setting(settings,"Collapsed",value)
   tween(sidebar,{Size=UDim2.fromOffset(if value then 94 else 210,sidebarHeight)})
   toggle.Text=if value then "☰" else "☰  PALM BAY"
-  for name,label in pairs(labels) do
-   if name=="Energy" or name=="Cash" or name=="Rebirths" then
-    label.Position=if value then UDim2.fromOffset(39,0) else UDim2.fromOffset(48,0)
-    label.Size=UDim2.new(1,if value then -40 else -52,1,0);label.TextSize=if value then 11 else 14
-   else label.Visible=not value end
-  end
+  for _,label in pairs(labels) do label.Visible=not value end
   api.OnSetting()
  end
  toggle.Activated:Connect(function() audio.play("Button");api.collapse(not settings.Collapsed) end)
@@ -224,7 +228,7 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
   if oldRevision~=nil and snap.InventoryRevision~=oldRevision and overlay.Visible and not api.Closing and (api.CurrentMenu=="Garage" or api.CurrentMenu=="Pets" or api.CurrentMenu=="Pet" or api.CurrentMenu=="Index") then
    api.open(api.CurrentMenu)
   end
-  for _,name in ipairs({"Energy","Cash","Rebirths"}) do labels[name].Text=(if settings.Collapsed then "" else name.."\n")..Format.number(snap[name]) end
+  for _,name in ipairs({"Energy","Cash","Rebirths"}) do resourceValues[name].Text=Format.number(snap[name]) end
   local p=Presentation.training(snap)
   local info="Laufband "..p.Current.." • +"..Format.number(p.Gain).."/Impuls\n"..(if p.Complete then "Alle fünf Insel-Laufbänder verfügbar." else "Nächstes: "..p.Next.." • fehlen "..Format.number(p.Missing).." Energy\nODER "..Format.number(p.RebirthRequirement).." Rebirths (Weltzugang nötig)")
   local racing=snap.Race and snap.Race.Phase~="Idle"
@@ -257,7 +261,27 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
   scale.Scale=if size.X<360 then 0.92 else 1
   sidebarHeight=math.min(535,math.max(100,(size.Y-(if UserInputService.TouchEnabled then 130 else 12))/scale.Scale))
   sidebar.Size=UDim2.fromOffset(if settings.Collapsed then 94 else 210,sidebarHeight)
+  local touch=UserInputService.TouchEnabled
+  local compact=touch or size.X<600
+  local rowHeight=if compact then 30 else 36
+  local hudWidth=if compact then 154 else 190
+  -- CoreUISafeInsets handles cutouts/topbar. Touch controls additionally need clearance.
+  local shortTouch=touch and size.Y<420
+  local right=if shortTouch then 138 else 8
+  local bottom=if touch and not shortTouch then 130 else 8
+  resourceHUD.Position=UDim2.new(1,-right,1,-bottom)
+  resourceHUD.Size=UDim2.fromOffset(hudWidth,rowHeight*3)
+  for i,name in ipairs({"Energy","Cash","Rebirths"}) do
+   resourceRows[name].Position=UDim2.fromOffset(0,(i-1)*rowHeight)
+   resourceRows[name].Size=UDim2.new(1,0,0,rowHeight)
+   resourceIcons[name].Size=UDim2.fromOffset(rowHeight,rowHeight)
+   resourceValues[name].TextSize=if compact then 22 else 27
+   resourceValues[name].Position=UDim2.fromOffset(rowHeight+6,0)
+   resourceValues[name].Size=UDim2.new(1,-rowHeight-6,1,0)
+  end
   local width=math.min(225,math.max(155,size.X*0.4));training.Size=UDim2.fromOffset(width,48);status.Size=UDim2.fromOffset(width,65)
+  training.Position=UDim2.new(1,-right,1,-(bottom+rowHeight*3+12))
+  status.Position=UDim2.new(1,-right,1,-(bottom+rowHeight*3+66))
  end
  root:GetPropertyChangedSignal("AbsoluteSize"):Connect(layout);layout();api.collapse(settings.Collapsed)
  return api
