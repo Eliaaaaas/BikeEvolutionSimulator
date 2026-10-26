@@ -58,6 +58,7 @@ with tempfile.TemporaryDirectory(prefix='bike-tests-') as directory:
 print('All production Luau files compiled successfully.')
 subprocess.run(['python3', str(ROOT / 'tools/build_world.py'), '--check'], check=True)
 subprocess.run(['python3', str(ROOT / 'tests/world_test.py')], check=True)
+subprocess.run(['python3', str(ROOT / 'tests/visual_v4_test.py')], check=True)
 subprocess.run(['python3', str(ROOT / 'tools/build_race_assets.py'), '--check'], check=True)
 subprocess.run(['python3', str(ROOT / 'tests/race_assets_test.py')], check=True)
 subprocess.run(['python3', str(ROOT / 'tools/build_vehicle_fleet.py'), '--check'], check=True)

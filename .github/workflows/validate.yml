@@ -23,3 +23,11 @@ jobs:
           name: BikeEvolutionSimulator-Studio
           path: build/BikeEvolutionSimulator.rbxlx
           if-no-files-found: error
+      - name: Package V4 Studio build with provenance
+        run: python3 tools/package_v4.py
+      - name: Upload V4 Studio build
+        uses: actions/upload-artifact@v4
+        with:
+          name: BikeEvolutionSimulator-V4
+          path: build/v4/
+          if-no-files-found: error

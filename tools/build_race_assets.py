@@ -7,7 +7,7 @@ ROOT=Path(__file__).resolve().parents[1]
 # Load the primitive serializer without running its island output/check branch.
 source=(ROOT/'tools/build_world.py').read_text().split('model,_=item(world')[0]
 ns={"__file__":str(ROOT/"tools/build_world.py")};exec(compile(source,str(ROOT/'tools/build_world.py'),'exec'),ns)
-item,part,sign=ns['item'],ns['part'],ns['sign']
+item,part=ns['item'],ns['part']
 
 def save(tree,path):
  E.indent(tree);data=E.tostring(tree,encoding='utf-8',xml_declaration=True)+b'\n'

@@ -2,7 +2,7 @@
 local State={}
 local Numbers=require(script.Parent.Numbers)
 function State.new(phone: boolean): any
- return {Collapsed=phone,Animations=true,Popups=true,Sound=true,Volume=0.35,LastEvent=0,Active="Energy"}
+ return {Collapsed=phone,Animations=true,Popups=true,Sound=true,Volume=0.35,LastEvent=0,Active="Garage"}
 end
 function State.setting(state: any, name: string, value: any): boolean
  if name=="Volume" then

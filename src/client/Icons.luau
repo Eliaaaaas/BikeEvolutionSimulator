@@ -33,6 +33,9 @@ function Icons.draw(parent:Instance,name:string):Frame
   shape(0.02,0.48,0.4,0.4,true,true);shape(0.58,0.48,0.4,0.4,true,true)
   local a=shape(0.25,0.42,0.5,0.06,false);a.Rotation=-30
   local b=shape(0.4,0.27,0.06,0.42,false);b.Rotation=-30;shape(0.6,0.22,0.3,0.06,false)
+ elseif name=="Shop" then
+  shape(.15,.38,.7,.5,true,true);shape(.29,.18,.42,.32,true,true)
+  shape(.32,.5,.1,.2,true);shape(.58,.5,.1,.2,true)
  elseif name=="Pets" then
   shape(0.22,0.47,0.58,0.4,true)
   for i=0,3 do shape(0.03+i*0.24,0.12+(if i==0 or i==3 then 0.1 else 0),0.19,0.25,true) end
@@ -43,7 +46,7 @@ function Icons.draw(parent:Instance,name:string):Frame
   shape(0.08,0.08,0.84,0.84,true,true);shape(0.3,0.08,0.4,0.84,true,true);shape(0.1,0.48,0.8,0.04,false)
  else
   local text=Instance.new("TextLabel");text.Size=UDim2.fromScale(1,1);text.BackgroundTransparency=1;text.TextColor3=Color3.new(1,1,1)
-  text.Text=({Energy="ϟ",Cash="$",Rebirths="↻",Upgrades="★",Settings="⚙"})[name] or "•"
+  text.Text=({Energy="ϟ",Cash="$",Rebirths="↻",Settings="⚙"})[name] or "•"
   text.Font=Enum.Font.GothamBold;text.TextSize=30;text.Parent=icon
  end
  return icon

@@ -4,7 +4,7 @@ local Contract={}
 Contract.Paths={
  {"Workspace","World1","IslandSpawn"},{"Workspace","World1","Training"},
  {"Workspace","World1","GaragePreview","Platform"},{"Workspace","World1","RacePreview","Platform"},
- {"Workspace","TestCourse","Road_0"},
+ {"Workspace","TestCourse","Road_0"},{"Workspace","World1","ShopArea","Platform"},{"Workspace","World1","WorldPreview","Platform"},
 }
 for id=1,5 do table.insert(Contract.Paths,{"Workspace","World1","Training","Treadmill_"..id,"Zone"}) end
 for id=1,3 do table.insert(Contract.Paths,{"Workspace","World1","EggStation_"..id,"Egg"}) end

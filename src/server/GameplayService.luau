@@ -105,7 +105,6 @@ function Service.new(dataService: any): any
   snapshot.TrainingMultiplier = Numbers.multiply(Rules.trainingGain(snapshot.Rebirths),snapshot.PetEnergyBonus)
   local impulse = if selected == 0 then 0 else Numbers.multiply(Rules.trainingGain(snapshot.Rebirths, Catalog.Treadmills[selected].TrainingMultiplier),snapshot.PetEnergyBonus)
   snapshot.ImpulseGain=Numbers.add(snapshot.Energy,impulse)-snapshot.Energy
-  player:SetAttribute("TrainingGain",snapshot.ImpulseGain)
   snapshot.RebirthRequirement = Rules.rebirthRequirement(snapshot.Rebirths)
   return snapshot
  end
@@ -120,6 +119,8 @@ function Service.new(dataService: any): any
   end
   for id=1,3 do menuPrompt(island:WaitForChild("EggStation_"..id):WaitForChild("Egg") :: BasePart,Catalog.Eggs[id].Name,{Kind="OpenEgg",EggId=id}) end
   menuPrompt(island:WaitForChild("GaragePreview"):WaitForChild("Platform") :: BasePart,"Garage",{Kind="OpenMenu",Menu="Garage"})
+  menuPrompt(island:WaitForChild("ShopArea"):WaitForChild("Platform") :: BasePart,"Shop",{Kind="OpenMenu",Menu="Shop"})
+  menuPrompt(island:WaitForChild("WorldPreview"):WaitForChild("Platform") :: BasePart,"Worlds",{Kind="OpenMenu",Menu="Worlds"})
   race.request=function(player) result.interact(player,{Version=1,Action="StartRace"}) end
   race.run()
   local function added(player: Player)

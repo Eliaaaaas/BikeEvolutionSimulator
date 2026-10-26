@@ -115,7 +115,7 @@
     "Lighting": {
       "$className": "Lighting",
       "$properties": {
-        "ClockTime": 14.5,
+        "ClockTime": 13.3,
         "Brightness": 2.8,
         "Ambient": [
           0.55,
@@ -128,13 +128,13 @@
           0.78
         ],
         "EnvironmentDiffuseScale": 0.65,
-        "EnvironmentSpecularScale": 0.65,
+        "EnvironmentSpecularScale": 0.75,
         "GlobalShadows": true
       },
       "TropicalAtmosphere": {
         "$className": "Atmosphere",
         "$properties": {
-          "Density": 0.22,
+          "Density": 0.18,
           "Offset": 0.1,
           "Color": [
             0.76,
@@ -146,24 +146,36 @@
             0.79,
             0.89
           ],
-          "Glare": 0.15,
-          "Haze": 0.8
+          "Glare": 0.2,
+          "Haze": 0.6
         }
       },
       "TropicalBloom": {
         "$className": "BloomEffect",
         "$properties": {
-          "Intensity": 0.15,
-          "Size": 20,
+          "Intensity": 0.12,
+          "Size": 18,
           "Threshold": 1.5
         }
       },
       "TropicalGrade": {
         "$className": "ColorCorrectionEffect",
         "$properties": {
-          "Saturation": 0.12,
-          "Contrast": 0.04,
-          "Brightness": 0.01
+          "Saturation": 0.16,
+          "Contrast": 0.05,
+          "Brightness": 0.01,
+          "TintColor": [
+            1,
+            0.985,
+            0.96
+          ]
+        }
+      },
+      "SunlightRays": {
+        "$className": "SunRaysEffect",
+        "$properties": {
+          "Intensity": 0.035,
+          "Spread": 0.7
         }
       }
     }

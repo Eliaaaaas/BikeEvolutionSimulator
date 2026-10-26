@@ -151,7 +151,7 @@ test("V2 HUD binds confirmed resources without sidebar duplicates or background 
  for _,collapsed in ipairs({true,false,true}) do
   e.UI.collapse(collapsed)
   assert(not e.UI.Buttons.Energy and not e.UI.Buttons.Cash)
-  for _,name in ipairs({"Garage","Pets","Race","Worlds","Rebirths","Upgrades","Settings"}) do
+  for _,name in ipairs({"Garage","Pets","Race","Worlds","Rebirths","Shop","Settings"}) do
    local label=e.UI.Buttons[name]:FindFirstChildOfClass("TextLabel")
    assert(label.Text==name and label.Visible==not collapsed)
   end
@@ -226,7 +226,7 @@ test("overhaul removes header, resource menu tiles and scrolling navigation from
  local e=integration(true)
  assert(e.UI.Sidebar.BackgroundTransparency==1 and e.UI.Sidebar.BorderSizePixel==0)
  assert(e.UI.Navigation:IsA("Frame") and not e.UI.Buttons.Energy and not e.UI.Buttons.Cash)
- local names={"Garage","Pets","Race","Worlds","Rebirths","Upgrades","Settings"}
+ local names={"Garage","Pets","Race","Worlds","Rebirths","Shop","Settings"}
  assert(#e.UI.Navigation:GetChildren()==#names)
  for _,node in ipairs(e.UI.Sidebar:GetDescendants()) do
   assert(not node:IsA("ScrollingFrame"))
@@ -275,17 +275,17 @@ test("locked belt and rebirth access loss stop both automatic and tapped trainin
  for _,node in ipairs(e.Workspace.World1.Training:GetDescendants()) do assert(not node:IsA("ProximityPrompt")) end
  input.TouchTap:Fire({e.Vector2.new(300,200)},false);assert(e.Data.snapshot(e.Player).Energy==0)
 end)
-test("actual training billboard is transparent, follows active avatar and disappears after leaving",function()
+test("V4 station effects never create training BillboardGui on enter, leave or re-enter",function()
  local e=integration(true)
  local stations=modules.make_StationEffects(e.Game,e.Workspace,e.Task,e.OS,e.Instance,e.Vector3,e.UDim2,e.Color3,e.ColorSequence,e.Enum)
- stations.new({Animations=false},e.UI);e.onBelt(1);e.Workspace.CurrentCamera.CFrame=e.CFrame.new(0,20,-30);e.advance(.4)
- local found
- for _,node in ipairs(e.UI.Gui:GetDescendants()) do if node.Name=="ActiveTrainingBillboard" then found=node end end
- assert(found and found.Adornee==e.Root and found.MaxDistance==65 and found.StudsOffsetWorldSpace.Y>=4)
- local label=found:FindFirstChild("ConfirmedGain")
- assert(label and label.BackgroundTransparency==1 and label.TextScaled and string.find(label.Text,"+1/SEK",1,true))
- e.Root.CFrame=e.CFrame.new(0,11,0);e.advance(1)
- for _,node in ipairs(e.UI.Gui:GetDescendants()) do assert(node.Name~="ActiveTrainingBillboard") end
+ stations.new({Animations=false},e.UI)
+ local function absent()
+  for _,node in ipairs(e.UI.Gui:GetDescendants()) do assert(not node:IsA("BillboardGui")) end
+  assert(e.Player:GetAttribute("TrainingGain")==nil)
+ end
+ absent();e.onBelt(1);absent()
+ e.Root.CFrame=e.CFrame.new(0,11,0);e.advance(1);absent()
+ e.onBelt(1);absent();e.Player.CharacterRemoving:Fire();e.advance(.5);absent()
 end)
 test("recreating actual HUD destroys old Palm Bay GUI instead of leaving duplicate overlays",function()
  local e=integration(true);local previous=e.UI.Gui
@@ -293,7 +293,41 @@ test("recreating actual HUD destroys old Palm Bay GUI instead of leaving duplica
  e.add(legacy,"TextLabel","OldEnergy")
  local new=modules.UI.new(e.Player.PlayerGui,e.UI.Settings,{play=function() end})
  assert(previous.Parent==nil and legacy.Parent==nil and e.Player.PlayerGui:FindFirstChild("PalmBaySidebar")==nil)
- assert(new.Gui.Name=="BikeHUDV3")
- local count=0;for _,node in ipairs(e.Player.PlayerGui:GetChildren()) do if node.Name=="BikeHUDV3" then count+=1 end end;assert(count==1)
+ assert(new.Gui.Name=="BikeHUDV4")
+ local count=0;for _,node in ipairs(e.Player.PlayerGui:GetChildren()) do if node.Name=="BikeHUDV4" then count+=1 end end;assert(count==1)
+end)
+test("V4 Shop and portal prompts open actual themed menus with working navigation",function()
+ local e=integration(true);local before=e.Data.snapshot(e.Player).Cash
+ e.UI.Buttons.Shop.Activated:Fire();assert(e.UI.CurrentMenu=="Shop")
+ e.press("Fahrzeuge kaufen");assert(e.UI.CurrentMenu=="Garage" and e.UI.Viewport)
+ e.UI.Buttons.Shop.Activated:Fire();e.press("Eier kaufen / öffnen");assert(e.UI.CurrentMenu=="Eggs")
+ e.Root.CFrame=e.CFrame.new(32,11,24)
+ e.Workspace.World1.ShopArea.Platform:FindFirstChildOfClass("ProximityPrompt").Triggered:Fire(e.Player)
+ assert(e.UI.CurrentMenu=="Shop")
+ e.advance(.3);e.Root.CFrame=e.CFrame.new(-45,11,57)
+ e.Workspace.World1.WorldPreview.Platform:FindFirstChildOfClass("ProximityPrompt").Triggered:Fire(e.Player)
+ assert(e.UI.CurrentMenu=="Worlds");e.press("Rennen in Palm Bay");assert(e.UI.CurrentMenu=="Race")
+ assert(e.Data.snapshot(e.Player).Cash==before)
+end)
+test("V4 seven sidebar menus stay on screen and Settings actions remain connected",function()
+ local e=integration(true);local root=e.UI.Sidebar.Parent
+ local names={"Garage","Pets","Race","Worlds","Rebirths","Shop","Settings"}
+ for _,size in ipairs({{304,600},{375,680},{820,284},{1024,700},{1904,1000}}) do
+  root.AbsoluteSize=e.Vector2.new(size[1],size[2]);root:GetPropertyChangedSignal("AbsoluteSize"):Fire()
+  local scale=e.UI.Sidebar:FindFirstChildOfClass("UIScale").Scale
+  for _,name in ipairs(names) do
+   local button=e.UI.Buttons[name]
+   assert((button.Position[1]+button.Size[1])*scale<=size[1])
+   assert((32+button.Position[2]+button.Size[2])*scale<=size[2])
+   button.Activated:Fire();assert(e.UI.CurrentMenu==name)
+   assert(button:FindFirstChildOfClass("UIGradient") and button:FindFirstChildOfClass("UICorner"))
+  end
+ end
+ e.UI.Buttons.Settings.Activated:Fire()
+ local animations=e.UI.Settings.Animations
+ e.press("Animationen: "..(if animations then "AN" else "AUS"))
+ assert(e.UI.Settings.Animations~=animations)
+ local volume=e.UI.Settings.Volume;e.press("− Leiser");assert(e.UI.Settings.Volume<volume)
+ e.press("+ Lauter");assert(math.abs(e.UI.Settings.Volume-volume)<1e-9)
 end)
 print(string.format("%d actual runtime wiring tests passed (engine doubles; NOT Roblox Studio)",count))

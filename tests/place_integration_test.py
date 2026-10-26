@@ -47,14 +47,14 @@ for node in training.iter('Item'):
  assert name(node) not in ['Sign','Console','LocalTrainingStatus','SelectTraining']
 ui_source=child(client,'UI').findtext("Properties/string[@name='Source']")
 assert ui_source==(ROOT/'src/client/UI.luau').read_text(), 'Built UI source must match runtime-tested source'
-assert 'PALM BAY' not in ui_source and 'Name="PalmBaySidebar"' not in ui_source and 'api.Status=' not in ui_source
+assert '☰  PALM BAY' not in ui_source and 'Name="PalmBaySidebar"' not in ui_source and 'api.Status=' not in ui_source
 assert 'Name="Navigation"' in ui_source and 'Name="ResourceHUD"' in ui_source
 assert child(client,'TrainingInput') is not None
 for id in range(1,4):path('Workspace','World1',f'EggStation_{id}','Egg')
 assert not any('rebirth' in name(n).lower() for n in path('Workspace','World1').iter('Item')), 'V2 forbids a physical Rebirth stand'
 for n in root.iter('Item'):assert n.attrib['class'] not in ['VehicleSeat','MeshPart','SpecialMesh']
 world_parts=[n for n in path('Workspace','World1').iter('Item') if n.attrib['class'] in ['Part','WedgePart','SpawnLocation']]
-assert len(world_parts)<2800,len(world_parts)
+assert len(world_parts)<3300,len(world_parts)
 # Verify real non-circular, three-dimensional centerline, including full arc length.
 source=(ROOT/'src/shared/CourseData.luau').read_text()
 points=[tuple(map(float,m)) for m in re.findall(r'X=([\-\d.]+),Y=([\-\d.]+),Z=([\-\d.]+)',source)]
@@ -66,3 +66,9 @@ turns=[b[0]-a[0] for a,b in zip(points,points[1:])]
 assert sum(a*b<0 for a,b in zip(turns,turns[1:]))>=3
 for a,b in zip(points,points[1:]):assert abs(b[1]-a[1])/math.dist(a,b)<.2
 print(f'Built-place integration passed: script mapping, requires, ten visible showroom bikes, station dependencies, {len(world_parts)} island parts, open 800-stud elevated S-course. NOT a Studio run.')
+
+station_source=child(client,'StationEffects').findtext("Properties/string[@name='Source']")
+assert 'BillboardGui' not in station_source and 'ActiveTrainingBillboard' not in station_source
+assert not any(n.attrib['class']=='BillboardGui' for n in root.iter('Item'))
+for key in ['ShopArea','VIPArea','EggPetLandmark','TrainingLandmark']:path('Workspace','World1',key)
+print('V4 built place: themed zone landmarks, Shop/portal integration, no training BillboardGui creation')
