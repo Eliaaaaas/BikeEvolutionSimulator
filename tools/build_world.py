@@ -110,25 +110,36 @@ for x in [-57,57]:
 training,_=item(model,'Folder','Training')
 xs=[-54,-36,-18,24,42]
 colors=[(43,225,166),(52,185,255),(255,205,65),(255,126,65),(159,121,255)]
+def oval(parent,name,width,depth,thickness,pos,color,material):
+    node,props=part(parent,name,(thickness,width,depth),pos,color,material,False,shape=2)
+    cf=props.find("CoordinateFrame[@name='CFrame']")
+    for row in range(3):
+        for col in range(3):cf.find(f'R{row}{col}').text=str([[0,-1,0],[1,0,0],[0,0,1]][row][col])
+    return node
 for i,(x,color) in enumerate(zip(xs,colors),1):
     treadmill,_=item(training,'Model',f'Treadmill_{i}')
-    part(treadmill,'Platform',(13,.55,17),(x,8.275,-51),(28,63,84))
-    part(treadmill,'Deck',(11,.5,15),(x,8.8,-51),color)
-    part(treadmill,'Belt',(8,.2,12),(x,9.15,-51),(28,43,58))
+    accent=colors[i%len(colors)]
+    oval(treadmill,'RoundedBase',14,18,.5,(x,8.25,-51),(31,53,78),1088)
+    oval(treadmill,'NeonRim',14.3,18.3,.14,(x,8.54,-51),color,288)
+    oval(treadmill,'RoundedLayer',12.5,16.5,.4,(x,8.75,-51),accent,256)
+    part(treadmill,'Deck',(10.5,.5,14),(x,8.8,-51),(26,43,64))
+    part(treadmill,'Belt',(8,.2,12),(x,9.15,-51),(19,33,53))
     part(treadmill,'Zone',(8,.1,12),(x,9.3,-51),color,collide=False,transparency=1)
     for side in [-1,1]:
-        part(treadmill,'NeonEdge',(.22,.25,16),(x+side*6.2,8.7,-51),color,288,False)
-        part(treadmill,'RailPost',(.35,3.4,.35),(x+side*4.7,10.8,-56),(222,242,246),collide=False)
-        part(treadmill,'Handrail',(.4,.4,9),(x+side*4.7,12.4,-52.5),color,288,False)
-    for j in range(8):part(treadmill,f'BeltStripe_{j}',(7.8,.025,.18),(x,9.265,-56+j*1.4),color,288,False)
-    part(treadmill,'Console',(6,1.1,1),(x,12.4,-56.5),(22,65,83),collide=False)
-    energy=0 if i==1 else 4**(i-2);rebirth=0 if i==1 else 3**(i-2)
-    plaque(treadmill,f'BELT {i}  /  +{2**(i-1)} ENERGY',(x,17.5,-59),14,color,3.5)
-    plaque(treadmill,f'{energy} ENERGY OR {rebirth} REBIRTHS',(x,14.8,-59),14,(25,71,89),1.8)
-    # The local client replaces this status, while the server owns actual permission.
-    plaque(treadmill,'STEP ON TO TRAIN',(x,10.6,-43.7),12,(28,100,112),1.2)
+        part(treadmill,'NeonEdge',(.22,.25,14.4),(x+side*5.4,9.2,-51),color,288,False)
+        beam(treadmill,'PowerArm',(x+side*5.5,9,-55),(x+side*3.5,11.8,-57),.4,(123,154,180),1088)
+        part(treadmill,'JointGlow',(.8,.8,.8),(x+side*3.5,11.8,-57),accent,288,False,shape=0)
+    for j in range(8):part(treadmill,f'BeltStripe_{j}',(7.7,.025,.15),(x,9.265,-56+j*1.4),color if j%2 else accent,288,False)
+    for j in range(3):
+        for side in [-1,1]:part(treadmill,f'DirectionChevron_{j}_{side}',(.13,.03,1.2),(x+side*.35,9.28,-54+j*3),(232,255,245),288,False,yaw=side*35)
+    part(treadmill,'PowerCore',(1.5+i*.12,1.5+i*.12,1.5+i*.12),(x,11.3,-57.2),accent,288,False,shape=0)
+    for j in range(6+i):
+        angle=j*math.tau/(6+i)
+        part(treadmill,f'OrbitLight_{j}',(.3,.7,.3),(x+math.sin(angle)*2.1,11.3,-57.2+math.cos(angle)*2.1),color,288,False,yaw=j*40)
+    for j in range(2+i):
+        side=-1 if j%2 else 1
+        part(treadmill,'EnergyFin',(.3,1+j*.15,1.4),(x+side*5.7,9.7,-54+(j//2)*2),accent,288,False,cls='WedgePart',yaw=side*90)
 part(training,'PremiumReserved',(20,.12,17),(3,8.08,-51),(240,208,120),collide=False)
-plaque(training,'PREMIUM / FUTURE',(3,14,-60),22,(167,119,40))
 # Paths made of individual offset pavers, with wide visible links between every station.
 for x,z,dx,dz,count in [(0,-4,0,-3.6,11),(0,7,0,3.6,16),(-7,0,-3.6,0,13),(7,0,3.6,0,13),(48,-18,0,3.6,14)]:
  for n in range(count):

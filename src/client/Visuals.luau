@@ -2,11 +2,16 @@
 local Players=game:GetService("Players")
 local RunService=game:GetService("RunService")
 local Pose=require(script.Parent.AvatarPose)
+local Rig=require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("BikeRig"))
+local Input=game:GetService("UserInputService")
 local Visuals={}
 function Visuals.new(settings:any,ui:any):any
+ local trainers:any={}
+ local cycles=Instance.new("Folder");cycles.Name="LocalTrainingCycles";cycles.Parent=workspace
  local poses:any={};local bikes:any={};local connection:RBXScriptConnection?=nil
  local api:any={}
  local function restore()
+  for player,record in pairs(trainers) do record.Bike:Destroy();trainers[player]=nil end
   for player,pose in pairs(poses) do Pose.destroy(pose.Record);poses[player]=nil end
   for bike,record in pairs(bikes) do
    for motor,base in pairs(record.Bases) do if motor.Parent then motor.C0=base end end
@@ -22,8 +27,29 @@ function Visuals.new(settings:any,ui:any):any
  local function frame(dt:number)
   local folder=workspace:FindFirstChild("ActiveRaceBikes")
   local riderBikes:any={}
-  if folder then
-   for _,bike in ipairs(folder:GetChildren()) do
+  local count=0
+  local players=Players:GetPlayers();table.sort(players,function(a,b) if a==Players.LocalPlayer then return b~=a elseif b==Players.LocalPlayer then return false end;return a.UserId<b.UserId end)
+  for _,player in ipairs(players) do
+   local root=if player.Character then player.Character:FindFirstChild("HumanoidRootPart") else nil
+   local selected=(player:GetAttribute("SelectedTreadmill") or 0)>0 and player:GetAttribute("Racing")~=true
+   if settings.Animations and selected and visible(player.Character) and root and root:IsA("BasePart") and count<(if Input.TouchEnabled then 2 else 4) then
+    count+=1
+    local record=trainers[player]
+    if not record then
+     local bike=game:GetService("ReplicatedStorage").Vehicles.Mountainbike:Clone();bike.Name="TrainingCycle_"..player.UserId;bike:ScaleTo(.65)
+     record={Bike=bike,Rig=Rig.prepare(bike),Distance=0};trainers[player]=record
+     bike:SetAttribute("OwnerUserId",player.UserId);bike:SetAttribute("Pedaling",true);bike:SetAttribute("WheelRadius",1.43*.65);bike.Parent=cycles
+    end
+    record.Distance+=math.min(dt,.1)*10
+    record.Rig.Root.CFrame=root.CFrame*CFrame.new(0,-4.8*.65,-.9*.65)
+    record.Bike:SetAttribute("RaceSpeed",10);record.Bike:SetAttribute("Distance",record.Distance)
+   elseif trainers[player] then trainers[player].Bike:Destroy();trainers[player]=nil end
+  end
+  for player,record in pairs(trainers) do if player.Parent~=Players then record.Bike:Destroy();trainers[player]=nil end end
+  local models=if folder then folder:GetChildren() else {}
+  for _,record in pairs(trainers) do table.insert(models,record.Bike) end
+  do
+   for _,bike in ipairs(models) do
     if not bike:IsA("Model") or not bike.PrimaryPart then continue end
     if bike:GetAttribute("Bot") and bike:GetAttribute("RaceOwnerUserId")~=Players.LocalPlayer.UserId then
      if not bike:GetAttribute("LocallyHidden") then
@@ -77,7 +103,7 @@ function Visuals.new(settings:any,ui:any):any
     if current then
      current.Exit=nil
      local phase=if bike and bike:GetAttribute("Pedaling")==false then 0 elseif bike and bikes[bike] then bikes[bike].Crank else os.clock()*7
-     Pose.update(current.Record,phase,bike~=nil,math.min(1,dt*12))
+     Pose.update(current.Record,phase,bike~=nil or training,math.min(1,dt*12))
     end
    end
   end
@@ -102,7 +128,7 @@ function Visuals.new(settings:any,ui:any):any
   if active and settings.Animations and not connection then connection=RunService.PreSimulation:Connect(frame)
   elseif (not active or not settings.Animations) and connection then connection:Disconnect();connection=nil;restore() end
  end
- task.spawn(function() while ui.Gui.Parent do updateConnection();task.wait(0.2) end;if connection then connection:Disconnect() end;restore() end)
+ task.spawn(function() while ui.Gui.Parent do updateConnection();task.wait(0.2) end;if connection then connection:Disconnect() end;restore();cycles:Destroy() end)
  return api
 end
 return Visuals

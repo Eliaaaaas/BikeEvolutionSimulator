@@ -7,7 +7,6 @@ local UserInputService=game:GetService("UserInputService")
 local Shared=ReplicatedStorage:WaitForChild("Shared")
 local Config=require(Shared:WaitForChild("Config"))
 local Protocol=require(Shared:WaitForChild("Protocol"))
-local Format=require(Shared:WaitForChild("Format"))
 local Presentation=require(Shared:WaitForChild("Presentation"))
 local State=require(Shared:WaitForChild("ClientState"))
 local UI=require(script.Parent.UI)
@@ -41,9 +40,7 @@ ui.OnMenu=function(name:string)
 end
 ui.OnAction=function(kind:string,fields:any?)
  if not snapshot then return end
- if kind=="Training" then
-  if snapshot.SelectedTreadmill==0 then ui.message("Stelle dich hinten auf ein Laufband und nutze „Trainieren“.") else send("Click") end
- elseif kind=="Rebirth" then
+ if kind=="Rebirth" then
   if Presentation.rebirth(snapshot).Allowed then send("Rebirth") else ui.message("Noch nicht genug Energy oder maximales Rebirth-Level erreicht.") end
  else send(kind,fields) end
 end
@@ -107,13 +104,6 @@ task.defer(function()
  optional("Island",function() require(script.Parent.IslandEffects).new(settings,ui.Gui) end)
  optional("Stations",function() require(script.Parent.StationEffects).new(settings,ui) end)
 end)
-local training=workspace:WaitForChild("World1"):WaitForChild("Training")
-local Catalog=require(Shared:WaitForChild("Catalog"))
-for id=1,5 do
- local prompt=training:WaitForChild("Treadmill_"..id):WaitForChild("Zone"):WaitForChild("SelectTraining") :: ProximityPrompt
- local t=Catalog.Treadmills[id]
- prompt.ObjectText="Laufband "..id.." • "..Format.number(t.EnergyRequirement).." Energy ODER "..Format.number(t.RebirthRequirement).." Rebirths"
-end
-
+require(script.Parent.TrainingInput).new(ui,send)
 end
 return App

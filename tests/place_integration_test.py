@@ -40,11 +40,20 @@ for id in range(1,11):
  for n in visible:assert n.findtext("Properties/bool[@name='Anchored']")=='true'
 for id in range(1,6):
  belt=path('Workspace','World1','Training',f'Treadmill_{id}')
- for component in ['Zone','Belt','NeonEdge','Console','BeltStripe_0']:assert child(belt,component) is not None
+ for component in ['Zone','Belt','NeonEdge','PowerCore','RoundedBase','BeltStripe_0']:assert child(belt,component) is not None
+training=path('Workspace','World1','Training')
+for node in training.iter('Item'):
+ assert node.attrib['class'] not in ['SurfaceGui','BillboardGui','TextLabel','ProximityPrompt'], 'No training signs/prompts'
+ assert name(node) not in ['Sign','Console','LocalTrainingStatus','SelectTraining']
+ui_source=child(client,'UI').findtext("Properties/string[@name='Source']")
+assert ui_source==(ROOT/'src/client/UI.luau').read_text(), 'Built UI source must match runtime-tested source'
+assert 'PALM BAY' not in ui_source and 'Name="PalmBaySidebar"' not in ui_source and 'api.Status=' not in ui_source
+assert 'Name="Navigation"' in ui_source and 'Name="ResourceHUD"' in ui_source
+assert child(client,'TrainingInput') is not None
 for id in range(1,4):path('Workspace','World1',f'EggStation_{id}','Egg')
 assert not any('rebirth' in name(n).lower() for n in path('Workspace','World1').iter('Item')), 'V2 forbids a physical Rebirth stand'
 for n in root.iter('Item'):assert n.attrib['class'] not in ['VehicleSeat','MeshPart','SpecialMesh']
-world_parts=[n for n in path('Workspace','World1').iter('Item') if n.attrib['class'] in ['Part','SpawnLocation']]
+world_parts=[n for n in path('Workspace','World1').iter('Item') if n.attrib['class'] in ['Part','WedgePart','SpawnLocation']]
 assert len(world_parts)<2800,len(world_parts)
 # Verify real non-circular, three-dimensional centerline, including full arc length.
 source=(ROOT/'src/shared/CourseData.luau').read_text()

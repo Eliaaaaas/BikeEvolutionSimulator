@@ -103,7 +103,9 @@ function Service.new(dataService: any): any
   snapshot.PetEnergyBonus=PetRules.bonus(profile,"Energy");snapshot.PetCashBonus=PetRules.bonus(profile,"Cash")
   snapshot.Revision=dataService.revision(player)
   snapshot.TrainingMultiplier = Numbers.multiply(Rules.trainingGain(snapshot.Rebirths),snapshot.PetEnergyBonus)
-  snapshot.ImpulseGain = if selected == 0 then 0 else Numbers.multiply(Rules.trainingGain(snapshot.Rebirths, Catalog.Treadmills[selected].TrainingMultiplier),snapshot.PetEnergyBonus)
+  local impulse = if selected == 0 then 0 else Numbers.multiply(Rules.trainingGain(snapshot.Rebirths, Catalog.Treadmills[selected].TrainingMultiplier),snapshot.PetEnergyBonus)
+  snapshot.ImpulseGain=Numbers.add(snapshot.Energy,impulse)-snapshot.Energy
+  player:SetAttribute("TrainingGain",snapshot.ImpulseGain)
   snapshot.RebirthRequirement = Rules.rebirthRequirement(snapshot.Rebirths)
   return snapshot
  end
@@ -120,17 +122,6 @@ function Service.new(dataService: any): any
   menuPrompt(island:WaitForChild("GaragePreview"):WaitForChild("Platform") :: BasePart,"Garage",{Kind="OpenMenu",Menu="Garage"})
   race.request=function(player) result.interact(player,{Version=1,Action="StartRace"}) end
   race.run()
-  for id=1,5 do
-   local prompt = Instance.new("ProximityPrompt")
-   prompt.Name = "SelectTraining"
-   prompt.ActionText = "Trainieren +"..Catalog.Treadmills[id].TrainingMultiplier
-   prompt.ObjectText = "Laufband "..id
-   prompt.HoldDuration = 0
-   prompt.MaxActivationDistance = Config.Training.MaxDistance
-   prompt.RequiresLineOfSight = false
-   prompt.Parent = zones[id]
-   prompt.Triggered:Connect(function(player) result.interact(player, {Version=1,Action="Select",TreadmillId=id}) end)
-  end
   local function added(player: Player)
    player.CharacterRemoving:Connect(function() controller:stop(player) end)
   end

@@ -41,9 +41,9 @@ local function engine()
  local function object(cls,name)
   local properties={ClassName=cls,Name=name or cls,Position=vector.zero,CFrame=cf.new(),Size=vector.new(1,1,1),AbsoluteSize=vector.new(1000,700),Visible=true,CanvasPosition=vector.zero}
   local children,attributes,changed={},{},{};local self;local methods={}
-  for _,event in ipairs({"Activated","MouseEnter","MouseLeave","Triggered","CharacterRemoving","AttributeChanged"}) do properties[event]=signal() end
+  for _,event in ipairs({"Activated","MouseEnter","MouseLeave","Triggered","CharacterRemoving","AttributeChanged","Destroying"}) do properties[event]=signal() end
   if cls=="RemoteEvent" then properties.OnServerEvent=signal();properties.OnClientEvent=signal() end
-  function methods:IsA(kind) return cls==kind or kind=="BasePart" and (cls=="Part" or cls=="SpawnLocation") end
+  function methods:IsA(kind) return cls==kind or kind=="GuiButton" and cls=="TextButton" or kind=="BasePart" and (cls=="Part" or cls=="WedgePart" or cls=="SpawnLocation") end
   function methods:GetChildren() return table.clone(children) end
   function methods:GetDescendants() local result={};for _,c in ipairs(children) do table.insert(result,c);for _,d in ipairs(c:GetDescendants()) do table.insert(result,d) end end;return result end
   function methods:FindFirstChild(name) for _,c in ipairs(children) do if c.Name==name then return c end end;return nil end
@@ -53,7 +53,7 @@ local function engine()
   function methods:GetPropertyChangedSignal(key) if not changed[key] then changed[key]=signal() end;return changed[key] end
   function methods:SetAttribute(key,value) attributes[key]=value;properties.AttributeChanged:Fire(key) end
   function methods:GetAttribute(key) return attributes[key] end
-  function methods:Destroy() self.Parent=nil end
+  function methods:Destroy() properties.Destroying:Fire();self.Parent=nil end
   function methods:Clone() local c=object(cls,properties.Name);for k,v in pairs(properties) do if k~="Parent" and k~="PrimaryPart" then c[k]=v end end;for _,child in ipairs(children) do child:Clone().Parent=c end;return c end
   function methods:ChangeState(state) properties.State=state end
   function methods:Kick(reason) properties.Kicks=(properties.Kicks or 0)+1;properties.KickReason=reason end
@@ -79,7 +79,7 @@ local function engine()
  e.Players=e.add(game,"Players","Players");e.Players.PlayerAdded=signal();e.Players.PlayerRemoving=signal()
  e.Players.GetPlayers=function() local all={};for _,p in ipairs(e.Players:GetChildren()) do if p:IsA("Player") then table.insert(all,p) end end;return all end
  e.Player=e.add(e.Players,"Player","Tester");e.Player.UserId=123;e.Players.LocalPlayer=e.Player
- e.add(e.Player,"PlayerGui","PlayerGui")
+ e.add(e.Player,"PlayerGui","PlayerGui").GetGuiObjectsAtPosition=function() return {} end
  local character=e.add(e.Workspace,"Model","Character");e.Player.Character=character
  e.Root=e.add(character,"Part","HumanoidRootPart",0,11,0);e.Root.Anchored=false
  local hum=e.add(character,"Humanoid","Humanoid");hum.Health=100;hum.WalkSpeed=16;hum.AutoRotate=true;hum.PlatformStand=false
@@ -89,7 +89,7 @@ local function engine()
  local services={Players=e.Players,ReplicatedStorage=e.Rep,RunService={IsStudio=function() return e.Studio~=false end},
  HttpService={GenerateGUID=function() serial+=1;return "integration-"..serial end,JSONEncode=function() return "[]" end},
  DataStoreService={GetDataStore=function(_,name) e.StoreCalls+=1;e.StoreName=name;if e.FailStoreCreation then error("Publish place first") end;return store end},
- UserInputService={TouchEnabled=false},TweenService={Create=function(_,target,_,props) local done=signal();return {Completed=done,Cancel=function() end,Play=function() for k,v in pairs(props) do target[k]=v end;done:Fire() end} end}}
+ UserInputService={TouchEnabled=false,InputBegan=signal(),TouchTap=signal(),GetFocusedTextBox=function() return nil end},TweenService={Create=function(_,target,_,props) local done=signal();return {Completed=done,Cancel=function() end,Play=function() for k,v in pairs(props) do target[k]=v end;done:Fire() end} end}}
  function game:GetService(name) return services[name] or self:FindFirstChild(name) end
  function game:BindToClose(cb) table.insert(e.Closes,cb) end
  e.Game=game;e.OS={clock=function() return e.Now end,time=function() return math.floor(e.Now) end}

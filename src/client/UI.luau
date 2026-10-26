@@ -10,7 +10,7 @@ local State=require(Shared:WaitForChild("ClientState"))
 local Icons=require(script.Parent.Icons)
 local UI={}
 local white=Color3.new(1,1,1)
-local palette={Energy=Color3.fromRGB(217,157,23),Cash=Color3.fromRGB(32,151,88),Rebirths=Color3.fromRGB(23,157,177),Garage=Color3.fromRGB(44,133,204),Pets=Color3.fromRGB(59,162,106),Race=Color3.fromRGB(229,125,38),Worlds=Color3.fromRGB(33,163,159),Upgrades=Color3.fromRGB(197,153,29),Settings=Color3.fromRGB(54,130,174)}
+local palette={Rebirths=Color3.fromRGB(23,157,177),Garage=Color3.fromRGB(44,133,204),Pets=Color3.fromRGB(59,162,106),Race=Color3.fromRGB(229,125,38),Worlds=Color3.fromRGB(33,163,159),Upgrades=Color3.fromRGB(197,153,29),Settings=Color3.fromRGB(54,130,174)}
 local function make(class:string,parent:Instance?,props:any):any
  local o:any=Instance.new(class);for k,v in pairs(props) do o[k]=v end;o.Parent=parent;return o
 end
@@ -19,15 +19,15 @@ local function text(parent:Instance,value:string,height:number):any
  return make("TextLabel",parent,{Size=UDim2.new(1,-16,0,height),BackgroundTransparency=1,Text=value,TextWrapped=true,TextColor3=white,TextSize=16,Font=Enum.Font.GothamBold,LayoutOrder=0})
 end
 function UI.new(playerGui:Instance,settings:any,audio:any):any
- local gui=make("ScreenGui",playerGui,{Name="PalmBaySidebar",ResetOnSpawn=false,ScreenInsets=Enum.ScreenInsets.CoreUISafeInsets,ZIndexBehavior=Enum.ZIndexBehavior.Sibling})
+ for _,name in ipairs({"PalmBaySidebar","BikeHUDV3"}) do
+  local old=playerGui:FindFirstChild(name);if old then old:Destroy() end
+ end
+ local gui=make("ScreenGui",playerGui,{Name="BikeHUDV3",ResetOnSpawn=false,ScreenInsets=Enum.ScreenInsets.CoreUISafeInsets,ZIndexBehavior=Enum.ZIndexBehavior.Sibling})
  local root=make("Frame",gui,{Size=UDim2.new(1,-16,1,-16),Position=UDim2.fromOffset(8,8),BackgroundTransparency=1})
- local sidebar=make("Frame",root,{Size=UDim2.fromOffset(210,535),Position=UDim2.fromOffset(0,4),BackgroundColor3=Color3.fromRGB(17,89,112),BackgroundTransparency=0.14,BorderSizePixel=0})
- corner(sidebar,18);make("UIStroke",sidebar,{Color=white,Thickness=1,Transparency=0.65})
+ local sidebar=make("Frame",root,{Name="MenuSidebar",Size=UDim2.fromOffset(160,400),Position=UDim2.fromOffset(0,4),BackgroundTransparency=1,BorderSizePixel=0})
  local scale=make("UIScale",sidebar,{Scale=1})
- local shadow=make("Frame",sidebar,{Size=UDim2.new(1,4,1,4),Position=UDim2.fromOffset(2,3),BackgroundColor3=Color3.fromRGB(13,59,78),BackgroundTransparency=0.85,ZIndex=0,BorderSizePixel=0});corner(shadow,18)
- local toggle=make("TextButton",sidebar,{Size=UDim2.new(1,-12,0,38),Position=UDim2.fromOffset(6,6),Text="☰  PALM BAY",TextColor3=white,TextSize=15,Font=Enum.Font.GothamBold,BackgroundTransparency=1})
- local list=make("ScrollingFrame",sidebar,{Position=UDim2.fromOffset(6,48),Size=UDim2.new(1,-12,1,-54),BackgroundTransparency=1,BorderSizePixel=0,ScrollBarThickness=3,AutomaticCanvasSize=Enum.AutomaticSize.Y,CanvasSize=UDim2.new()})
- make("UIListLayout",list,{Padding=UDim.new(0,7),SortOrder=Enum.SortOrder.LayoutOrder})
+ local toggle=make("TextButton",sidebar,{Name="MenuToggle",Size=UDim2.fromOffset(44,28),Text="☰",TextColor3=white,TextSize=22,Font=Enum.Font.GothamBold,BackgroundTransparency=1,BorderSizePixel=0})
+ local list=make("Frame",sidebar,{Name="Navigation",Position=UDim2.fromOffset(0,32),Size=UDim2.new(1,0,1,-32),BackgroundTransparency=1,BorderSizePixel=0})
  local buttons:any={};local labels:any={};local scales:any={};local activeTweens:any={}
  local function tween(object:any,properties:any,duration:number?)
   if activeTweens[object] then activeTweens[object]:Cancel();activeTweens[object]=nil end
@@ -35,10 +35,9 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
   local t=TweenService:Create(object,TweenInfo.new(duration or 0.18,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),properties)
   activeTweens[object]=t;t.Completed:Once(function() if activeTweens[object]==t then activeTweens[object]=nil end end);t:Play()
  end
- local sidebarHeight=535
+ local sidebarHeight=400
+ local arrange:()->()=function() end
  local generation=0
- local messageUntil=0
- local messageText=""
  local api:any={Gui=gui,Settings=settings,Buttons=buttons,Snapshot=nil,Viewport=nil,OnAction=function() end,OnSetting=function() end,OnMenu=function() end,Difficulty="Easy"}
  -- V2 contract: this transparent container lays out free-standing icons and values only.
  local resourceHUD=make("Frame",root,{Name="ResourceHUD",AnchorPoint=Vector2.new(1,1),Position=UDim2.new(1,-8,1,-8),Size=UDim2.fromOffset(190,108),BackgroundTransparency=1,BorderSizePixel=0})
@@ -49,7 +48,7 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
   resourceValues[name]=make("TextLabel",holder,{Name="Value",Position=UDim2.fromOffset(40,0),Size=UDim2.new(1,-40,1,0),BackgroundTransparency=1,BorderSizePixel=0,Text="—",TextColor3=white,TextSize=27,Font=Enum.Font.GothamBold,TextXAlignment=Enum.TextXAlignment.Left,TextStrokeColor3=Color3.fromRGB(14,45,61),TextStrokeTransparency=0.25,TextWrapped=false})
  end
  api.ResourceHUD=resourceHUD;api.ResourceValues=resourceValues
- for i,name in ipairs({"Energy","Cash","Rebirths","Garage","Pets","Race","Worlds","Upgrades","Settings"}) do
+ for i,name in ipairs({"Garage","Pets","Race","Worlds","Rebirths","Upgrades","Settings"}) do
   local button=make("TextButton",list,{Name=name,LayoutOrder=i,Size=UDim2.new(1,-4,0,47),BackgroundColor3=palette[name],BackgroundTransparency=0.08,BorderSizePixel=0,Text="",AutoButtonColor=false})
   corner(button,12);make("UIGradient",button,{Color=ColorSequence.new(white,Color3.fromRGB(185,226,241)),Rotation=32})
   make("UIStroke",button,{Color=white,Transparency=0.8,Thickness=1})
@@ -65,9 +64,7 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
    api.CurrentMenu=name;api.OnMenu(name)
   end)
  end
- local training=make("TextButton",root,{AnchorPoint=Vector2.new(1,1),Size=UDim2.fromOffset(225,54),Position=UDim2.new(1,-8,1,-142),Text="ϟ TRAINIEREN",Font=Enum.Font.GothamBold,TextSize=17,TextColor3=white,BackgroundColor3=palette.Energy,BorderSizePixel=0});corner(training,15)
- local status=make("TextLabel",root,{AnchorPoint=Vector2.new(1,1),Size=UDim2.fromOffset(225,58),Position=UDim2.new(1,-8,1,-200),BackgroundColor3=Color3.fromRGB(20,111,128),BackgroundTransparency=0.2,Text="Daten werden geladen …",TextWrapped=true,TextColor3=white,TextSize=13,Font=Enum.Font.GothamBold});corner(status,12)
- training.Activated:Connect(function() if api.Snapshot and api.Snapshot.Race and api.Snapshot.Race.Phase~="Idle" then return end;audio.play("Button");api.OnAction("Training") end)
+ local noticeToast=make("TextLabel",root,{Name="ActionNotice",Visible=false,AnchorPoint=Vector2.new(0.5,0),Size=UDim2.new(0.7,0,0,58),Position=UDim2.fromScale(0.6,0.14),BackgroundTransparency=1,Text="",TextWrapped=true,TextColor3=white,TextStrokeColor3=Color3.fromRGB(15,55,68),TextStrokeTransparency=0.2,TextSize=15,Font=Enum.Font.GothamBold})
  local overlay=make("TextButton",root,{Visible=false,Size=UDim2.fromScale(1,1),BackgroundColor3=Color3.fromRGB(12,51,68),BackgroundTransparency=0.3,Text="",AutoButtonColor=false,ZIndex=20})
  local window=make("Frame",overlay,{AnchorPoint=Vector2.new(0.5,0.5),Size=UDim2.new(0.9,0,0.85,0),Position=UDim2.fromScale(0.5,0.5),BackgroundColor3=Color3.fromRGB(25,116,139),BorderSizePixel=0,ZIndex=21});corner(window,20)
  make("UISizeConstraint",window,{MaxSize=Vector2.new(560,560),MinSize=Vector2.new(240,200)})
@@ -108,9 +105,7 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
  end
  function api.collapse(value:boolean)
   State.setting(settings,"Collapsed",value)
-  tween(sidebar,{Size=UDim2.fromOffset(if value then 94 else 210,sidebarHeight)})
-  toggle.Text=if value then "☰" else "☰  PALM BAY"
-  for _,label in pairs(labels) do label.Visible=not value end
+  arrange()
   api.OnSetting()
  end
  toggle.Activated:Connect(function() audio.play("Button");api.collapse(not settings.Collapsed) end)
@@ -209,12 +204,8 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
    api.RebirthInfo=row("",110);api.RebirthBar=bar(p.Ratio)
    api.RebirthConfirm=command("Rebirth bestätigen",function() if api.Snapshot and Presentation.rebirth(api.Snapshot).Allowed then api.OnAction("Rebirth");hide() end end)
    command("Abbrechen",hide)
-  elseif name=="Energy" and snap then
-   api.TrainingInfo=row("",125);api.TrainingBar=bar(0)
-   command("Zusätzlicher Trainingsimpuls",function() api.OnAction("Training") end)
-   command("Training beenden",function() api.OnAction("Stop");hide() end)
   elseif name=="Race" then
-   row("PALM BAY • 800 Studs • 5 Bots\nEnergy wird nicht verbraucht.",55)
+   row("WORLD 1 • 800 Studs • 5 Bots\nEnergy wird nicht verbraucht.",55)
    for _,tier in ipairs({"Easy","Medium","Hard"}) do command((if api.Difficulty==tier then "✓ " else "")..tier,function() api.Difficulty=tier;api.open("Race") end) end
    local tier=Content.Difficulties[api.Difficulty]
    row("Bot-Tempo: "..table.concat(tier.Speeds," / ").."\nCash Plätze 1–6: "..table.concat(tier.Rewards," / "),60)
@@ -222,7 +213,6 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
    if api.LastRaceResult then row("Ergebnis "..(api.LastRaceResult.Difficulty or "")..": Platz "..(api.LastRaceResult.Place or "—").." • +"..Format.number(api.LastRaceResult.Reward or 0).." Cash",50) end
    command("Rennen starten / erneut starten",function() api.OnAction("StartRace",{Difficulty=api.Difficulty});hide() end)
    command("Rennen abbrechen",function() api.OnAction("AbortRace");hide() end)
-  elseif name=="Cash" then row("Verdiene Cash in Rennen gegen fünf Bots. Die Platzierung und Schwierigkeit bestimmen deine Belohnung; ausgerüstete Pets erhöhen sie. Kaufe damit Fahrzeuge oder öffne Eier.",130)
   else row(name.." • VORSCHAU\nDieser Bereich ist noch nicht spielbar. Keine Käufe oder Belohnungen.",90) end
   api.update(api.Snapshot)
  end
@@ -234,14 +224,6 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
    api.open(api.CurrentMenu)
   end
   for _,name in ipairs({"Energy","Cash","Rebirths"}) do resourceValues[name].Text=Format.number(snap[name]) end
-  local p=Presentation.training(snap)
-  local info="Laufband "..p.Current.." • +"..Format.number(p.Gain).."/Impuls\n"..(if p.Complete then "Alle fünf Insel-Laufbänder verfügbar." else "Nächstes: "..p.Next.." • fehlen "..Format.number(p.Missing).." Energy\nODER "..Format.number(p.RebirthRequirement).." Rebirths (Weltzugang nötig)")
-  local racing=snap.Race and snap.Race.Phase~="Idle"
-  status.Text=if racing then (snap.Race.Difficulty or "Easy").." • Platz "..(snap.Race.Place or 1).." / 6\n"..(if snap.Race.Phase=="Countdown" then "Start in "..snap.Race.Countdown else math.floor(snap.Race.Progress*100).." % • "..Format.number(snap.Race.Speed).." Studs/Sek.") else "×"..Format.multiplier(snap.TrainingMultiplier).." • "..info
-  if os.clock()<messageUntil then status.Text=messageText end
-  training.Text=if racing then "🏁 RENNEN" elseif snap.SelectedTreadmill==0 then "ϟ TRAINIEREN" else "+"..Format.number(snap.ImpulseGain).." ϟ TIPPEN"
-  training.Active=not racing;training.AutoButtonColor=not racing
-  if api.TrainingInfo and api.TrainingInfo.Parent then api.TrainingInfo.Text=info;tween(api.TrainingBar,{Size=UDim2.fromScale(p.Ratio,1)}) end
   if api.RebirthInfo and api.RebirthInfo.Parent then
    local r=Presentation.rebirth(snap);api.RebirthInfo.Text="Rebirths: "..Format.number(r.Current).."\nMultiplikator ×"..Format.multiplier(r.Multiplier).." → ×"..Format.multiplier(r.NextMultiplier).."\nBenötigt: "..Format.number(r.Requirement).." Energy\nEnergy wird auf 0 gesetzt. Laufbandzugang kann entfallen."
    tween(api.RebirthBar,{Size=UDim2.fromScale(r.Ratio,1)});api.RebirthConfirm.Text=if r.Allowed then "Rebirth bestätigen" else "Noch nicht genug Energy";api.RebirthConfirm.Active=r.Allowed;api.RebirthConfirm.AutoButtonColor=r.Allowed
@@ -251,21 +233,25 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
    tween(api.RaceBar,{Size=UDim2.fromScale(race.Progress,1)})
   end
  end
- api.Status=status
- function api.message(value:string) messageText=value;messageUntil=os.clock()+4;status.Text=value;notice.Text=value end
+ api.Notice=noticeToast;api.Sidebar=sidebar;api.Navigation=list
+ function api.isMenuOpen():boolean return overlay.Visible end
+ local toastSequence=0
+ function api.message(value:string)
+  toastSequence+=1;local token=toastSequence
+  noticeToast.Text=value;noticeToast.Visible=true;notice.Text=value
+  task.delay(4,function() if token==toastSequence then noticeToast.Visible=false end end)
+ end
  function api.refreshSettings()
   if not settings.Animations then
    for object,t in pairs(activeTweens) do t:Cancel();activeTweens[object]=nil end
    for _,s in pairs(scales) do s.Scale=1 end
-   sidebar.Size=UDim2.fromOffset(if settings.Collapsed then 94 else 210,sidebarHeight)
+   arrange()
    window.Position=UDim2.fromScale(0.5,0.5)
   end
  end
  local function layout()
   local size=root.AbsoluteSize
-  scale.Scale=if size.X<360 then 0.92 else 1
-  sidebarHeight=math.min(535,math.max(100,(size.Y-(if UserInputService.TouchEnabled then 130 else 12))/scale.Scale))
-  sidebar.Size=UDim2.fromOffset(if settings.Collapsed then 94 else 210,sidebarHeight)
+  arrange()
   local touch=UserInputService.TouchEnabled
   local compact=touch or size.X<600
   local rowHeight=if compact then 30 else 36
@@ -284,9 +270,24 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
    resourceValues[name].Position=UDim2.fromOffset(rowHeight+6,0)
    resourceValues[name].Size=UDim2.new(1,-rowHeight-6,1,0)
   end
-  local width=math.min(225,math.max(155,size.X*0.4));training.Size=UDim2.fromOffset(width,48);status.Size=UDim2.fromOffset(width,65)
-  training.Position=UDim2.new(1,-right,1,-(bottom+rowHeight*3+12))
-  status.Position=UDim2.new(1,-right,1,-(bottom+rowHeight*3+66))
+ end
+ arrange=function()
+  local size=root.AbsoluteSize
+  local short=size.Y<420
+  local columns=if short then 4 else 1
+  local compact=settings.Collapsed or short or size.X<320
+  local width=if compact then 48 else 158
+  local height=44;local gap=6
+  local rows=math.ceil(7/columns)
+  sidebarHeight=32+rows*(height+gap)-gap
+  local available=math.max(120,size.Y-(if UserInputService.TouchEnabled then 100 else 12))
+  scale.Scale=math.min(1,available/sidebarHeight)
+  sidebar.Size=UDim2.fromOffset(columns*(width+gap)-gap,sidebarHeight)
+  for i,name in ipairs({"Garage","Pets","Race","Worlds","Rebirths","Upgrades","Settings"}) do
+   buttons[name].Size=UDim2.fromOffset(width,height)
+   buttons[name].Position=UDim2.fromOffset(((i-1)%columns)*(width+gap),math.floor((i-1)/columns)*(height+gap))
+   labels[name].Visible=not compact
+  end
  end
  root:GetPropertyChangedSignal("AbsoluteSize"):Connect(layout);layout();api.collapse(settings.Collapsed)
  return api

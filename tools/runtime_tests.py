@@ -39,6 +39,8 @@ def adapters():
   ('server/RemoteService','game,task,os,Instance'),
   ('client/UI','game,task,os,Instance,Color3,ColorSequence,Vector2,Vector3,CFrame,UDim,UDim2,Enum,TweenInfo'),
   ('client/Icons','Instance,UDim2,UDim,Color3,Enum'),
+  ('client/TrainingInput','game,os,Enum,Vector2'),
+  ('client/StationEffects','game,workspace,task,os,Instance,Vector3,UDim2,Color3,ColorSequence,Enum'),
   ('client/ClientApp','game,workspace,task,Instance,Vector2'),
   ('server/init.server','game,workspace,Instance,script,warn'),
   ('client/init.client','game,Instance,UDim2,Color3,Enum,script,warn'),

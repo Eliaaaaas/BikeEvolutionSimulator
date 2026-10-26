@@ -12,12 +12,13 @@ function Pose.new(character:Model,bike:Model?):any
   if motor:IsA("Motor6D") then record.Motors[motor]={C0=motor.C0,Transform=motor.Transform} end
  end
  if bike and hum.RigType==Enum.HumanoidRigType.R15 then
+  local modelScale=bike:GetScale()
   local steering=bike:FindFirstChild("Steering") :: Model
   local crank=bike:FindFirstChild("Crank") :: Model
   local function ik(upper:string,lower:string,parent:BasePart,position:Vector3)
    local a=character:FindFirstChild(upper);local b=character:FindFirstChild(lower)
    if not a or not b or not a:IsA("BasePart") or not b:IsA("BasePart") then return end
-   local target=Instance.new("Attachment");target.Name="LocalRiderTarget";target.Position=position;target.Parent=parent;table.insert(record.Attachments,target)
+   local target=Instance.new("Attachment");target.Name="LocalRiderTarget";target.Position=position*modelScale;target.Parent=parent;table.insert(record.Attachments,target)
    local control=Instance.new("IKControl");control.Name="ProceduralBikeIK";control.Type=Enum.IKControlType.Position
    control.ChainRoot=a;control.EndEffector=b;control.Target=target;control.Weight=1;control.SmoothTime=0.06;control.Parent=hum;table.insert(record.IK,control)
   end

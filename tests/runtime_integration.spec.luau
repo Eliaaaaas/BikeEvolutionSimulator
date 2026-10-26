@@ -16,14 +16,22 @@ local function integration(preview,remove,live)
  modules.Icons=modules.make_Icons(e.Instance,e.UDim2,e.UDim,e.Color3,e.Enum)
  local uiModule=modules.make_UI(e.Game,e.Task,e.OS,e.Instance,e.Color3,e.ColorSequence,e.Vector2,e.Vector3,e.CFrame,e.UDim,e.UDim2,e.Enum,e.TweenInfo)
  modules.UI={new=function(...) e.UI=uiModule.new(...);return e.UI end}
+ e.TrainingPopups={}
  local noop=function() end
  modules.Audio={new=function() return {refresh=noop,play=noop} end}
- modules.Effects={new=function(gui) assert(gui and gui:IsA("ScreenGui"),"Actual UI did not export Gui");return {refresh=noop,training=noop,rebirth=noop} end}
+ modules.Effects={new=function(gui) assert(gui and gui:IsA("ScreenGui"),"Actual UI did not export Gui");return {refresh=noop,training=function(amount) table.insert(e.TrainingPopups,amount) end,rebirth=noop} end}
  for _,name in ipairs({"Visuals","PetFollowers","IslandEffects","StationEffects","RaceCamera"}) do modules[name]={new=function() return {refresh=noop} end} end
+ modules.TrainingInput=modules.make_TrainingInput(e.Game,e.OS,e.Enum,e.Vector2)
  modules.ClientApp=modules.make_ClientApp(e.Game,e.Workspace,e.Task,e.Instance,e.Vector2)
  modules.make_init_client(e.Game,e.Instance,e.UDim2,e.Color3,e.Enum,e.add(nil,"LocalScript","Client"),e.Warn)
  e.advance(.5)
- function e.action(kind,fields) e.UI.OnAction(kind,fields);e.advance(.26) end
+ function e.action(kind,fields)
+  if kind=="Training" then
+   if e.UI.isMenuOpen() then e.press("×") end
+   e.Game:GetService("UserInputService").InputBegan:Fire({UserInputType=e.Enum.UserInputType.MouseButton1},false)
+  else e.UI.OnAction(kind,fields) end
+  e.advance(.26)
+ end
  function e.onBelt(id) local z=e.Workspace.World1.Training:FindFirstChild("Treadmill_"..id).Zone;e.Root.CFrame=e.CFrame.new(z.Position.X,z.Position.Y+3,z.Position.Z);e.advance(1.5) end
  function e.press(text)
   for _,node in ipairs(e.UI.Gui:GetDescendants()) do
@@ -56,8 +64,9 @@ test("step-on and prompt rejection communicate through real services and client"
  assert(e.UI.Snapshot.SelectedTreadmill==1 and e.UI.Snapshot.Energy>=1,"selected="..e.UI.Snapshot.SelectedTreadmill.." energy="..e.UI.Snapshot.Energy)
  local before=e.UI.Snapshot.Energy;e.action("Training");assert(e.UI.Snapshot.Energy>before)
  e.Root.CFrame=e.CFrame.new(0,11,0);e.advance(.3)
- e.Workspace.World1.Training.Treadmill_5.Zone.SelectTraining.Triggered:Fire(e.Player)
- assert(string.find(e.UI.Status.Text,"Laufband"))
+ assert(not e.Workspace.World1.Training.Treadmill_5.Zone:FindFirstChild("SelectTraining"))
+ e.Rep.BikeRemotes.Action:FireServer({Version=1,Action="Select",TreadmillId=5})
+ assert(string.find(e.UI.Notice.Text,"Laufband"))
  e.advance(.3);assert(e.UI.Snapshot.SelectedTreadmill==0)
 end)
 test("complete wired gameplay: train, rebirth, race, buy, equip, hatch, pets and save/rejoin",function()
@@ -141,7 +150,8 @@ test("V2 HUD binds confirmed resources without sidebar duplicates or background 
  assert(e.UI.ResourceValues.Energy.Text=="1.5T" and e.UI.ResourceValues.Cash.Text=="2.5B" and e.UI.ResourceValues.Rebirths.Text=="1.2K")
  for _,collapsed in ipairs({true,false,true}) do
   e.UI.collapse(collapsed)
-  for _,name in ipairs({"Energy","Cash","Rebirths"}) do
+  assert(not e.UI.Buttons.Energy and not e.UI.Buttons.Cash)
+  for _,name in ipairs({"Garage","Pets","Race","Worlds","Rebirths","Upgrades","Settings"}) do
    local label=e.UI.Buttons[name]:FindFirstChildOfClass("TextLabel")
    assert(label.Text==name and label.Visible==not collapsed)
   end
@@ -211,5 +221,79 @@ test("V3 actual hatch buttons auto-fill only new pets and never replace full or 
  assert(#e.UI.Snapshot.EquippedPets==0)
  e.UI.EggId=1;e.UI.open("Egg");e.press("Ei öffnen")
  assert(#e.UI.Snapshot.EquippedPets==1 and not table.find(first,e.UI.Snapshot.EquippedPets[1]))
+end)
+test("overhaul removes header, resource menu tiles and scrolling navigation from actual UI",function()
+ local e=integration(true)
+ assert(e.UI.Sidebar.BackgroundTransparency==1 and e.UI.Sidebar.BorderSizePixel==0)
+ assert(e.UI.Navigation:IsA("Frame") and not e.UI.Buttons.Energy and not e.UI.Buttons.Cash)
+ local names={"Garage","Pets","Race","Worlds","Rebirths","Upgrades","Settings"}
+ assert(#e.UI.Navigation:GetChildren()==#names)
+ for _,node in ipairs(e.UI.Sidebar:GetDescendants()) do
+  assert(not node:IsA("ScrollingFrame"))
+  if node:IsA("TextLabel") or node:IsA("TextButton") then assert(not string.find(node.Text or "","PALM BAY",1,true)) end
+ end
+ for _,name in ipairs(names) do assert(e.UI.Buttons[name] and e.UI.Buttons[name].Visible) end
+ assert(e.UI.Status==nil and e.UI.TrainingInfo==nil and e.UI.Notice.BackgroundTransparency==1 and not e.UI.Notice.Visible)
+ local root=e.UI.Sidebar.Parent
+ for _,size in ipairs({{375,680},{820,300},{1024,700}}) do
+  root.AbsoluteSize=e.Vector2.new(size[1],size[2]);root:GetPropertyChangedSignal("AbsoluteSize"):Fire()
+  for _,name in ipairs(names) do assert(e.UI.Buttons[name].Parent==e.UI.Navigation) end
+ end
+ e.UI.Buttons.Rebirths.Activated:Fire();assert(e.UI.CurrentMenu=="Rebirths" and e.UI.RebirthInfo)
+end)
+test("screen taps use one touch source, block UI, deduplicate synthetic mouse and confirm actual multipliers",function()
+ local e=integration(true);local input=e.Game:GetService("UserInputService")
+ assert(e.Data.change(e.Player,function(profile)
+  profile.Rebirths=1;profile.DiscoveredPets={1};profile.Pets.pet={SpeciesId=1,Variant="Normal"};profile.EquippedPets={"pet"};return true
+ end,true));e.onBelt(1)
+ local before=e.Data.snapshot(e.Player).Energy;local count=#e.TrainingPopups
+ input.TouchTap:Fire({e.Vector2.new(300,200)},false)
+ local after=e.Data.snapshot(e.Player).Energy
+ assert(math.abs(after-before-1.65)<1e-9 and #e.TrainingPopups==count+1 and math.abs(e.TrainingPopups[#e.TrainingPopups]-1.65)<1e-9)
+ input.InputBegan:Fire({UserInputType=e.Enum.UserInputType.Touch},false)
+ input.InputBegan:Fire({UserInputType=e.Enum.UserInputType.MouseButton1},false)
+ input.TouchTap:Fire({e.Vector2.new(300,200)},false)
+ assert(e.Data.snapshot(e.Player).Energy==after)
+ e.advance(.4);before=e.Data.snapshot(e.Player).Energy
+ input.InputBegan:Fire({UserInputType=e.Enum.UserInputType.MouseButton1},true)
+ assert(e.Data.snapshot(e.Player).Energy==before)
+ e.Player.PlayerGui.GetGuiObjectsAtPosition=function() return {e.UI.Buttons.Pets} end
+ input.TouchTap:Fire({e.Vector2.new(300,200)},false)
+ assert(e.Data.snapshot(e.Player).Energy==before)
+ e.Player.PlayerGui.GetGuiObjectsAtPosition=function() return {} end
+ e.UI.Buttons.Pets.Activated:Fire();input.TouchTap:Fire({e.Vector2.new(300,200)},false)
+ assert(e.Data.snapshot(e.Player).Energy==before)
+end)
+test("locked belt and rebirth access loss stop both automatic and tapped training without prompts",function()
+ local e=integration(true);local input=e.Game:GetService("UserInputService")
+ e.onBelt(5);assert(e.Data.snapshot(e.Player).Energy==0 and e.UI.Snapshot.SelectedTreadmill==0)
+ input.TouchTap:Fire({e.Vector2.new(300,200)},false);assert(e.Data.snapshot(e.Player).Energy==0)
+ assert(e.Data.change(e.Player,function(profile) profile.Energy=1000;return true end));e.advance(1.5)
+ assert(e.UI.Snapshot.SelectedTreadmill==5)
+ e.UI.Buttons.Rebirths.Activated:Fire();e.press("Rebirth bestätigen");e.advance(1.1)
+ assert(e.Data.snapshot(e.Player).Energy==0 and e.UI.Snapshot.SelectedTreadmill==0)
+ for _,node in ipairs(e.Workspace.World1.Training:GetDescendants()) do assert(not node:IsA("ProximityPrompt")) end
+ input.TouchTap:Fire({e.Vector2.new(300,200)},false);assert(e.Data.snapshot(e.Player).Energy==0)
+end)
+test("actual training billboard is transparent, follows active avatar and disappears after leaving",function()
+ local e=integration(true)
+ local stations=modules.make_StationEffects(e.Game,e.Workspace,e.Task,e.OS,e.Instance,e.Vector3,e.UDim2,e.Color3,e.ColorSequence,e.Enum)
+ stations.new({Animations=false},e.UI);e.onBelt(1);e.Workspace.CurrentCamera.CFrame=e.CFrame.new(0,20,-30);e.advance(.4)
+ local found
+ for _,node in ipairs(e.UI.Gui:GetDescendants()) do if node.Name=="ActiveTrainingBillboard" then found=node end end
+ assert(found and found.Adornee==e.Root and found.MaxDistance==65 and found.StudsOffsetWorldSpace.Y>=4)
+ local label=found:FindFirstChild("ConfirmedGain")
+ assert(label and label.BackgroundTransparency==1 and label.TextScaled and string.find(label.Text,"+1/SEK",1,true))
+ e.Root.CFrame=e.CFrame.new(0,11,0);e.advance(1)
+ for _,node in ipairs(e.UI.Gui:GetDescendants()) do assert(node.Name~="ActiveTrainingBillboard") end
+end)
+test("recreating actual HUD destroys old Palm Bay GUI instead of leaving duplicate overlays",function()
+ local e=integration(true);local previous=e.UI.Gui
+ local legacy=e.add(e.Player.PlayerGui,"ScreenGui","PalmBaySidebar")
+ e.add(legacy,"TextLabel","OldEnergy")
+ local new=modules.UI.new(e.Player.PlayerGui,e.UI.Settings,{play=function() end})
+ assert(previous.Parent==nil and legacy.Parent==nil and e.Player.PlayerGui:FindFirstChild("PalmBaySidebar")==nil)
+ assert(new.Gui.Name=="BikeHUDV3")
+ local count=0;for _,node in ipairs(e.Player.PlayerGui:GetChildren()) do if node.Name=="BikeHUDV3" then count+=1 end end;assert(count==1)
 end)
 print(string.format("%d actual runtime wiring tests passed (engine doubles; NOT Roblox Studio)",count))
