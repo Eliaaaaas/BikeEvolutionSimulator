@@ -104,6 +104,7 @@ task.defer(function()
  optional("Island",function() require(script.Parent.IslandEffects).new(settings,ui.Gui) end)
  optional("Stations",function() require(script.Parent.StationEffects).new(settings,ui) end)
 end)
+require(script.Parent.BikeInput).new(ui,remotes:WaitForChild("Drive") :: RemoteEvent)
 require(script.Parent.TrainingInput).new(ui,send)
 end
 return App

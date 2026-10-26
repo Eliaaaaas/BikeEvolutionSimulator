@@ -2,16 +2,11 @@
 local Players=game:GetService("Players")
 local RunService=game:GetService("RunService")
 local Pose=require(script.Parent.AvatarPose)
-local Rig=require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("BikeRig"))
-local Input=game:GetService("UserInputService")
 local Visuals={}
 function Visuals.new(settings:any,ui:any):any
- local trainers:any={}
- local cycles=Instance.new("Folder");cycles.Name="LocalTrainingCycles";cycles.Parent=workspace
  local poses:any={};local bikes:any={};local connection:RBXScriptConnection?=nil
  local api:any={}
  local function restore()
-  for player,record in pairs(trainers) do record.Bike:Destroy();trainers[player]=nil end
   for player,pose in pairs(poses) do Pose.destroy(pose.Record);poses[player]=nil end
   for bike,record in pairs(bikes) do
    for motor,base in pairs(record.Bases) do if motor.Parent then motor.C0=base end end
@@ -27,27 +22,9 @@ function Visuals.new(settings:any,ui:any):any
  local function frame(dt:number)
   local folder=workspace:FindFirstChild("ActiveRaceBikes")
   local riderBikes:any={}
-  local count=0
-  local players=Players:GetPlayers();table.sort(players,function(a,b) if a==Players.LocalPlayer then return b~=a elseif b==Players.LocalPlayer then return false end;return a.UserId<b.UserId end)
-  for _,player in ipairs(players) do
-   local root=if player.Character then player.Character:FindFirstChild("HumanoidRootPart") else nil
-   local selected=(player:GetAttribute("SelectedTreadmill") or 0)>0 and player:GetAttribute("Racing")~=true
-   if settings.Animations and selected and visible(player.Character) and root and root:IsA("BasePart") and count<(if Input.TouchEnabled then 2 else 4) then
-    count+=1
-    local record=trainers[player]
-    if not record then
-     local bike=game:GetService("ReplicatedStorage").Vehicles.Mountainbike:Clone();bike.Name="TrainingCycle_"..player.UserId;bike:ScaleTo(.65)
-     record={Bike=bike,Rig=Rig.prepare(bike),Distance=0};trainers[player]=record
-     bike:SetAttribute("OwnerUserId",player.UserId);bike:SetAttribute("Pedaling",true);bike:SetAttribute("WheelRadius",1.43*.65);bike.Parent=cycles
-    end
-    record.Distance+=math.min(dt,.1)*10
-    record.Rig.Root.CFrame=root.CFrame*CFrame.new(0,-4.8*.65,-.9*.65)
-    record.Bike:SetAttribute("RaceSpeed",10);record.Bike:SetAttribute("Distance",record.Distance)
-   elseif trainers[player] then trainers[player].Bike:Destroy();trainers[player]=nil end
-  end
-  for player,record in pairs(trainers) do if player.Parent~=Players then record.Bike:Destroy();trainers[player]=nil end end
   local models=if folder then folder:GetChildren() else {}
-  for _,record in pairs(trainers) do table.insert(models,record.Bike) end
+  local persistent=workspace:FindFirstChild("PlayerBikes")
+  if persistent then for _,bike in ipairs(persistent:GetChildren()) do table.insert(models,bike) end end
   do
    for _,bike in ipairs(models) do
     if not bike:IsA("Model") or not bike.PrimaryPart then continue end
@@ -91,7 +68,7 @@ function Visuals.new(settings:any,ui:any):any
    local character=player.Character
    local bike=riderBikes[player.UserId]
    local training=(player:GetAttribute("SelectedTreadmill") or 0)>0
-   local wanted=settings.Animations and visible(character) and (bike~=nil or training)
+   local wanted=visible(character) and bike~=nil
    local current=poses[player]
    if current and (current.Character~=character or wanted and current.Bike~=bike) then Pose.destroy(current.Record);poses[player]=nil;current=nil end
    if current and not wanted then
@@ -102,7 +79,7 @@ function Visuals.new(settings:any,ui:any):any
     if not current then local record=Pose.new(character,bike);if record then current={Record=record,Character=character,Bike=bike};poses[player]=current end end
     if current then
      current.Exit=nil
-     local phase=if bike and bike:GetAttribute("Pedaling")==false then 0 elseif bike and bikes[bike] then bikes[bike].Crank else os.clock()*7
+     local phase=if not settings.Animations or bike and bike:GetAttribute("Pedaling")==false then 0 elseif bike and bikes[bike] then bikes[bike].Crank else os.clock()*7
      Pose.update(current.Record,phase,bike~=nil or training,math.min(1,dt*12))
     end
    end
@@ -114,21 +91,21 @@ function Visuals.new(settings:any,ui:any):any
   end
  end
  function api.refresh()
-  if not settings.Animations then restore() end
+  -- Seated pose is mandatory even when decorative animations are disabled.
   -- One shared connection; idle when no avatars, bikes or garage are active.
  end
  local function updateConnection()
   local active=ui.Viewport~=nil or next(poses)~=nil
-  for _,player in ipairs(Players:GetPlayers()) do if visible(player.Character) and (player:GetAttribute("Racing") or (player:GetAttribute("SelectedTreadmill") or 0)>0) then active=true;break end end
+  for _,player in ipairs(Players:GetPlayers()) do if visible(player.Character) and (player:GetAttribute("Mounted")) then active=true;break end end
   local folder=workspace:FindFirstChild("ActiveRaceBikes")
   local camera=workspace.CurrentCamera
   if not active and folder and camera then
    for _,model in ipairs(folder:GetChildren()) do if model:IsA("Model") and model.PrimaryPart and (model.PrimaryPart.Position-camera.CFrame.Position).Magnitude<230 and (model:GetAttribute("RaceSpeed") or 0)>0 then active=true;break end end
   end
-  if active and settings.Animations and not connection then connection=RunService.PreSimulation:Connect(frame)
-  elseif (not active or not settings.Animations) and connection then connection:Disconnect();connection=nil;restore() end
+  if active and not connection then connection=RunService.PreSimulation:Connect(frame)
+  elseif not active and connection then connection:Disconnect();connection=nil;restore() end
  end
- task.spawn(function() while ui.Gui.Parent do updateConnection();task.wait(0.2) end;if connection then connection:Disconnect() end;restore();cycles:Destroy() end)
+ task.spawn(function() while ui.Gui.Parent do updateConnection();task.wait(0.2) end;if connection then connection:Disconnect() end;restore() end)
  return api
 end
 return Visuals

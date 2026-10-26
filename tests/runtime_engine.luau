@@ -34,6 +34,7 @@ local function engine()
  vector.zero=vector.new();e.Vector3=vector;e.Vector2={new=function(x,y) return vector.new(x,y) end,zero=vector.zero}
  local cf,cm={},{}
  function cf.new(x,y,z) return setmetatable({Position=if type(x)=="table" then x else vector.new(x,y,z)},cm) end
+ function cf.Angles() return cf.new() end
  function cf.lookAt(p,_) return cf.new(p) end
  cm.__mul=function(a,b) return cf.new(a.Position+b.Position) end
  cm.__index={ToObjectSpace=function(a,b) return cf.new(b.Position-a.Position) end}
@@ -41,7 +42,7 @@ local function engine()
  local function object(cls,name)
   local properties={ClassName=cls,Name=name or cls,Position=vector.zero,CFrame=cf.new(),Size=vector.new(1,1,1),AbsoluteSize=vector.new(1000,700),Visible=true,CanvasPosition=vector.zero}
   local children,attributes,changed={},{},{};local self;local methods={}
-  for _,event in ipairs({"Activated","MouseEnter","MouseLeave","Triggered","CharacterRemoving","AttributeChanged","Destroying"}) do properties[event]=signal() end
+  for _,event in ipairs({"Activated","MouseEnter","MouseLeave","Triggered","CharacterRemoving","CharacterAdded","AttributeChanged","Destroying","DescendantAdded"}) do properties[event]=signal() end
   if cls=="RemoteEvent" then properties.OnServerEvent=signal();properties.OnClientEvent=signal() end
   function methods:IsA(kind) return cls==kind or kind=="GuiButton" and cls=="TextButton" or kind=="BasePart" and (cls=="Part" or cls=="WedgePart" or cls=="SpawnLocation") end
   function methods:GetChildren() return table.clone(children) end
@@ -81,15 +82,23 @@ local function engine()
  e.Player=e.add(e.Players,"Player","Tester");e.Player.UserId=123;e.Players.LocalPlayer=e.Player
  e.add(e.Player,"PlayerGui","PlayerGui").GetGuiObjectsAtPosition=function() return {} end
  local character=e.add(e.Workspace,"Model","Character");e.Player.Character=character
+ e.Player.Respawns=0;e.Player.LoadCharacterAsync=function() e.Player.Respawns+=1 end
  e.Root=e.add(character,"Part","HumanoidRootPart",0,11,0);e.Root.Anchored=false
  local hum=e.add(character,"Humanoid","Humanoid");hum.Health=100;hum.WalkSpeed=16;hum.AutoRotate=true;hum.PlatformStand=false
+ e.GroundY=8;e.Collision=false;e.NoGround=false
+ e.Workspace.Raycast=function(_,origin,_) return if e.NoGround then nil else {Position=vector.new(origin.X,e.GroundY,origin.Z)} end
+ e.Workspace.Blockcast=function() return if e.Collision then {} else nil end
+ e.RaycastParams={new=function() return {} end}
+ e.Move=vector.zero;e.Controls={GetMoveVector=function() return e.Move end}
+ e.PlayerModule={GetControls=function() return e.Controls end}
  e.Workspace.CurrentCamera={ViewportSize=vector.new(1000,700),CFrame=cf.new(0,20,30)}
  local serial=0
- local store=modules.StudioStore.new();e.StoreCalls=0;e.FailStoreCreation=false
+ local store=modules.StudioStore.new();e.Store=store;e.StoreCalls=0;e.FailStoreCreation=false
  local services={Players=e.Players,ReplicatedStorage=e.Rep,RunService={IsStudio=function() return e.Studio~=false end},
  HttpService={GenerateGUID=function() serial+=1;return "integration-"..serial end,JSONEncode=function() return "[]" end},
  DataStoreService={GetDataStore=function(_,name) e.StoreCalls+=1;e.StoreName=name;if e.FailStoreCreation then error("Publish place first") end;return store end},
- UserInputService={TouchEnabled=false,InputBegan=signal(),TouchTap=signal(),GetFocusedTextBox=function() return nil end},TweenService={Create=function(_,target,_,props) local done=signal();return {Completed=done,Cancel=function() end,Play=function() for k,v in pairs(props) do target[k]=v end;done:Fire() end} end}}
+ ContextActionService={BindActionAtPriority=function(_,_,callback) e.BrakeCallback=callback end,SetTitle=function() end,SetPosition=function() end,UnbindAction=function() e.BrakeCallback=nil end},
+ UserInputService={TouchEnabled=false,InputBegan=signal(),TouchTap=signal(),WindowFocused=signal(),WindowFocusReleased=signal(),GetFocusedTextBox=function() return nil end},TweenService={Create=function(_,target,_,props) local done=signal();return {Completed=done,Cancel=function() end,Play=function() for k,v in pairs(props) do target[k]=v end;done:Fire() end} end}}
  function game:GetService(name) return services[name] or self:FindFirstChild(name) end
  function game:BindToClose(cb) table.insert(e.Closes,cb) end
  e.Game=game;e.OS={clock=function() return e.Now end,time=function() return math.floor(e.Now) end}

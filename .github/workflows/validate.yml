@@ -31,3 +31,11 @@ jobs:
           name: BikeEvolutionSimulator-V4
           path: build/v4/
           if-no-files-found: error
+      - name: Package V4.1 permanent-bike Studio build
+        run: python3 tools/package_v4.py --version V4.1
+      - name: Upload V4.1 Studio build
+        uses: actions/upload-artifact@v4
+        with:
+          name: BikeEvolutionSimulator-V4.1
+          path: build/v4.1/
+          if-no-files-found: error

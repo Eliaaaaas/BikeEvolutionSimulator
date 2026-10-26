@@ -234,17 +234,48 @@ for name,title,x,z,color in [('RacePreview','RACE / 5 BOTS',0,63,(255,145,56)),(
     station,_=item(model,'Model',name)
     w,d=(32,29) if name=='GaragePreview' else (25,15)
     part(station,'Platform',(w,.35,d),(x,8.175,z),color)
-    for side in [-1,1]:
+    for side in ([] if name=='GaragePreview' else [-1,1]):
         part(station,'ArchPost',(1.2,13,1.2),(x+side*(w/2-1),14.5,z+5),(26,84,101))
         part(station,'ArchGlow',(.3,12,.3),(x+side*(w/2-1),14.5,z+4.3),color,288,False)
-    part(station,'ArchTop',(w+1,1.2,2),(x,21,z+5),color,288,False)
-    plaque(station,title,(x,20,z+3.7),w,color)
+    if name!='GaragePreview':part(station,'ArchTop',(w+1,1.2,2),(x,21,z+5),color,288,False)
+    if name!='GaragePreview':plaque(station,title,(x,20,z+3.7),w,color)
     if name=='RacePreview':
         for side in [-1,1]:
             for j in range(5):part(station,'StartCurb',(2,.25,1.2),(x+side*10,8.4,z-5+j*2),(255,228,105) if j%2 else (245,96,69),collide=False)
     if name=='WorldPreview':
         ring(station,'PortalRim',(x,13.8,z+3),4,(151,112,248),16)
         part(station,'PortalAura',(7,8,.2),(x,13.8,z+3),(96,222,244),288,False,.6,shape=0)
+# Closed showroom with a colorful automatic-entry semicircle facing the central island.
+garage=next(n for n in model.findall('Item') if n.findtext("Properties/string[@name='Name']")=='GaragePreview')
+for wall,sz,p,color,mat,alpha in [
+ ('BackWall',(.7,14,30),(-76,15,8),(44,119,177),256,0),
+ ('LeftWall',(32,14,.7),(-60,15,-7),(39,136,183),256,0),
+ ('RightWall',(32,14,.7),(-60,15,23),(39,136,183),256,0),
+ ('FrontBase',(.7,3,30),(-44,9.5,8),(41,113,164),256,0),
+ ('FrontGlass',(.5,11,29),(-44,16.5,8),(126,220,238),1568,.65),
+ ('Roof',(34,1,32),(-60,22.5,8),(29,94,140),256,0)]:
+    part(garage,wall,sz,p,color,mat,True,alpha)
+for z in [-6,8,22]:part(garage,'FrontMullion',(.8,14,.35),(-43.8,15,z),(255,215,100),1088,False)
+for z in [-7,23]:part(garage,'RoofNeon',(33,.18,.2),(-60,23.1,z),(82,244,218),288,False)
+banner=marquee(garage,'BIKE GARAGE',(-43,21,8),26,(53,177,248),3.8,'Garage')
+# Rotate the complete sign as a rigid object to face +X, including icons and captions.
+for n in banner.iter('Item'):
+    cf=n.find("Properties/CoordinateFrame[@name='CFrame']")
+    if cf is None:continue
+    px=float(cf.find('X').text)+43;pz=float(cf.find('Z').text)-8
+    cf.find('X').text=str(-43+pz);cf.find('Z').text=str(8-px)
+    rows=[[float(cf.find(f'R{r}{c}').text) for c in range(3)] for r in range(3)]
+    for r,values in enumerate([rows[2],rows[1],[-v for v in rows[0]]]):
+        for c,v in enumerate(values):cf.find(f'R{r}{c}').text=str(v)
+part(garage,'EntryZone',(22,.1,22),(-43,8.1,8),(89,228,230),collide=False,transparency=1)
+for j in range(32):
+    za=-11+j*22/32;zb=-11+(j+1)*22/32;z=(za+zb)/2
+    width=math.sqrt(max(0,121-z*z))
+    color=[(74,215,245),(115,236,164),(255,219,88),(255,147,104),(190,142,246)][j%5]
+    part(garage,'EntryRainbowPaver',(width,.07,zb-za),(-43+width/2,8.08,8+z),color,256,False)
+for j in range(24):
+    a=-math.pi/2+j*math.pi/24;b=a+math.pi/24
+    beam(garage,'EntryNeonArc',(-43+11*math.cos(a),8.15,8+11*math.sin(a)),(-43+11*math.cos(b),8.15,8+11*math.sin(b)),.17,(255,230,116),288)
 # Authored vehicle gallery: visible before Play and while walking around, never drivable.
 import copy
 showroom,_=item(model,'Folder','GarageShowroom')

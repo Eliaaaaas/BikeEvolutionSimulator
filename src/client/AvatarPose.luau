@@ -9,7 +9,7 @@ function Pose.new(character:Model,bike:Model?):any
  local animate=character:FindFirstChild("Animate")
  if animate and animate:IsA("LocalScript") then record.Animate=animate;record.Disabled=animate.Disabled;animate.Disabled=true end
  for _,motor in ipairs(character:GetDescendants()) do
-  if motor:IsA("Motor6D") then record.Motors[motor]={C0=motor.C0,Transform=motor.Transform} end
+  if motor:IsA("Motor6D") then record.Motors[motor]={C0=motor:GetAttribute("RiderBaseC0") or motor.C0,RestoreC0=motor.C0,Transform=motor.Transform} end
  end
  if bike and hum.RigType==Enum.HumanoidRigType.R15 then
   local modelScale=bike:GetScale()
@@ -49,7 +49,7 @@ function Pose.fade(record:any,weight:number)
  for _,control in ipairs(record.IK) do control.Weight=math.max(0,control.Weight-weight) end
 end
 function Pose.destroy(record:any)
- for motor,base in pairs(record.Motors) do if motor.Parent then motor.C0=base.C0;motor.Transform=base.Transform end end
+ for motor,base in pairs(record.Motors) do if motor.Parent then motor.C0=base.RestoreC0;motor.Transform=base.Transform end end
  for _,control in ipairs(record.IK) do control:Destroy() end
  for _,target in ipairs(record.Attachments) do target:Destroy() end
  if record.Animate and record.Animate.Parent then record.Animate.Disabled=record.Disabled end

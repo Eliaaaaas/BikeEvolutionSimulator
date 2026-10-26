@@ -13,6 +13,8 @@ local PetRules=require(Shared:WaitForChild("PetRules"))
 local Numbers=require(Shared:WaitForChild("Numbers"))
 local Http=game:GetService("HttpService")
 local RaceService=require(script.Parent.RaceService)
+local MountedBikes=require(script.Parent.MountedBikeService)
+local BikeMotion=require(Shared:WaitForChild("BikeMotion"))
 local Service = {}
 function Service.new(dataService: any): any
  local training = workspace:WaitForChild("World1"):WaitForChild("Training")
@@ -40,7 +42,8 @@ function Service.new(dataService: any): any
   local ok,err=pcall(sink,player,event);if not ok then warn("[Feedback]",player.UserId,tostring(err)) end
  end
  local controller = Controller.new(dataService, os.clock, near,emit)
- local race=RaceService.new(dataService,function(player) controller:stop(player) end,emit)
+ local mounts=MountedBikes.new(dataService)
+ local race=RaceService.new(dataService,function(player) controller:stop(player) end,emit,mounts)
  local rng=Random.new()
  local economy=Economy.new(dataService,os.clock,function() return rng:NextInteger(1,10000) end,function() return Http:GenerateGUID(false) end,emit,function(player,event,reason) warn("[Economy]",event,player.UserId,reason) end)
  local limiter = Limiter.new(Config.Training.RemoteCapacity, Config.Training.RemoteRefillPerSecond, os.clock)
@@ -49,6 +52,7 @@ function Service.new(dataService: any): any
  local snapshotSequence: {[Player]:number}={}
  local autoBlocked: {[Player]:boolean}={}
  local result: any = {}
+ function result.drive(player:Player,payload:any):boolean return mounts.input(player,payload) end
  function result.setFeedback(callback:any) sink=callback end
  function result.status(player:Player):string return dataService.status(player) end
  function result.handle(player: Player, payload: any): (boolean, string?)
@@ -118,7 +122,7 @@ function Service.new(dataService: any): any
    end)
   end
   for id=1,3 do menuPrompt(island:WaitForChild("EggStation_"..id):WaitForChild("Egg") :: BasePart,Catalog.Eggs[id].Name,{Kind="OpenEgg",EggId=id}) end
-  menuPrompt(island:WaitForChild("GaragePreview"):WaitForChild("Platform") :: BasePart,"Garage",{Kind="OpenMenu",Menu="Garage"})
+  mounts.start()
   menuPrompt(island:WaitForChild("ShopArea"):WaitForChild("Platform") :: BasePart,"Shop",{Kind="OpenMenu",Menu="Shop"})
   menuPrompt(island:WaitForChild("WorldPreview"):WaitForChild("Platform") :: BasePart,"Worlds",{Kind="OpenMenu",Menu="Worlds"})
   race.request=function(player) result.interact(player,{Version=1,Action="StartRace"}) end
@@ -131,11 +135,19 @@ function Service.new(dataService: any): any
   Players.PlayerRemoving:Connect(function(player) controller:remove(player); limiter:remove(player);sequence[player]=nil;inventorySent[player]=nil;inventoryCache[player]=nil;snapshotSequence[player]=nil;autoBlocked[player]=nil;economy:remove(player) end)
   task.spawn(function()
    local entered:{[Player]:number}={}
+   local garageEntered:{[Player]:boolean}={}
+   local garage=island:WaitForChild("GaragePreview"):WaitForChild("EntryZone") :: BasePart
    local retry:{[Player]:number}={}
-   Players.PlayerRemoving:Connect(function(player) entered[player]=nil;retry[player]=nil end)
+   Players.PlayerRemoving:Connect(function(player) entered[player]=nil;retry[player]=nil;garageEntered[player]=nil end)
    while true do
     task.wait(0.2)
     for _,player in ipairs(Players:GetPlayers()) do
+     local root=if player.Character then player.Character:FindFirstChild("HumanoidRootPart") else nil
+     local inside=root and root:IsA("BasePart") and alive(player) and player:GetAttribute("Racing")~=true and BikeMotion.inGarage(root.Position.X,root.Position.Y,root.Position.Z,garage.Position.X,garage.Position.Y,garage.Position.Z,garage.Size.Z/2)
+     if not inside then garageEntered[player]=nil
+     elseif not garageEntered[player] and dataService.snapshot(player) and limiter:allow(player) then
+      garageEntered[player]=true;emit(player,{Kind="OpenMenu",Menu="Garage"})
+     end
      local onBelt=0
      for id=1,5 do if near(player,id) then onBelt=id;break end end
      if onBelt==0 then entered[player]=nil;retry[player]=nil;autoBlocked[player]=nil

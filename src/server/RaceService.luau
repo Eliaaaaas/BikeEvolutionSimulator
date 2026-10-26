@@ -5,11 +5,10 @@ local Config=require(Shared:WaitForChild("Config"))
 local Course=require(Shared:WaitForChild("RaceCourse"))
 local Logic=require(Shared:WaitForChild("RaceController"))
 local BikeRig=require(Shared:WaitForChild("BikeRig"))
-local Content=require(Shared:WaitForChild("World1Content"))
 local RaceRules=require(Shared:WaitForChild("RaceRules"))
 local Http=game:GetService("HttpService")
 local Race={}
-function Race.new(data:any,stopTraining:(Player)->(),feedback:(Player,any)->()):any
+function Race.new(data:any,stopTraining:(Player)->(),feedback:(Player,any)->(),mounts:any):any
  local prototype=game:GetService("ReplicatedStorage"):WaitForChild("Vehicles"):WaitForChild("Mountainbike") :: Model
  local bikes=Instance.new("Folder");bikes.Name="ActiveRaceBikes";bikes.Parent=workspace
  local adapter:any={}
@@ -33,16 +32,7 @@ function Race.new(data:any,stopTraining:(Player)->(),feedback:(Player,any)->()):
   local root,hum=character(player);assert(root and hum,"Missing rider")
   state.Character=player.Character;state.Root=root;state.Humanoid=hum;state.Lane=0
   state.RewardId=if state.Difficulty=="Test" then "test" else Http:GenerateGUID(false)
-  state.Original={Anchored=root.Anchored,AutoRotate=hum.AutoRotate,WalkSpeed=hum.WalkSpeed,PlatformStand=hum.PlatformStand}
-  local definition=Content.Vehicles[state.VehicleId]
-  local asset=if state.VehicleId==1 then prototype else game:GetService("ReplicatedStorage").Vehicles:FindFirstChild(definition.Model)
-  assert(asset,"Vehicle model missing")
-  local bike=asset:Clone();state.Bike=bike;bike.Name="Vehicle_"..player.UserId;bike.ModelStreamingMode=Enum.ModelStreamingMode.Atomic
-  -- Build joints while still at prototype origin, before transporting the assembly.
-  state.Rig=BikeRig.prepare(bike)
-  bike:SetAttribute("VehicleId",state.VehicleId);bike:SetAttribute("Pedaling",state.VehicleId<=6);bike:SetAttribute("WheelRadius",if state.VehicleId==3 or state.VehicleId==8 then 1.15 else 1.43)
-  bike:SetAttribute("OwnerUserId",player.UserId);bike:SetAttribute("RaceSpeed",0);bike:SetAttribute("Distance",0)
-  bike.Parent=bikes
+  local mounted=mounts.race(player);state.Mount=mounted;state.Bike=mounted.Bike;state.Rig=mounted.Rig;state.VisualStart=mounted.Distance
   state.BotModels={}
   for i,bot in ipairs(state.Bots) do
    local botAsset=game:GetService("ReplicatedStorage"):WaitForChild("Vehicles"):FindFirstChild("Vehicle2") or prototype
@@ -67,15 +57,12 @@ function Race.new(data:any,stopTraining:(Player)->(),feedback:(Player,any)->()):
  end
  function adapter.valid(player:Player,state:any):boolean
   return player.Parent==Players and player.Character==state.Character and state.Humanoid and state.Humanoid.Health>0
-   and state.Root and state.Root.Parent~=nil and state.Bike and state.Bike.Parent==bikes and data.snapshot(player)~=nil
+   and state.Root and state.Root.Parent~=nil and state.Bike and state.Bike.Parent~=nil and state.Mount.Mode=="Race" and data.snapshot(player)~=nil
  end
  function adapter.move(player:Player,state:any,point:any)
   local position=Vector3.new(point.X+point.DZ*state.Lane,point.Y,point.Z-point.DX*state.Lane)
   local cf=CFrame.lookAt(position,position+Vector3.new(point.DX,point.DY or 0,point.DZ))
-  state.Rig.Root.CFrame=cf
-  state.Root.CFrame=cf*CFrame.new(0,4.8,0.9)
-  state.Root.AssemblyLinearVelocity=Vector3.zero;state.Root.AssemblyAngularVelocity=Vector3.zero
-  state.Bike:SetAttribute("RaceSpeed",state.Speed);state.Bike:SetAttribute("Distance",state.Distance)
+  mounts.move(state.Mount,cf,state.Speed,state.VisualStart+state.Distance)
   for _,bot in ipairs(state.Bots) do
    local p=Course.sample(bot.Distance);local pos=Vector3.new(p.X+p.DZ*bot.Lane,p.Y,p.Z-p.DX*bot.Lane)
    bot.Rig.Root.CFrame=CFrame.lookAt(pos,pos+Vector3.new(p.DX,p.DY or 0,p.DZ))
@@ -83,24 +70,8 @@ function Race.new(data:any,stopTraining:(Player)->(),feedback:(Player,any)->()):
   end
  end
  function adapter.cleanup(player:Player,state:any,reason:string)
-  -- Restore controls even when a part was removed or Character changed during teardown.
-  local ok,err=pcall(function()
-   if state.Original then
-    if state.Humanoid and state.Humanoid.Parent then
-     state.Humanoid.AutoRotate=state.Original.AutoRotate;state.Humanoid.WalkSpeed=state.Original.WalkSpeed
-     state.Humanoid.PlatformStand=state.Original.PlatformStand
-    end
-    if state.Root and state.Root.Parent then
-     state.Root.Anchored=state.Original.Anchored
-     if reason~="Disconnect" and player.Character==state.Character and state.Humanoid and state.Humanoid.Health>0 then
-      state.Root.CFrame=CFrame.new(0,12,50);state.Root.AssemblyLinearVelocity=Vector3.zero;state.Root.AssemblyAngularVelocity=Vector3.zero
-      state.Humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
-     end
-    end
-   end
-  end)
-  if state.Original and (not state.Root or not state.Root.Parent) and reason~="Disconnect" and reason~="Shutdown"
-   and player.Parent==Players and player.Character==state.Character and state.Humanoid and state.Humanoid.Health>0 then
+  local ok,err=pcall(function() if state.Mount then mounts.finish(player,state.Mount,reason) end end)
+  if state.Root and not state.Root.Parent and reason~="Disconnect" and reason~="Shutdown" and player.Parent==Players and player.Character==state.Character and state.Humanoid.Health>0 then
    task.defer(function()
     if player.Parent==Players and player.Character==state.Character then
      local spawned,spawnError=pcall(function() player:LoadCharacterAsync() end)
@@ -108,7 +79,6 @@ function Race.new(data:any,stopTraining:(Player)->(),feedback:(Player,any)->()):
     end
    end)
   end
-  if state.Bike then state.Bike:Destroy() end
   for _,model in ipairs(state.BotModels or {}) do model:Destroy() end
   player:SetAttribute("Racing",false)
   if player.Parent==Players then feedback(player,{Kind="RaceEnded",Reason=reason,RaceId=state.Id,Place=state.Place,Reward=state.Reward,Difficulty=state.Difficulty}) end

@@ -15,6 +15,7 @@ function RemoteService.start(gameplay: any)
   remotes[name] = remote
  end
  gameplay.setFeedback(function(player:Player,event:any) remotes.Feedback:FireClient(player,event) end)
+ remotes.Drive.OnServerEvent:Connect(function(player:Player,payload:any) gameplay.drive(player,payload) end)
  local lastRequest: {[Player]: number} = {}
  remotes.GetSnapshot.OnServerInvoke = function(player: Player, payload: any): any
   if player.Parent~=Players then return {Ok=false,Error="NotReady"} end

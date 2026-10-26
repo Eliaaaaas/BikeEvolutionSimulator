@@ -72,3 +72,15 @@ assert 'BillboardGui' not in station_source and 'ActiveTrainingBillboard' not in
 assert not any(n.attrib['class']=='BillboardGui' for n in root.iter('Item'))
 for key in ['ShopArea','VIPArea','EggPetLandmark','TrainingLandmark']:path('Workspace','World1',key)
 print('V4 built place: themed zone landmarks, Shop/portal integration, no training BillboardGui creation')
+
+# V4.1 actual packaged modules and closed garage, not a second demo scene.
+for group in ['BikeInput','Visuals','AvatarPose']:assert child(client,group) is not None
+assert child(server,'MountedBikeService') is not None
+entry=path('Workspace','World1','GaragePreview','EntryZone')
+assert entry.findtext("Properties/float[@name='Transparency']")=='1'
+assert entry.findtext("Properties/bool[@name='CanCollide']")=='false'
+for key in ['BackWall','LeftWall','RightWall','FrontBase','FrontGlass','Roof']:
+ assert path('Workspace','World1','GaragePreview',key).findtext("Properties/bool[@name='CanCollide']")=='true'
+visual_source=child(client,'Visuals').findtext("Properties/string[@name='Source']")
+assert 'LocalTrainingCycles' not in visual_source and 'TrainingCycle_' not in visual_source
+print('V4.1 built-place wiring: permanent bike modules, closed showroom and automatic semicircle present')

@@ -35,6 +35,8 @@ def adapters():
  import re
  out=[]
  for filename,params in [
+  ('server/MountedBikeService','game,workspace,task,os,warn,Instance,CFrame,Vector3,Enum,RaycastParams'),
+  ('client/BikeInput','game,task,UDim2,Enum'),
   ('server/GameplayService','game,workspace,task,os,warn,Instance,Random'),
   ('server/RemoteService','game,task,os,Instance'),
   ('client/UI','game,task,os,Instance,Color3,ColorSequence,Vector2,Vector3,CFrame,UDim,UDim2,Enum,TweenInfo'),
@@ -51,6 +53,7 @@ def adapters():
   source=source.replace('require(ReplicatedStorage.Shared.RuntimeContract)','modules.RuntimeContract')
   source=re.sub(r'require\(script.Parent\.(\w+)\)',r'modules.\1',source)
   source=re.sub(r'require\(script\.(\w+)\)',r'modules.\1',source)
+  source=source.replace('loadPlayerModule(player:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule"))','modules.PlayerModule')
   name=filename.split('/')[-1].replace('.','_')
   out.append(f'modules.make_{name}=function({params})\n{source}\nend')
  return '\n'.join(out)

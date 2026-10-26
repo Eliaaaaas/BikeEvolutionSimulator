@@ -67,10 +67,14 @@ class VisualV4Tests(unittest.TestCase):
                 for axis in 'XY':
                     self.assertLessEqual(float(dims.findtext(axis+'S'))+float(pos.findtext(axis+'S')), .97)
                 self.assertEqual(label.findtext("Properties/bool[@name='TextWrapped']"),'false')
-                left=xyz(carrier)[0]-size(carrier)[0]/2+float(pos.findtext('XS'))*size(carrier)[0]
+                right=[row[0] for row in rotation(carrier)]
+                left=-size(carrier)[0]/2+float(pos.findtext('XS'))*size(carrier)[0]
                 for icon in sign.findall('Item'):
                     if name(icon) in {'BikeWheel','BikeFrame','EggIcon','StarGem','FlagPole','CheckeredFlag','PortalIcon','CoinRim','CoinStamp','StarRay','EnergyBolt'}:
-                        self.assertLess(bounds(icon)[1][0],left, name(sign))
+                        center=sum((xyz(icon)[a]-xyz(carrier)[a])*right[a] for a in range(3))
+                        r=rotation(icon)
+                        half=sum(abs(sum(r[a][b]*right[a] for a in range(3)))*size(icon)[b]/2 for b in range(3))
+                        self.assertLess(center+half,left,name(sign))
 
     def test_showroom_label_frames_do_not_overlap(self):
         showroom=by_name['GarageShowroom']

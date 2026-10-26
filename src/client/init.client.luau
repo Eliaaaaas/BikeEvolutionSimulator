@@ -13,8 +13,8 @@ local failed=false
 local function refresh()
  if not runtime then label.Text="SERVER FEHLT • BikeRuntime wurde nicht erzeugt. Output und Server-Script prüfen.";return end
  local state=runtime:GetAttribute("State")
- label.Visible=failed or runtime:GetAttribute("Diagnostics")==true or state~="Ready"
- label.Text=tostring(runtime:GetAttribute("DataMode")).."\nSERVER "..tostring(state).." / "..tostring(runtime:GetAttribute("Stage")).." • CLIENT "..clientStage.."\n"..tostring(runtime:GetAttribute("Error") or "")
+ label.Visible=failed or runtime:GetAttribute("Diagnostics")==true or state~="Ready" or runtime:GetAttribute("BikeState")=="Failed"
+ label.Text=tostring(runtime:GetAttribute("DataMode")).."\nSERVER "..tostring(state).." / "..tostring(runtime:GetAttribute("Stage")).." • CLIENT "..clientStage.."\n"..tostring(runtime:GetAttribute("BikeError") or runtime:GetAttribute("Error") or "")
 end
 if runtime then runtime.AttributeChanged:Connect(refresh) end
 refresh()
