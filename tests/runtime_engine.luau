@@ -46,7 +46,7 @@ local function engine()
   end
  end
  local function object(cls,name)
-  local properties={ClassName=cls,Name=name or cls,Position=vector.zero,CFrame=cf.new(),Size=vector.new(1,1,1),AbsoluteSize=vector.new(1000,700),C0=cf.identity,C1=cf.identity,Transform=cf.identity,PivotOffset=cf.identity,Visible=true,CanvasPosition=vector.zero}
+  local properties={ClassName=cls,Name=name or cls,Position=vector.zero,CFrame=cf.new(),Size=vector.new(1,1,1),AbsoluteSize=vector.new(1000,700),C0=cf.identity,C1=cf.identity,Transform=cf.identity,PivotOffset=cf.identity,Archivable=true,LocalTransparencyModifier=0,Visible=true,CanvasPosition=vector.zero}
   local children,attributes,changed={},{},{};local self;local methods={}
   for _,event in ipairs({"Activated","MouseEnter","MouseLeave","Triggered","CharacterRemoving","CharacterAdded","AttributeChanged","Destroying","DescendantAdded"}) do properties[event]=signal() end
   if cls=="RemoteEvent" then properties.OnServerEvent=signal();properties.OnClientEvent=signal() end
@@ -65,7 +65,26 @@ local function engine()
   end
   function methods:GetScale() return 1 end
   function methods:Destroy() properties.Destroying:Fire();self.Parent=nil end
-  function methods:Clone() local c=object(cls,properties.Name);for k,v in pairs(properties) do if k~="Parent" and k~="PrimaryPart" then c[k]=v end end;for _,child in ipairs(children) do child:Clone().Parent=c end;return c end
+  function methods:Clone()
+   local mapping={};local originals={}
+   local function copy(node)
+    local result=object(node.ClassName,node.Name);mapping[node]=result;table.insert(originals,node)
+    for k,v in pairs(node._properties) do
+     if k~="Parent" and k~="PrimaryPart" and k~="Part0" and k~="Part1" and k~="LeafJoint" and not (type(v)=="table" and v.Connect) then result[k]=v end
+    end
+    for k,v in pairs(node:GetAttributes()) do result:SetAttribute(k,v) end
+    for _,child in ipairs(node:GetChildren()) do copy(child).Parent=result end
+    return result
+   end
+   local result=copy(self)
+   for _,node in ipairs(originals) do
+    for _,key in ipairs({"Part0","Part1","PrimaryPart"}) do
+     local value=node[key];if value then mapping[node][key]=mapping[value] or value end
+    end
+   end
+   return result
+  end
+  function methods:GetAttributes() return table.clone(attributes) end
   function methods:Move(value) properties.MoveDirection=value end
   function methods:SetStateEnabled(state,value) properties.StateEnabled=properties.StateEnabled or {};properties.StateEnabled[state]=value end
   function methods:GetStateEnabled(state) return not properties.StateEnabled or properties.StateEnabled[state]~=false end
@@ -114,8 +133,17 @@ local function engine()
  e.Player.Respawns=0;e.Player.LoadCharacterAsync=function() e.Player.Respawns+=1 end
  e.Root=e.add(character,"Part","HumanoidRootPart",0,11,0);e.Root.Anchored=false
  local hum=e.add(character,"Humanoid","Humanoid");hum.Health=100;hum.WalkSpeed=16;hum.AutoRotate=true;hum.PlatformStand=false
- e.GroundY=8;e.Collision=false;e.NoGround=false
- e.Workspace.Raycast=function(_,origin,_) return if e.NoGround then nil else {Position=vector.new(origin.X,e.GroundY,origin.Z)} end
+ e.GroundY=nil;e.Collision=false;e.NoGround=false
+ e.Workspace.Raycast=function(_,origin,_) local y=e.GroundY
+  if y==nil then
+   y=8
+   if e.FloorY then y=e.FloorY(origin.X,origin.Z)
+   else for _,x in ipairs({-54,-36,-18,24,42}) do
+    if math.abs(origin.X-x)<4.5 and origin.Z>=-45.5 and origin.Z<=-34.5 then y=8+1.3*(-34.5-origin.Z)/11 end
+    if math.abs(origin.X-x)<4 and origin.Z>=-57 and origin.Z<=-45 then y=9.25 end
+   end end
+  end
+  return if e.NoGround or y==nil then nil else {Position=vector.new(origin.X,y,origin.Z),Normal=vector.new(0,1,0)} end
  e.Workspace.Blockcast=function() return if e.Collision then {} else nil end
  e.RaycastParams={new=function() return {} end}
  e.Move=vector.zero;e.Controls={GetMoveVector=function() return e.Move end,moveFunction=function() e.DefaultMoves=(e.DefaultMoves or 0)+1 end}
@@ -126,7 +154,7 @@ local function engine()
  local services={Players=e.Players,ReplicatedStorage=e.Rep,RunService={PreSimulation=signal(),RenderStepped=signal(),IsStudio=function() return e.Studio~=false end},
  HttpService={GenerateGUID=function() serial+=1;return "integration-"..serial end,JSONEncode=function() return "[]" end},
  DataStoreService={GetDataStore=function(_,name) e.StoreCalls+=1;e.StoreName=name;if e.FailStoreCreation then error("Publish place first") end;return store end},
- ContextActionService={BindActionAtPriority=function(_,_,callback) e.BrakeCallback=callback end,SetTitle=function() end,SetPosition=function() end,UnbindAction=function() e.BrakeCallback=nil end},
+ ContextActionService={BindActionAtPriority=function(_,name,callback) if name=="BikeBrake" then e.BrakeCallback=callback else e.JumpCallback=callback end end,SetTitle=function() end,SetPosition=function() end,UnbindAction=function() e.BrakeCallback=nil end},
  UserInputService={TouchEnabled=false,InputBegan=signal(),TouchTap=signal(),WindowFocused=signal(),WindowFocusReleased=signal(),GetFocusedTextBox=function() return nil end},TweenService={Create=function(_,target,_,props) local done=signal();return {Completed=done,Cancel=function() end,Play=function() for k,v in pairs(props) do target[k]=v end;done:Fire() end} end}}
  function game:GetService(name) return services[name] or self:FindFirstChild(name) end
  function game:BindToClose(cb) table.insert(e.Closes,cb) end

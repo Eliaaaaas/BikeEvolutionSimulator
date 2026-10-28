@@ -5,7 +5,7 @@ import argparse,hashlib,json,subprocess,zipfile,xml.etree.ElementTree as E
 from datetime import datetime,timezone
 ROOT=Path(__file__).resolve().parents[1]
 parser=argparse.ArgumentParser()
-parser.add_argument('--version',choices=['V4','V4.1','V4.2'],default='V4')
+parser.add_argument('--version',choices=['V4','V4.1','V4.2','V4.3'],default='V4')
 version=parser.parse_args().version
 package='BikeEvolutionSimulator-'+version
 source=ROOT/'build/BikeEvolutionSimulator.rbxlx'

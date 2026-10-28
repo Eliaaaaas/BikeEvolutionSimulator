@@ -14,6 +14,7 @@ function RemoteService.start(gameplay: any)
   remote.Parent = folder
   remotes[name] = remote
  end
+ gameplay.setDriveState(function(player:Player,state:any) remotes.DriveState:FireClient(player,state) end)
  gameplay.setFeedback(function(player:Player,event:any) remotes.Feedback:FireClient(player,event) end)
  remotes.Drive.OnServerEvent:Connect(function(player:Player,payload:any) gameplay.drive(player,payload) end)
  local lastRequest: {[Player]: number} = {}

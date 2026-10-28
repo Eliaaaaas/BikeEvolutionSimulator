@@ -1,4 +1,4 @@
-local function integration(preview,remove,live)
+local function integration(preview,remove,live,predict)
  local e=modules.runtimeEngine();modules.populateWorld(e.add,e.Workspace,e.Rep)
  if remove then e.Workspace.World1.Training.Treadmill_1.Zone:Destroy() end
  e.Workspace:SetAttribute("StudioPreviewData",preview)
@@ -8,6 +8,7 @@ local function integration(preview,remove,live)
  modules.RaceService=modules.makeRaceService(e.Game,e.Workspace,e.Task,e.OS,e.Warn,e.Instance,e.CFrame,e.Vector3,e.Enum)
  modules.PlayerDataService=modules.makeService(e.Game,e.Task,e.OS,e.Warn)
  modules.RiderMount=modules.make_RiderMount(e.CFrame)
+ modules.BikeSurface=modules.make_BikeSurface(e.CFrame,e.Vector3,e.RaycastParams,e.Enum)
  local mountedModule=modules.make_MountedBikeService(e.Game,e.Workspace,e.Task,e.OS,e.Warn,e.Instance,e.CFrame,e.Vector3,e.Enum,e.RaycastParams)
  modules.MountedBikeService={new=function(data) e.Mounts=mountedModule.new(data);return e.Mounts end}
  function e.teleport(x,y,z)
@@ -29,6 +30,7 @@ local function integration(preview,remove,live)
  modules.Effects={new=function(gui) assert(gui and gui:IsA("ScreenGui"),"Actual UI did not export Gui");return {refresh=noop,training=function(amount) table.insert(e.TrainingPopups,amount) end,rebirth=noop} end}
  for _,name in ipairs({"Visuals","PetFollowers","IslandEffects","StationEffects","RaceCamera"}) do modules[name]={new=function() return {refresh=noop} end} end
  modules.PlayerModule=e.PlayerModule
+ modules.RidePrediction=if predict then modules.make_RidePrediction(e.Game,e.Workspace,e.Instance,e.CFrame,e.OS) else {new=function() return {intent=function() end,command=function() end} end}
  modules.BikeInput=modules.make_BikeInput(e.Game,e.Task,e.UDim2,e.Enum,e.Vector3)
  modules.TrainingInput=modules.make_TrainingInput(e.Game,e.OS,e.Enum,e.Vector2)
  modules.ClientApp=modules.make_ClientApp(e.Game,e.Workspace,e.Task,e.Instance,e.Vector2)
@@ -373,14 +375,15 @@ test("V4.1 native keyboard/touch vectors drive, steer, brake and pause in menus"
  stopped=e.Root.Position;e.advance(.3);assert((e.Root.Position-stopped).Magnitude<1e-6)
  assert(e.Player.Character:FindFirstChildOfClass("Humanoid").Sit)
 end)
-test("V4.1 manual collisions, missing ground and excessive steps stop the bike",function()
+test("V4.3 walls stop the bike while unsupported ground permits natural falling",function()
  local e=integration(true);e.Move=e.Vector3.new(0,0,-1)
  local start=e.Root.Position
  e.Collision=true;e.advance(.5);assert((e.Root.Position-start).Magnitude<1e-6)
- e.Collision=false;e.NoGround=true;e.advance(.5);assert((e.Root.Position-start).Magnitude<1e-6)
- e.NoGround=false;e.GroundY=25;e.advance(.5);assert((e.Root.Position-start).Magnitude<1e-6)
- e.GroundY=8;e.advance(.5);assert(e.Root.Position.Z<start.Z)
+ e.Collision=false;e.NoGround=true;e.advance(.3);assert(e.Root.Position.Y<start.Y)
+ e.NoGround=false;e.GroundY=8;e.teleport(0,12.625,0);e.advance(.5)
+ assert(e.Root.Position.Z<start.Z)
 end)
+
 test("V4.1 stale or replayed steering cannot keep a bike moving or modify economics",function()
  local e=integration(true);local remote=e.Rep.BikeRemotes.Drive
  local before=e.Data.snapshot(e.Player)
@@ -536,5 +539,94 @@ test("V4.2 actual camera follows the current mounted humanoid and switches back 
  assert(cam.CameraType==e.Enum.CameraType.Scriptable)
  e.action("AbortRace");assert(cam.CameraType==e.Enum.CameraType.Custom)
  assert(cam.CameraSubject==e.Player.Character:FindFirstChildOfClass("Humanoid") and e.Workspace.PlayerBikes:GetChildren()[1]==bike)
+end)
+test("V4.3 driving up the authored approach starts training without any prompt",function()
+ local e=integration(true);local r=e.Mounts.ensure(e.Player)
+ e.teleport(-54,8.05+r.Offset.Position.Y,-30)
+ e.Move=e.Vector3.new(0,0,-1)
+ local deadline=e.Now+3
+ while r.State.Z> -50 and e.Now<deadline do e.advance(.05) end
+ e.BrakeCallback("BikeBrake",e.Enum.UserInputState.Begin);e.advance(1.3)
+ assert(r.State.Z< -50 and r.State.Z> -55 and r.State.Grounded and math.abs(r.State.Y-9.3)<.1)
+ assert(e.UI.Snapshot.SelectedTreadmill==1 and e.Data.snapshot(e.Player).Energy>=1)
+ assert(e.Workspace.World1.Training.Treadmill_1.AccessRamp:IsA("WedgePart"))
+end)
+test("V4.3 touch jump moves the mounted rider and immediately invalidates training contact",function()
+ local e=integration(true);e.onBelt(1);local bike=e.Workspace.PlayerBikes:GetChildren()[1]
+ local y=e.Root.Position.Y;local energy=e.Data.snapshot(e.Player).Energy
+ e.JumpCallback("BikeJump",e.Enum.UserInputState.Begin);e.advance(.3)
+ local r=e.Mounts.ensure(e.Player)
+ assert(not r.State.Grounded and e.Root.Position.Y>y+2 and e.UI.Snapshot.SelectedTreadmill==0)
+ assert(e.Workspace.PlayerBikes:GetChildren()[1]==bike and e.Data.snapshot(e.Player).Energy==energy)
+ e.JumpCallback("BikeJump",e.Enum.UserInputState.End);e.advance(.9)
+ assert(r.State.Grounded and math.abs(e.Root.Position.Y-y)<.1)
+end)
+test("V4.3 airborne jump spam and race input cannot create extra jumps",function()
+ local e=integration(true);local r=e.Mounts.ensure(e.Player)
+ e.JumpCallback("BikeJump",e.Enum.UserInputState.Begin);e.advance(.12)
+ local vy=r.State.VY
+ e.JumpCallback("BikeJump",e.Enum.UserInputState.Begin);e.advance(.1)
+ assert(r.State.VY<vy and r.State.JumpId==2)
+ e.advance(1);assert(r.State.Grounded)
+ e.teleport(0,12.625,63);e.action("StartRace",{Difficulty="Easy"})
+ local id=r.State.JumpId;e.JumpCallback("BikeJump",e.Enum.UserInputState.Begin);e.advance(.1)
+ assert(r.Mode=="Race" and r.State.JumpId==id)
+ e.action("AbortRace")
+end)
+test("V4.3 switching bikes in flight preserves gravity and jump history",function()
+ local e=integration(true)
+ e.JumpCallback("BikeJump",e.Enum.UserInputState.Begin);e.advance(.15)
+ local old=e.Mounts.ensure(e.Player);local vy=old.State.VY
+ assert(e.Data.change(e.Player,function(p) p.OwnedVehicles={1,2};p.ActiveVehicle=2;return true end,true));e.advance(.05)
+ local r=e.Mounts.ensure(e.Player)
+ assert(r.VehicleId==2 and not r.State.Grounded and r.State.VY<vy and r.State.JumpId==1 and old.Bike.Parent==nil)
+end)
+test("V4.3 predicted presentation has no transform writer on the replicated bike or avatar",function()
+ local e=integration(true,false,false,true);local p=e.UI.Prediction
+ assert(p.Active and p.Bike and p.Character and p.Character~=e.Player.Character)
+ local authority=e.Workspace.PlayerBikes:GetChildren()[1]
+ local cf=authority.PrimaryPart.CFrame;local writes=e.CFrameWrites[authority.PrimaryPart]
+ p.intent({Throttle=1,Steer=0,Brake=false,JumpId=0});p.command(999,{Throttle=1,Steer=0,Brake=false,JumpId=0})
+ e.Game:GetService("RunService").RenderStepped:Fire(.016)
+ closeFrame(authority.PrimaryPart.CFrame,cf);assert(e.CFrameWrites[authority.PrimaryPart]==writes)
+ local root=p.Character:FindFirstChild("HumanoidRootPart")
+ local weld=p.Bike.Frame.Pivot:FindFirstChild("PermanentRiderMount")
+ assert(weld.Part1==root and weld.Part1~=e.Root)
+ closeFrame(root.CFrame,weld.Part0.CFrame*weld.C0)
+ assert(e.Root.LocalTransparencyModifier==1)
+ e.Player:SetAttribute("Racing",true)
+ assert(not p.Active and e.Root.LocalTransparencyModifier==0)
+end)
+test("V4.3 stale prediction states do not roll back the visible vehicle or resource counters",function()
+ local e=integration(true,false,false,true);local p=e.UI.Prediction
+ local bike=p.Bike;local energy=e.Data.snapshot(e.Player).Energy
+ local r=e.Mounts.ensure(e.Player)
+ e.Rep.BikeRemotes.DriveState:FireClient(e.Player,{Epoch=r.Epoch-1,Ack=999,Sequence=999,State=table.clone(r.State),Mode="Manual",VehicleId=2,MaxSpeed=18})
+ assert(p.Bike==bike and e.Data.snapshot(e.Player).Energy==energy)
+ e.UI.Gui:Destroy();assert(not p.Active and e.Root.LocalTransparencyModifier==0)
+end)
+test("V4.3 predicted presentation rebuilds after vehicle change and cleans up on respawn",function()
+ local e=integration(true,false,false,true);local p=e.UI.Prediction;local first=p.Bike
+ assert(e.Data.change(e.Player,function(profile) profile.OwnedVehicles={1,7};profile.ActiveVehicle=7;return true end,true));e.advance(.3)
+ assert(p.Active and p.Bike~=first and p.Bike:GetAttribute("VehicleId")==7)
+ e.Player.CharacterRemoving:Fire();assert(not p.Active and p.Bike==nil)
+end)
+test("V4.3 queued drive floods cannot accelerate server simulation time",function()
+ local e=integration(true);local r=e.Mounts.ensure(e.Player)
+ local start=r.Frame.Position
+ for seq=1000,1100 do e.Rep.BikeRemotes.Drive:FireServer({Version=1,Sequence=seq,Throttle=1,Steer=0,Brake=false,JumpId=0}) end
+ assert(#r.Queue<=modules.Config.Bike.QueueLimit)
+ e.advance(.1);assert((r.Frame.Position-start).Magnitude<1)
+end)
+test("V4.3 low walls block the chassis while known raised deck surfaces remain traversable",function()
+ local e=integration(true);local n=0
+ local obstacle=e.add(e.Workspace,"Part","LowWall",0,8.3,0,3,.6,1)
+ e.Workspace.Blockcast=function()
+  n+=1;if n%2==1 then return nil end
+  return {Instance=obstacle,Normal=e.Vector3.new(0,0,1)}
+ end
+ local scene=modules.BikeSurface.new(e.Workspace,{},6)
+ assert(scene.block(0,10,0,0,0,0,-.2,8,true))
+ obstacle.Name="Deck";assert(not scene.block(0,10,0,0,0,0,-.2,8,true))
 end)
 print(string.format("%d actual runtime wiring tests passed (engine doubles; NOT Roblox Studio)",count))

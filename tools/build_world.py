@@ -190,6 +190,8 @@ def oval(parent,name,width,depth,thickness,pos,color,material):
 for i,(x,color) in enumerate(zip(xs,colors),1):
     treadmill,_=item(training,'Model',f'Treadmill_{i}')
     accent=colors[i%len(colors)]
+    # Slope rises from island y=8 at z=-34.5 to the running deck y=9.3 at z=-45.5.
+    part(treadmill,'AccessRamp',(9,1.3,11),(x,8.65,-40),color,256,True,cls='WedgePart',yaw=180)
     oval(treadmill,'RoundedBase',14,18,.5,(x,8.25,-51),(31,53,78),1088)
     oval(treadmill,'NeonRim',14.3,18.3,.14,(x,8.54,-51),color,288)
     oval(treadmill,'RoundedLayer',12.5,16.5,.4,(x,8.75,-51),accent,256)

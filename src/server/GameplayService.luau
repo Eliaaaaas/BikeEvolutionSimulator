@@ -25,15 +25,10 @@ function Service.new(dataService: any): any
   local humanoid = if character then character:FindFirstChildOfClass("Humanoid") else nil
   return humanoid ~= nil and humanoid.Health > 0 and character ~= nil and character:IsDescendantOf(workspace)
  end
+ local mounts:any=nil
  local function near(player: Player, id: number): boolean
   if not alive(player) or player:GetAttribute("Racing")==true then return false end
-  local character = player.Character
-  local root = if character then character:FindFirstChild("HumanoidRootPart") else nil
-  local zone = zones[id]
-  if not root or not root:IsA("BasePart") or not zone then return false end
-  local delta = root.Position - zone.Position
-  -- Axis bounds match the actual belt. Vertical check prevents training from beneath the island.
-  return Rules.withinTrainingZone(delta.X, delta.Y, delta.Z, zone.Size.X, zone.Size.Z)
+  return mounts~=nil and mounts.onBelt(player,zones[id])
  end
  local sink: any=function() end
  local sequence: {[Player]:number}={}
@@ -42,7 +37,7 @@ function Service.new(dataService: any): any
   local ok,err=pcall(sink,player,event);if not ok then warn("[Feedback]",player.UserId,tostring(err)) end
  end
  local controller = Controller.new(dataService, os.clock, near,emit)
- local mounts=MountedBikes.new(dataService)
+ mounts=MountedBikes.new(dataService)
  local race=RaceService.new(dataService,function(player) controller:stop(player) end,emit,mounts)
  local rng=Random.new()
  local economy=Economy.new(dataService,os.clock,function() return rng:NextInteger(1,10000) end,function() return Http:GenerateGUID(false) end,emit,function(player,event,reason) warn("[Economy]",event,player.UserId,reason) end)
@@ -52,6 +47,7 @@ function Service.new(dataService: any): any
  local snapshotSequence: {[Player]:number}={}
  local autoBlocked: {[Player]:boolean}={}
  local result: any = {}
+ function result.setDriveState(callback:any) mounts.setStateSink(callback) end
  function result.drive(player:Player,payload:any):boolean return mounts.input(player,payload) end
  function result.setFeedback(callback:any) sink=callback end
  function result.status(player:Player):string return dataService.status(player) end

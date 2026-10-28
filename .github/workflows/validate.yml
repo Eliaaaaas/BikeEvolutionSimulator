@@ -47,3 +47,11 @@ jobs:
           name: BikeEvolutionSimulator-V4.2
           path: build/v4.2/
           if-no-files-found: error
+      - name: Package V4.3 movement and training fix
+        run: python3 tools/package_v4.py --version V4.3
+      - name: Upload V4.3 Studio build
+        uses: actions/upload-artifact@v4
+        with:
+          name: BikeEvolutionSimulator-V4.3
+          path: build/v4.3/
+          if-no-files-found: error

@@ -9,7 +9,7 @@ function Motion.step(speed:number,yaw:number,throttle:number,steer:number,brake:
  local rate=if brake or speed*target<0 then cfg.Braking elseif throttle==0 then cfg.Drag else cfg.Acceleration
  local change=math.clamp(target-speed,-rate*dt,rate*dt)
  speed+=change
- yaw=(yaw-steer*cfg.TurnRate*dt*math.clamp(math.abs(speed)/4,0,1)*(if speed<-.1 then -1 else 1))% (math.pi*2)
+ yaw=(yaw-steer*cfg.TurnRate*dt*math.clamp(math.abs(speed)/1.5,0,1)*(if speed<-.1 then -1 else 1))% (math.pi*2)
  return {Speed=speed,Yaw=yaw,DX=-math.sin(yaw)*speed*dt,DZ=-math.cos(yaw)*speed*dt}
 end
 function Motion.inGarage(x:number,y:number,z:number,cx:number,cy:number,cz:number,radius:number):boolean

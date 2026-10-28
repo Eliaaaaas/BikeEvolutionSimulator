@@ -92,3 +92,10 @@ assert child(path('ReplicatedStorage','Shared'),'RiderMount') is not None
 input_source=child(client,'BikeInput').findtext("Properties/string[@name='Source']")
 assert 'controls.moveFunction=suppressMove' in input_source
 print('V4.2 actual place: single vehicle transform owner, native movement dispatcher suppressed')
+
+for id in range(1,6):
+ ramp=path('Workspace','World1','Training',f'Treadmill_{id}','AccessRamp')
+ assert ramp.attrib['class']=='WedgePart' and ramp.findtext("Properties/bool[@name='CanCollide']")=='true'
+for group in ['RidePrediction']:assert child(client,group) is not None
+for group in ['RideSimulation','RideReconciliation','BikeSurface']:path('ReplicatedStorage','Shared',group)
+print('V4.3 actual place: five physical ramps, shared jump/collision simulation and isolated local prediction')

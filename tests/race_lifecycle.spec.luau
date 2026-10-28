@@ -6,6 +6,7 @@ local function fixture()
  local profile=modules.Profile.new();profile.Energy=500;profile.Cash=75
  local data={change=function(_,cb) return cb(profile),nil end,snapshot=function() return table.clone(profile) end,read=function() return modules.Profile.copy(profile) end,inventoryRevision=function() return 0 end,ownsVehicle=function(_,id) return id==1 end}
  local old=modules.BikeRig;modules.BikeRig=modules.makeBikeRig(e.Instance)
+ modules.BikeSurface=modules.make_BikeSurface(e.CFrame,e.Vector3,e.RaycastParams,e.Enum)
  modules.RiderMount=modules.make_RiderMount(e.CFrame)
  local mounts=modules.make_MountedBikeService(e.Game,e.Workspace,e.Task,e.OS,e.Warn,e.Instance,e.CFrame,e.Vector3,e.Enum,e.RaycastParams).new(data)
  mounts.start();e.advance(0)

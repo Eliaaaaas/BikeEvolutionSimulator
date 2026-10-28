@@ -25,6 +25,7 @@ function Visuals.new(settings:any,ui:any):any
   local models=if folder then folder:GetChildren() else {}
   local persistent=workspace:FindFirstChild("PlayerBikes")
   if persistent then for _,bike in ipairs(persistent:GetChildren()) do table.insert(models,bike) end end
+  if ui.Prediction and ui.Prediction.Active then table.insert(models,ui.Prediction.Bike) end
   do
    for _,bike in ipairs(models) do
     if not bike:IsA("Model") or not bike.PrimaryPart then continue end
@@ -37,6 +38,7 @@ function Visuals.new(settings:any,ui:any):any
     end
     local camera=workspace.CurrentCamera
     if camera and (bike.PrimaryPart.Position-camera.CFrame.Position).Magnitude>230 then continue end
+    if ui.Prediction and ui.Prediction.Active and bike:GetAttribute("OwnerUserId")==Players.LocalPlayer.UserId and bike~=ui.Prediction.Bike then continue end
     local owner=bike:GetAttribute("OwnerUserId");if type(owner)=="number" then riderBikes[owner]=bike end
     if not settings.Animations then continue end
     local record=bikes[bike]
@@ -65,7 +67,7 @@ function Visuals.new(settings:any,ui:any):any
   end
   for bike in pairs(bikes) do if not bike.Parent then bikes[bike]=nil end end
   for _,player in ipairs(Players:GetPlayers()) do
-   local character=player.Character
+   local character=if player==Players.LocalPlayer and ui.Prediction and ui.Prediction.Active then ui.Prediction.Character else player.Character
    local bike=riderBikes[player.UserId]
    local training=(player:GetAttribute("SelectedTreadmill") or 0)>0
    local wanted=visible(character) and bike~=nil

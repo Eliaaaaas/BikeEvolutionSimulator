@@ -39,6 +39,8 @@ def adapters():
  out=[]
  for filename,params in [
   ('server/MountedBikeService','game,workspace,task,os,warn,Instance,CFrame,Vector3,Enum,RaycastParams'),
+  ('shared/BikeSurface','CFrame,Vector3,RaycastParams,Enum'),
+  ('client/RidePrediction','game,workspace,Instance,CFrame,os'),
   ('client/AvatarPose','Instance,CFrame,Vector3,Enum'),
   ('client/Visuals','game,workspace,task,os,CFrame,Vector3'),
   ('client/RaceCamera','game,workspace,CFrame,Vector3,Enum'),

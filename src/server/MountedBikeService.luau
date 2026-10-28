@@ -4,7 +4,8 @@ local Rep=game:GetService("ReplicatedStorage")
 local Shared=Rep:WaitForChild("Shared")
 local Config=require(Shared:WaitForChild("Config"))
 local Content=require(Shared:WaitForChild("World1Content"))
-local Motion=require(Shared:WaitForChild("BikeMotion"))
+local Sim=require(Shared:WaitForChild("RideSimulation"))
+local Surface=require(Shared:WaitForChild("BikeSurface"))
 local Geometry=require(Shared:WaitForChild("RiderMount"))
 local Rig=require(Shared:WaitForChild("BikeRig"))
 local Protocol=require(Shared:WaitForChild("Protocol"))
@@ -14,7 +15,9 @@ function Service.new(data:any):any
  local folder=Instance.new("Folder");folder.Name="PlayerBikes";folder.Parent=workspace
  local records:{[Player]:any}={}
  local sequence:{[Player]:number}={}
- local gate=Limiter.new(20,15,os.clock)
+ local gate=Limiter.new(16,40,os.clock)
+ local epoch:{[Player]:number}={}
+ local stateSink:any=function() end
  local api:any={}
  local function poseNode(node:Instance)
   if node:IsA("BasePart") then node.CanCollide=false
@@ -66,7 +69,7 @@ function Service.new(data:any):any
   assert(asset and asset:IsA("Model"),"Mounted vehicle missing: "..definition.Model)
   local bike=asset:Clone();bike.Name="Rider_"..player.UserId;bike.ModelStreamingMode=Enum.ModelStreamingMode.Atomic
   local rig=Rig.prepare(bike)
-  local record={Character=char,Root=root,Humanoid=hum,Bike=bike,Rig=rig,VehicleId=id,InventoryRevision=revision,Mode="Manual",Connections={},Speed=0,Yaw=if old then old.Yaw else 0,Distance=if old then old.Distance else 0,Input={Throttle=0,Steer=0,Brake=true,At=0}}
+  local record:any={Character=char,Root=root,Humanoid=hum,Bike=bike,Rig=rig,VehicleId=id,InventoryRevision=revision,Mode="Manual",Connections={},Speed=0,Yaw=if old then old.Yaw else 0,Distance=if old then old.Distance else 0,Input={Throttle=0,Steer=0,Brake=true,At=0}}
   record.Offset=Geometry.offset(bike,char)
   local initial=if old then old.Frame else CFrame.new(root.Position.X,root.Position.Y-record.Offset.Position.Y,root.Position.Z-record.Offset.Position.Z)
   if not old then
@@ -75,6 +78,10 @@ function Service.new(data:any):any
    if floor then initial=CFrame.new(initial.Position.X,floor.Position.Y+.05,initial.Position.Z) end
   end
   Geometry.place(rig,initial);record.Frame=initial
+  epoch[player]=(epoch[player] or 0)+1;record.Epoch=epoch[player];record.Queue={};record.Processed=sequence[player] or 0;record.AckAt=0
+  record.State=if old and old.State then table.clone(old.State) else Sim.new(initial.Position.X,initial.Position.Y,initial.Position.Z,record.Yaw)
+  record.State.JumpId=player:GetAttribute("DriveJumpId") or 0
+  player:SetAttribute("DriveEpoch",record.Epoch)
   -- Only the vehicle root is anchored and positioned. The avatar is a passenger joint.
   local weld=Instance.new("Weld");weld.Name="PermanentRiderMount"
   weld.Part0=rig.Frame;weld.Part1=root;weld.C0=rig.FrameFromRoot:Inverse()*record.Offset
@@ -102,18 +109,30 @@ function Service.new(data:any):any
   if old then for _,c in ipairs(old.Connections) do c:Disconnect() end;old.Bike:Destroy() end
   return record
  end
+ function api.setStateSink(callback:any) stateSink=callback end
+ local function sendState(player:Player,r:any)
+  if not r.State then return end
+  r.Ack=(r.Ack or 0)+1
+  stateSink(player,{Ack=r.Ack,Epoch=r.Epoch,Sequence=r.Processed,State=table.clone(r.State),Mode=r.Mode,VehicleId=r.VehicleId,MaxSpeed=math.min(Config.Bike.MaxSpeed,Config.Bike.BaseSpeed*Content.Vehicles[r.VehicleId].Speed)})
+ end
  function api.input(player:Player,payload:any):boolean
   if player.Parent~=Players or not gate:allow(player) or not Protocol.validDrive(payload) then return false end
-  if payload.Sequence<=(sequence[player] or 0) then return false end
+  local r=records[player]
+  if not r or r.Mode~="Manual" or player:GetAttribute("Racing")==true or not data.snapshot(player) then return false end
+  if payload.Epoch~=nil and payload.Epoch~=r.Epoch or payload.Sequence<=(sequence[player] or 0) or #r.Queue>=Config.Bike.QueueLimit then return false end
   sequence[player]=payload.Sequence;player:SetAttribute("DriveSequence",payload.Sequence)
-  local record=records[player]
-  if not record or record.Mode~="Manual" or player:GetAttribute("Racing")==true or not data.snapshot(player) then return false end
-  record.Input={Throttle=payload.Throttle,Steer=payload.Steer,Brake=payload.Brake,At=os.clock()}
+  table.insert(r.Queue,{Throttle=payload.Throttle,Steer=payload.Steer,Brake=payload.Brake,JumpId=payload.JumpId or r.State.JumpId,Sequence=payload.Sequence})
+  r.Input.At=os.clock()
   return true
+ end
+ function api.onBelt(player:Player,zone:BasePart):boolean
+  local r=records[player]
+  return r~=nil and r.Mode=="Manual" and Sim.onBelt(r.State,zone.Position.X,zone.Position.Y,zone.Position.Z,zone.Size.X,zone.Size.Z)
  end
  function api.race(player:Player):any
   local record=api.ensure(player);assert(record,"Mounted rider unavailable")
-  record.Mode="Race";record.Speed=0;record.Input={Throttle=0,Steer=0,Brake=true,At=0}
+  record.Mode="Race";record.Queue={};record.Speed=0;record.Input={Throttle=0,Steer=0,Brake=true,At=0}
+  sendState(player,record)
   return record
  end
  function api.move(record:any,cf:CFrame,speed:number,distance:number)
@@ -126,16 +145,25 @@ function Service.new(data:any):any
  function api.teleport(player:Player,cf:CFrame)
   local record=api.ensure(player);if not record then return end
   record.Speed=0;local _,yaw=cf:ToEulerAnglesYXZ();record.Yaw=yaw
+  local scene=Surface.new(workspace,{record.Character,folder},6)
+  local floor=scene.floor(cf.Position.X,cf.Position.Y,cf.Position.Z)
+  if floor and math.abs(cf.Position.Y-floor-.05)<=Config.Bike.StepHeight then cf=CFrame.new(cf.Position.X,floor+.05,cf.Position.Z)*CFrame.Angles(0,yaw,0) end
+  record.State=Sim.new(cf.Position.X,cf.Position.Y,cf.Position.Z,yaw)
+  record.State.Distance=record.Distance;record.State.JumpId=player:GetAttribute("DriveJumpId") or 0;record.Queue={};record.LastCommand=nil
   api.move(record,cf,0,record.Distance)
  end
  function api.finish(player:Player,record:any,reason:string)
   if records[player]~=record then return end
   record.Mode="Manual";record.Speed=0;record.Yaw=0;record.Input={Throttle=0,Steer=0,Brake=true,At=0}
   if player.Character==record.Character and record.Root.Parent and record.Humanoid.Health>0 and reason~="Disconnect" and reason~="Shutdown" then
-   api.move(record,CFrame.new(0,8.05,50),0,record.Distance);seated(record)
+   epoch[player]=(epoch[player] or 0)+1;record.Epoch=epoch[player];player:SetAttribute("DriveEpoch",record.Epoch)
+   record.Queue={};record.Processed=sequence[player] or 0
+   record.State=Sim.new(0,8.05,50,0);record.State.Distance=record.Distance;record.State.JumpId=player:GetAttribute("DriveJumpId") or 0
+   api.move(record,CFrame.new(0,8.05,50),0,record.Distance);seated(record);sendState(player,record)
   end
  end
- function api.tick(dt:number)
+ function api.tick(dt:number):boolean
+  local ran=false
   for _,player in ipairs(Players:GetPlayers()) do
    local record=api.ensure(player)
    if not record then if records[player] then drop(player) end;continue end
@@ -143,32 +171,29 @@ function Service.new(data:any):any
    record.Humanoid.Sit=true;record.Humanoid.Jump=false;record.Humanoid.WalkSpeed=0;record.Humanoid.AutoRotate=false;record.Humanoid.PlatformStand=true
    record.Root.Anchored=false;record.Rig.Root.Anchored=true
    record.Humanoid:Move(Vector3.zero,false)
-   local input=record.Input
-   if os.clock()-input.At>Config.Bike.InputTimeout then input={Throttle=0,Steer=0,Brake=true} end
-   local motion=Motion.step(record.Speed,record.Yaw,input.Throttle,input.Steer,input.Brake,dt,math.min(Config.Bike.MaxSpeed,Config.Bike.BaseSpeed*Content.Vehicles[record.VehicleId].Speed))
-   local current=record.Frame.Position
-   local params=RaycastParams.new();params.FilterType=Enum.RaycastFilterType.Exclude;params.FilterDescendantsInstances={record.Character,folder};params.RespectCanCollide=true
-   local ground=workspace:Raycast(Vector3.new(current.X+motion.DX,current.Y+Config.Bike.StepHeight+.5,current.Z+motion.DZ),Vector3.new(0,-6,0),params)
-   local y=if ground then ground.Position.Y+.05 else current.Y
-   local supported=ground~=nil
-   for _,wheel in ipairs({-2.6,2.6}) do
-    local x=current.X+motion.DX-math.sin(motion.Yaw)*wheel
-    local z=current.Z+motion.DZ-math.cos(motion.Yaw)*wheel
-    local support=workspace:Raycast(Vector3.new(x,current.Y+Config.Bike.StepHeight+.5,z),Vector3.new(0,-6,0),params)
-    if not support then supported=false else y=math.max(y,support.Position.Y+.05) end
-   end
-   local step=math.abs(y-current.Y)<=Config.Bike.StepHeight
-   local delta=Vector3.new(motion.DX,0,motion.DZ)
    local height=math.max(5.8,record.Offset.Position.Y+record.Root.Size.Y+1)
-   local hit=if delta.Magnitude>.001 then workspace:Blockcast(CFrame.new(current.X,math.max(current.Y,y)+.4+height/2,current.Z),Vector3.new(7.8,height,7.8),delta,params) else nil
-   local accepted=supported and step and hit==nil
-   local x=current.X+(if accepted then motion.DX else 0);local z=current.Z+(if accepted then motion.DZ else 0)
-   record.Speed=if accepted then motion.Speed else 0;record.Yaw=motion.Yaw
-   if accepted then record.Distance+=math.abs(record.Speed)*math.min(dt,.1) end
-   local training=(player:GetAttribute("SelectedTreadmill") or 0)>0
-   if training then record.Distance+=10*math.min(dt,.1) end
-   api.move(record,CFrame.new(x,if accepted then y else current.Y,z)*CFrame.Angles(0,record.Yaw,0),if training then 10 else math.abs(record.Speed),record.Distance)
+   local scene=Surface.new(workspace,{record.Character,folder},height)
+   record.CommandPhase=(record.CommandPhase or 0)+1
+   if record.CommandPhase>=Config.Bike.CommandSteps then
+    record.CommandPhase=0
+    local command:any=table.remove(record.Queue,1)
+    if command then record.LastCommand=command
+    elseif record.LastCommand and os.clock()-record.Input.At<Config.Bike.InputTimeout then command=table.clone(record.LastCommand :: {[string]:any});command.Sequence=nil
+    else command={Throttle=0,Steer=0,Brake=true,JumpId=record.State.JumpId} end
+    ran=true
+    record.State=Sim.command(record.State,command,math.min(Config.Bike.MaxSpeed,Config.Bike.BaseSpeed*Content.Vehicles[record.VehicleId].Speed),scene)
+    if command.Sequence then record.Processed=command.Sequence end
+    player:SetAttribute("DriveJumpId",record.State.JumpId)
+    record.Speed=record.State.Speed;record.Yaw=record.State.Yaw
+    if record.State.Y< -35 then record.Humanoid.Health=0 end
+    local training=(player:GetAttribute("SelectedTreadmill") or 0)>0 and record.State.Grounded
+    local distance=record.State.Distance
+    if training then distance+=10*Config.Bike.InputInterval;record.State.Distance=distance end
+    api.move(record,CFrame.new(record.State.X,record.State.Y,record.State.Z)*CFrame.Angles(0,record.State.Yaw,0),if training then 10 else math.abs(record.Speed),distance)
+   end
+   if os.clock()-record.AckAt>=Config.Bike.AckInterval then record.AckAt=os.clock();sendState(player,record) end
   end
+  return ran
  end
  function api.start()
   local function added(player:Player)
@@ -183,14 +208,14 @@ function Service.new(data:any):any
    api.ensure(player)
   end
   Players.PlayerAdded:Connect(added);for _,p in ipairs(Players:GetPlayers()) do added(p) end
-  Players.PlayerRemoving:Connect(function(player) drop(player);sequence[player]=nil;gate:remove(player) end)
+  Players.PlayerRemoving:Connect(function(player) drop(player);sequence[player]=nil;epoch[player]=nil;gate:remove(player) end)
   task.spawn(function()
    local last=os.clock();local failed=false
    while true do
     task.wait(Config.Bike.Tick);local now=os.clock()
     local ok,err=pcall(api.tick,math.min(now-last,.1));last=now
     if not ok and not failed then warn("[PermanentBike]",tostring(err)) end
-    if failed~=not ok then
+    if (not ok or err==true) and failed~=not ok then
      failed=not ok
      local runtime=Rep:FindFirstChild("BikeRuntime")
      if runtime then

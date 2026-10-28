@@ -1,7 +1,7 @@
 --!strict
 local Protocol = {}
 -- Clients send intents only. Amounts, positions, identity and timing are server-owned.
-Protocol.Remotes = table.freeze({ Drive = "RemoteEvent", GetSnapshot = "RemoteFunction", SnapshotChanged = "RemoteEvent", Action = "RemoteEvent", ActionResult = "RemoteEvent", Feedback = "RemoteEvent" })
+Protocol.Remotes = table.freeze({ Drive = "RemoteEvent", DriveState = "RemoteEvent", GetSnapshot = "RemoteFunction", SnapshotChanged = "RemoteEvent", Action = "RemoteEvent", ActionResult = "RemoteEvent", Feedback = "RemoteEvent" })
 function Protocol.validRequest(payload: any): boolean
  if type(payload) ~= "table" or payload.Version ~= 1 then return false end
  local count = 0
@@ -37,7 +37,9 @@ function Protocol.validDrive(payload:any):boolean
  for _,key in ipairs({"Throttle","Steer"}) do
   local v=payload[key];if type(v)~="number" or v~=v or math.abs(v)>1 then return false end
  end
- local allowed={Version=true,Sequence=true,Throttle=true,Steer=true,Brake=true}
+ if payload.JumpId~=nil and (type(payload.JumpId)~="number" or payload.JumpId%1~=0 or payload.JumpId<0 or payload.JumpId>9007199254740991) then return false end
+ if payload.Epoch~=nil and not integer(payload.Epoch,9007199254740991) then return false end
+ local allowed={Version=true,Sequence=true,Throttle=true,Steer=true,Brake=true,JumpId=true,Epoch=true}
  for key in pairs(payload) do if not allowed[key] then return false end end
  return true
 end
