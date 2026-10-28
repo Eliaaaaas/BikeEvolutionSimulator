@@ -24,3 +24,10 @@ Spieler bleiben in allen normalen Zuständen auf genau einem serverseitig montie
 Keine Fußsteuerung, keine separaten Trainingsräder und kein Garage-E-Prompt wieder einführen.
 Rennen verwenden dasselbe Spieler-Modell; danach wird ausschließlich die manuelle Steuerung restauriert.
 Garage öffnet einmal pro Einfahrt in den Halbkreis; neue Ausgabe BikeEvolutionSimulator-V4.1.
+
+V4.2 hat Vorrang: [docs/RIDER_TRANSFORM_V42.md](docs/RIDER_TRANSFORM_V42.md).
+Nur die verankerte Fahrzeugwurzel besitzt die gemeinsame Transformation; keine CFrame-Bewegung
+auf der unverankerten Fahrerwurzel und keine abgeleitete Bewegungsposition aus Avatar-Offsets.
+Explizite Gelenk-C0/C1, PivotOffset und Sattel-/R15-Bindmaße berücksichtigen.
+PlayerModule-Eingabesammlung bleibt aktiv; der normale Move-Dispatcher bleibt unterbunden.
+Neue Ausgabe BikeEvolutionSimulator-V4.2. Transformationsregressionen dürfen keine Identitätsrotationen vortäuschen.

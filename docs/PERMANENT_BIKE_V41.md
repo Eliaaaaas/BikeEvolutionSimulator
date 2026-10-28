@@ -1,5 +1,7 @@
 # V4.1 — Permanentes Fahrrad-/Moped-System
 
+> Historischer Stand: V4.1 wurde in Studio als fehlerhaft gemeldet. [V4.2](RIDER_TRANSFORM_V42.md) ersetzt die Montage am verankerten Fahrer, Doppel-CFrame-Schreibzugriffe und die unvollständige PlayerModule-Unterbindung. Die Spielregeln bleiben bestehen.
+
 Diese verbindliche Erweiterung ersetzt sämtliche älteren Regeln, nach denen Spieler außerhalb eines Rennens laufen oder beim Training ein zweites Fahrrad erhalten. Branch und Draft PR #2 bleiben erhalten. Keine Merges, kein Roblox-Publish und keine produktiven DataStore-Aufrufe.
 
 ## Ein Modell für alle Zustände
