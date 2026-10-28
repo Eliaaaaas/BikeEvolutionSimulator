@@ -37,3 +37,10 @@ Space/Touch lösen einen servervalidierten Bike-Sprung aus; Shift bleibt Bremse.
 Rampen, vollständiger bodenberührender Bike-Footprint und bestehende Zugangsregeln bestimmen Training.
 Vorhersage darf nur die isolierte lokale Darstellung bewegen; repliziertes Bike/Avatar bleiben servergeführt.
 Neue Ausgabe BikeEvolutionSimulator-V4.3; keine weitere Dekoration im Bewegungsfix.
+
+V4.4 hat Vorrang: [docs/OVERHAUL_V44.md](docs/OVERHAUL_V44.md).
+Keine großen Rampen: fünf eingelassene Belt-Oberseiten bei y=8.05. Training benötigt weiterhin Bodenkontakt/Footprint und dieselben Zugangsgates.
+Nur RaceCamera besitzt CameraSubject/CameraType; Vorhersage bei Camera−2, Kameraziel bei Camera−1, native Inselkamera danach.
+Sidebar bleibt vertikal mittig mit sieben Buttons; Ressourcen ausschließlich rechts unten ohne Boxen, grafische UI-Geometrie statt Unicode.
+Schema 3 vor Änderungen in docs/V44_DATA_MIGRATION.md dokumentieren; alte Werte nie zurücksetzen. Premium-IDs 0 bleiben deaktiviert; keine echten Produkte erstellen.
+Auto-Navigation bleibt servergeführt, nutzt Kollisionen und erzeugt keine Teleports oder Tap-Impulse. Neue Ausgabe BikeEvolutionSimulator-V4.4.
