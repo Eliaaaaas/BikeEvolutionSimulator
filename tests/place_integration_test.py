@@ -84,3 +84,11 @@ for key in ['BackWall','LeftWall','RightWall','FrontBase','FrontGlass','Roof']:
 visual_source=child(client,'Visuals').findtext("Properties/string[@name='Source']")
 assert 'LocalTrainingCycles' not in visual_source and 'TrainingCycle_' not in visual_source
 print('V4.1 built-place wiring: permanent bike modules, closed showroom and automatic semicircle present')
+
+# V4.2 has one vehicle transform writer and explicit passenger offsets in the actual build.
+mounted=child(server,'MountedBikeService').findtext("Properties/string[@name='Source']")
+assert 'record.Root.CFrame=' not in mounted and 'record.Rig.Root.CFrame=cf' in mounted
+assert child(path('ReplicatedStorage','Shared'),'RiderMount') is not None
+input_source=child(client,'BikeInput').findtext("Properties/string[@name='Source']")
+assert 'controls.moveFunction=suppressMove' in input_source
+print('V4.2 actual place: single vehicle transform owner, native movement dispatcher suppressed')

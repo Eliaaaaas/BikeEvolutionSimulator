@@ -18,7 +18,10 @@ def fixture():
    args.extend(cf.findtext(axis) for axis in 'XYZ')
    if size is not None:args.extend(size.findtext(axis) for axis in 'XYZ')
   out.append(var+'=add('+','.join(args)+')')
-  for key in ['Anchored','CanCollide','Transparency']:
+  if cf is not None:
+   values=[cf.findtext(k) for k in ['X','Y','Z']+[f'R{r}{c}' for r in range(3) for c in range(3)]]
+   out.append(var+'.CFrame=workspace.TestCFrame.new('+','.join(values)+')')
+  for key in ['Anchored' ,'CanCollide','Transparency']:
    value=next((p.text for p in props if p.attrib.get('name')==key),None)
    if value is not None:out.append(var+'.'+key+'='+value)
   for child in node.findall('Item'):visit(child,var)
@@ -36,7 +39,11 @@ def adapters():
  out=[]
  for filename,params in [
   ('server/MountedBikeService','game,workspace,task,os,warn,Instance,CFrame,Vector3,Enum,RaycastParams'),
-  ('client/BikeInput','game,task,UDim2,Enum'),
+  ('client/AvatarPose','Instance,CFrame,Vector3,Enum'),
+  ('client/Visuals','game,workspace,task,os,CFrame,Vector3'),
+  ('client/RaceCamera','game,workspace,CFrame,Vector3,Enum'),
+  ('client/BikeInput','game,task,UDim2,Enum,Vector3'),
+  ('shared/RiderMount','CFrame'),
   ('server/GameplayService','game,workspace,task,os,warn,Instance,Random'),
   ('server/RemoteService','game,task,os,Instance'),
   ('client/UI','game,task,os,Instance,Color3,ColorSequence,Vector2,Vector3,CFrame,UDim,UDim2,Enum,TweenInfo'),

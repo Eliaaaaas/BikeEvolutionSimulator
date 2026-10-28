@@ -11,6 +11,21 @@ function Driver.new(ui:any,remote:RemoteEvent)
  -- PlayerModule is inserted by Roblox at runtime and is absent from the Rojo sourcemap.
  local loadPlayerModule:(Instance)->any=require
  local controls=loadPlayerModule(player:WaitForChild("PlayerScripts"):WaitForChild("PlayerModule")):GetControls()
+ -- Keep controller input collection active, but remove its default Player:Move dispatcher.
+ -- Disable() would also disable the native touch thumbstick and GetMoveVector().
+ local originalMove=controls.moveFunction
+ assert(type(originalMove)=="function","Unsupported Roblox ControlModule: moveFunction missing")
+ local suppressMove=function()
+  local hum=if player.Character then player.Character:FindFirstChildOfClass("Humanoid") else nil
+  if hum then hum:Move(Vector3.zero,false);hum.Jump=false;hum:SetStateEnabled(Enum.HumanoidStateType.Jumping,false) end
+ end
+ controls.moveFunction=suppressMove
+ local function stopWalking(character:Model?)
+  local hum=if character then character:FindFirstChildOfClass("Humanoid") else nil
+  if hum then hum:Move(Vector3.zero,false);hum.Jump=false;hum:SetStateEnabled(Enum.HumanoidStateType.Jumping,false) end
+ end
+ stopWalking(player.Character)
+ local spawned=player.CharacterAdded:Connect(stopWalking)
  local sequence=player:GetAttribute("DriveSequence") or 0
  local brake=false;local focused=true
  Actions:BindActionAtPriority("BikeBrake",function(_,state)
@@ -23,6 +38,7 @@ function Driver.new(ui:any,remote:RemoteEvent)
  local gained=Input.WindowFocused:Connect(function() focused=true;brake=false end)
  task.spawn(function()
   while ui.Gui.Parent do
+   controls.moveFunction=suppressMove
    local move=controls:GetMoveVector()
    local blocked=not focused or ui.isMenuOpen() or Input:GetFocusedTextBox()~=nil or player:GetAttribute("Racing")==true or not ui.Snapshot
    sequence+=1
@@ -30,7 +46,9 @@ function Driver.new(ui:any,remote:RemoteEvent)
    task.wait(Config.Bike.InputInterval)
   end
   sequence+=1;remote:FireServer({Version=1,Sequence=sequence,Throttle=0,Steer=0,Brake=true})
-  lost:Disconnect();gained:Disconnect();Actions:UnbindAction("BikeBrake")
+  spawned:Disconnect();lost:Disconnect();gained:Disconnect()
+  if controls.moveFunction==suppressMove then controls.moveFunction=originalMove end
+  Actions:UnbindAction("BikeBrake")
  end)
 end
 return Driver

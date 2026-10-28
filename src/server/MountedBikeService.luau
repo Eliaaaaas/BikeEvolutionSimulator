@@ -5,12 +5,11 @@ local Shared=Rep:WaitForChild("Shared")
 local Config=require(Shared:WaitForChild("Config"))
 local Content=require(Shared:WaitForChild("World1Content"))
 local Motion=require(Shared:WaitForChild("BikeMotion"))
+local Geometry=require(Shared:WaitForChild("RiderMount"))
 local Rig=require(Shared:WaitForChild("BikeRig"))
 local Protocol=require(Shared:WaitForChild("Protocol"))
 local Limiter=require(Shared:WaitForChild("RateLimiter"))
 local Service={}
-local offset=CFrame.new(0,Config.Bike.RiderHeight,.9)
-local inverse=CFrame.new(0,-Config.Bike.RiderHeight,-.9)
 function Service.new(data:any):any
  local folder=Instance.new("Folder");folder.Name="PlayerBikes";folder.Parent=workspace
  local records:{[Player]:any}={}
@@ -29,12 +28,17 @@ function Service.new(data:any):any
  local function seated(record:any)
   local hum=record.Humanoid
   hum.WalkSpeed=0;hum.AutoRotate=false;hum.PlatformStand=true;hum.Sit=true;hum.Jump=false
-  record.Root.Anchored=true
+  local animator=hum:FindFirstChildOfClass("Animator")
+  if animator then
+   for _,track in ipairs(animator:GetPlayingAnimationTracks()) do track:Stop(0) end
+  end
+  record.Root.Anchored=false;record.Rig.Root.Anchored=true
+  hum:Move(Vector3.zero,false);hum:SetStateEnabled(Enum.HumanoidStateType.Jumping,false)
   -- Replicated fallback pose also works before client IK loads and with effects disabled.
   for _,node in ipairs(record.Character:GetDescendants()) do poseNode(node) end
  end
  local function drop(player:Player)
-  local r=records[player];if r then if r.Parts then r.Parts:Disconnect() end;r.Bike:Destroy();records[player]=nil end
+  local r=records[player];if r then for _,c in ipairs(r.Connections) do c:Disconnect() end;r.Bike:Destroy();records[player]=nil end
   player:SetAttribute("Mounted",false)
  end
  function api.ensure(player:Player):any
@@ -49,30 +53,53 @@ function Service.new(data:any):any
   local profile=if ready and (not old or old.InventoryRevision~=revision) then data.read(player) else nil
   local id=if profile then profile.ActiveVehicle or 1 elseif old then old.VehicleId else 1
   if not Content.Vehicles[id] then id=1 end
-  if old and old.Bike.Parent and old.Rig.Root.Parent and (old.VehicleId==id or player:GetAttribute("Racing")==true) then old.InventoryRevision=revision;return old end
+  if old and old.Bike.Parent and old.Rig.Root.Parent and old.Weld.Parent and (old.VehicleId==id or player:GetAttribute("Racing")==true) then
+   old.InventoryRevision=revision
+   if old.SizingDirty then
+    old.Offset=Geometry.offset(old.Bike,char);old.Weld.C0=old.Rig.FrameFromRoot:Inverse()*old.Offset;old.SizingDirty=false
+   end
+   return old
+  end
   -- Construct the replacement before removing the old model: never unmount the rider.
   local definition=Content.Vehicles[id]
   local asset=Rep:WaitForChild("Vehicles"):FindFirstChild(definition.Model)
   assert(asset and asset:IsA("Model"),"Mounted vehicle missing: "..definition.Model)
   local bike=asset:Clone();bike.Name="Rider_"..player.UserId;bike.ModelStreamingMode=Enum.ModelStreamingMode.Atomic
   local rig=Rig.prepare(bike)
-  local record={Character=char,Root=root,Humanoid=hum,Bike=bike,Rig=rig,VehicleId=id,InventoryRevision=revision,Mode="Manual",Speed=0,Yaw=if old then old.Yaw else 0,Distance=if old then old.Distance else 0,Input={Throttle=0,Steer=0,Brake=true,At=0}}
+  local record={Character=char,Root=root,Humanoid=hum,Bike=bike,Rig=rig,VehicleId=id,InventoryRevision=revision,Mode="Manual",Connections={},Speed=0,Yaw=if old then old.Yaw else 0,Distance=if old then old.Distance else 0,Input={Throttle=0,Steer=0,Brake=true,At=0}}
+  record.Offset=Geometry.offset(bike,char)
+  local initial=if old then old.Frame else CFrame.new(root.Position.X,root.Position.Y-record.Offset.Position.Y,root.Position.Z-record.Offset.Position.Z)
   if not old then
    local params=RaycastParams.new();params.FilterType=Enum.RaycastFilterType.Exclude;params.FilterDescendantsInstances={char,folder};params.RespectCanCollide=true
    local floor=workspace:Raycast(root.Position+Vector3.new(0,6,0),Vector3.new(0,-24,0),params)
-   if floor then root.CFrame=CFrame.new(root.Position.X,floor.Position.Y+Config.Bike.RiderHeight+.05,root.Position.Z) end
+   if floor then initial=CFrame.new(initial.Position.X,floor.Position.Y+.05,initial.Position.Z) end
   end
-  seated(record)
-  rig.Root.CFrame=root.CFrame*inverse
-  local weld=Instance.new("WeldConstraint");weld.Name="PermanentRiderMount";weld.Part0=root;weld.Part1=rig.Root;weld.Parent=rig.Root
-  rig.Root.Anchored=false
+  Geometry.place(rig,initial);record.Frame=initial
+  -- Only the vehicle root is anchored and positioned. The avatar is a passenger joint.
+  local weld=Instance.new("Weld");weld.Name="PermanentRiderMount"
+  weld.Part0=rig.Frame;weld.Part1=root;weld.C0=rig.FrameFromRoot:Inverse()*record.Offset
+  record.Weld=weld;seated(record)
+  weld.Parent=rig.Frame
   bike:SetAttribute("VehicleId",id);bike:SetAttribute("OwnerUserId",player.UserId);bike:SetAttribute("Pedaling",id<=6)
   bike:SetAttribute("WheelRadius",if id==3 or id==8 then 1.15 else 1.43)
   bike:SetAttribute("RaceSpeed",0);bike:SetAttribute("Distance",record.Distance);bike.Parent=folder
   records[player]=record;player:SetAttribute("Mounted",true)
-  record.Parts=char.DescendantAdded:Connect(function(node) if records[player]==record then poseNode(node) end end)
+  local watched:{[Instance]:boolean}={}
+  local function watchSize(part:Instance)
+   if part:IsA("BasePart") and not watched[part] and (part.Name=="HumanoidRootPart" or part.Name=="LowerTorso" or part.Name=="Torso") then
+    watched[part]=true
+    table.insert(record.Connections,part:GetPropertyChangedSignal("Size"):Connect(function() record.SizingDirty=true end))
+   end
+   if part:IsA("Animator") then
+    table.insert(record.Connections,part.AnimationPlayed:Connect(function(track) track:Stop(0) end))
+   end
+  end
+  for _,part in ipairs(char:GetDescendants()) do watchSize(part) end
+  table.insert(record.Connections,char.DescendantAdded:Connect(function(node)
+   if records[player]==record then poseNode(node);watchSize(node);record.SizingDirty=true end
+  end))
   player.CameraMinZoomDistance=10;player.CameraMaxZoomDistance=60
-  if old then if old.Parts then old.Parts:Disconnect() end;old.Bike:Destroy() end
+  if old then for _,c in ipairs(old.Connections) do c:Disconnect() end;old.Bike:Destroy() end
   return record
  end
  function api.input(player:Player,payload:any):boolean
@@ -90,10 +117,16 @@ function Service.new(data:any):any
   return record
  end
  function api.move(record:any,cf:CFrame,speed:number,distance:number)
-  record.Rig.Root.CFrame=cf;record.Root.CFrame=cf*offset
-  record.Root.AssemblyLinearVelocity=Vector3.zero;record.Root.AssemblyAngularVelocity=Vector3.zero
+  record.Frame=cf
+  record.Rig.Root.CFrame=cf
+  record.Rig.Root.AssemblyLinearVelocity=Vector3.zero;record.Rig.Root.AssemblyAngularVelocity=Vector3.zero
   record.Distance=distance
   record.Bike:SetAttribute("RaceSpeed",speed);record.Bike:SetAttribute("Distance",distance)
+ end
+ function api.teleport(player:Player,cf:CFrame)
+  local record=api.ensure(player);if not record then return end
+  record.Speed=0;local _,yaw=cf:ToEulerAnglesYXZ();record.Yaw=yaw
+  api.move(record,cf,0,record.Distance)
  end
  function api.finish(player:Player,record:any,reason:string)
   if records[player]~=record then return end
@@ -107,11 +140,13 @@ function Service.new(data:any):any
    local record=api.ensure(player)
    if not record then if records[player] then drop(player) end;continue end
    if record.Mode~="Manual" or player:GetAttribute("Racing")==true then continue end
-   record.Humanoid.Sit=true;record.Humanoid.Jump=false
+   record.Humanoid.Sit=true;record.Humanoid.Jump=false;record.Humanoid.WalkSpeed=0;record.Humanoid.AutoRotate=false;record.Humanoid.PlatformStand=true
+   record.Root.Anchored=false;record.Rig.Root.Anchored=true
+   record.Humanoid:Move(Vector3.zero,false)
    local input=record.Input
    if os.clock()-input.At>Config.Bike.InputTimeout then input={Throttle=0,Steer=0,Brake=true} end
    local motion=Motion.step(record.Speed,record.Yaw,input.Throttle,input.Steer,input.Brake,dt,math.min(Config.Bike.MaxSpeed,Config.Bike.BaseSpeed*Content.Vehicles[record.VehicleId].Speed))
-   local current=(record.Root.CFrame*inverse).Position
+   local current=record.Frame.Position
    local params=RaycastParams.new();params.FilterType=Enum.RaycastFilterType.Exclude;params.FilterDescendantsInstances={record.Character,folder};params.RespectCanCollide=true
    local ground=workspace:Raycast(Vector3.new(current.X+motion.DX,current.Y+Config.Bike.StepHeight+.5,current.Z+motion.DZ),Vector3.new(0,-6,0),params)
    local y=if ground then ground.Position.Y+.05 else current.Y
@@ -124,7 +159,8 @@ function Service.new(data:any):any
    end
    local step=math.abs(y-current.Y)<=Config.Bike.StepHeight
    local delta=Vector3.new(motion.DX,0,motion.DZ)
-   local hit=if delta.Magnitude>.001 then workspace:Blockcast(CFrame.new(current.X,math.max(current.Y,y)+3.3,current.Z),Vector3.new(7.8,5.8,7.8),delta,params) else nil
+   local height=math.max(5.8,record.Offset.Position.Y+record.Root.Size.Y+1)
+   local hit=if delta.Magnitude>.001 then workspace:Blockcast(CFrame.new(current.X,math.max(current.Y,y)+.4+height/2,current.Z),Vector3.new(7.8,height,7.8),delta,params) else nil
    local accepted=supported and step and hit==nil
    local x=current.X+(if accepted then motion.DX else 0);local z=current.Z+(if accepted then motion.DZ else 0)
    record.Speed=if accepted then motion.Speed else 0;record.Yaw=motion.Yaw

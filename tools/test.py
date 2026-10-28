@@ -26,7 +26,9 @@ subprocess.run([str(ROOT / '.tools/rojo'), 'build', 'default.project.json', '--o
 from runtime_tests import fixture, adapters
 bundle.append(fixture())
 bundle.append(adapters())
+bundle.append((ROOT / 'tests/rigid_math.luau').read_text())
 bundle.append((ROOT / 'tests/runtime_engine.luau').read_text())
+bundle.append((ROOT / 'tests/rigid_transform.spec.luau').read_text())
 # Execute the actual Roblox lifecycle adapter against deterministic engine doubles.
 service = (ROOT / 'src/server/PlayerDataService.luau').read_text()
 service = re.sub(r'require\(Shared:WaitForChild\("(\w+)"\)\)', r'modules.\1', service)

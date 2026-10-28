@@ -5,7 +5,7 @@ function Pose.new(character:Model,bike:Model?):any
  local hum=character:FindFirstChildOfClass("Humanoid");if not hum then return nil end
  local record:any={Character=character,Motors={},IK={},Attachments={},Tracks={}}
  local animator=hum:FindFirstChildOfClass("Animator")
- if animator then for _,track in ipairs(animator:GetPlayingAnimationTracks()) do track:Stop(0.15) end end
+ if animator then for _,track in ipairs(animator:GetPlayingAnimationTracks()) do track:Stop(0) end end
  local animate=character:FindFirstChild("Animate")
  if animate and animate:IsA("LocalScript") then record.Animate=animate;record.Disabled=animate.Disabled;animate.Disabled=true end
  for _,motor in ipairs(character:GetDescendants()) do
@@ -36,7 +36,7 @@ function Pose.update(record:any,phase:number,riding:boolean,weight:number)
  for motor,base in pairs(record.Motors) do
   if not motor.Parent then continue end
   local name=motor.Name;local angle=0
-  if riding and #record.IK>0 and (string.find(name,"Hip") or string.find(name,"Shoulder") or string.find(name,"Knee") or string.find(name,"Elbow") or string.find(name,"Ankle") or string.find(name,"Wrist")) then motor.C0=base.C0;continue end
+  if riding and #record.IK>0 and (string.find(name,"Hip") or string.find(name,"Shoulder") or string.find(name,"Knee") or string.find(name,"Elbow") or string.find(name,"Ankle") or string.find(name,"Wrist")) then motor.C0=base.C0;motor.Transform=CFrame.identity;continue end
   if string.find(name,"Hip") then angle=if riding then -0.6+math.sin(phase+(if string.find(name,"Left") then 0 else math.pi))*0.6 else math.sin(phase+(if string.find(name,"Left") then 0 else math.pi))*0.55 end
   if string.find(name,"Shoulder") then angle=if riding then -0.95 else math.sin(phase+(if string.find(name,"Left") then math.pi else 0))*0.25 end
   if name=="Waist" then angle=if riding then -0.4 else -0.08 end
@@ -45,7 +45,7 @@ function Pose.update(record:any,phase:number,riding:boolean,weight:number)
  end
 end
 function Pose.fade(record:any,weight:number)
- for motor,base in pairs(record.Motors) do if motor.Parent then motor.C0=motor.C0:Lerp(base.C0,weight) end end
+ for motor,base in pairs(record.Motors) do if motor.Parent then motor.C0=motor.C0:Lerp(base.RestoreC0,weight) end end
  for _,control in ipairs(record.IK) do control.Weight=math.max(0,control.Weight-weight) end
 end
 function Pose.destroy(record:any)

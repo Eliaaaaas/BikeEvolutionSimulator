@@ -10,6 +10,9 @@ function Camera.new(settings:any,ui:any)
  local function stop()
   if connection then connection:Disconnect();connection=nil end
   if active and original then active.CameraType=original.Type;active.CameraSubject=original.Subject;active.FieldOfView=original.Fov end
+  local camera=workspace.CurrentCamera
+  local hum=if player.Character then player.Character:FindFirstChildOfClass("Humanoid") else nil
+  if camera and hum then camera.CameraType=Enum.CameraType.Custom;camera.CameraSubject=hum end
   active=nil;original=nil
  end
  local function update()
@@ -30,9 +33,13 @@ function Camera.new(settings:any,ui:any)
    camera.FieldOfView=65
   end)
  end
- player:GetAttributeChangedSignal("Racing"):Connect(update)
- player.CharacterRemoving:Connect(stop)
- ui.Gui.Destroying:Connect(stop)
+ local attribute=player:GetAttributeChangedSignal("Racing"):Connect(update)
+ local removing=player.CharacterRemoving:Connect(stop)
+ local added=player.CharacterAdded:Connect(function(character)
+  character:WaitForChild("Humanoid",15)
+  if player.Character==character and player:GetAttribute("Racing")~=true then stop() end
+ end)
+ ui.Gui.Destroying:Connect(function() attribute:Disconnect();removing:Disconnect();added:Disconnect();stop() end)
  update()
 end
 return Camera

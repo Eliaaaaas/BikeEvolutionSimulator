@@ -42,7 +42,7 @@ function Race.new(data:any,stopTraining:(Player)->(),feedback:(Player,any)->(),m
    model.Parent=bikes;bot.Rig=rig;bot.Model=model;bot.Lane=({-8,-5,-2,3,7})[i]
   end
   player:SetAttribute("Racing",true)
-  root.Anchored=true;hum.AutoRotate=false;hum.WalkSpeed=0;hum.PlatformStand=true
+  hum.AutoRotate=false;hum.WalkSpeed=0;hum.PlatformStand=true
   adapter.move(player,state,Course.sample(0))
   feedback(player,{Kind="RaceStarted",RaceId=state.Id})
  end

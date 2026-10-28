@@ -11,7 +11,7 @@ local Config = {
  Training = { AutoSeconds = 1, ClickCooldown = 0.2, SelectCooldown = 0.4, RebirthCooldown = 1,
   RemoteCapacity = 12, RemoteRefillPerSecond = 8, MaxDistance = 10, MaxVerticalDistance = 6 },
  Bike = { Tick = .05, InputInterval = .1, InputTimeout = .45, BaseSpeed = 18, MaxSpeed = 30,
-  Acceleration = 18, Braking = 48, Drag = 14, TurnRate = 2.2, RiderHeight = 4.8, StepHeight = 1.6 },
+  Acceleration = 18, Braking = 48, Drag = 14, TurnRate = 2.2, StepHeight = 1.6 },
  Network = { Folder = "BikeRemotes", ProtocolVersion = 1, SnapshotCooldown = 1 },
  -- Economy values are provisional configuration, not implemented purchase systems.
  Economy = { RebirthBaseEnergy = 1000, WorldBaseCash = 1000, VehicleBaseCash = 100 },

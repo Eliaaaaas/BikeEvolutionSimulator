@@ -39,3 +39,11 @@ jobs:
           name: BikeEvolutionSimulator-V4.1
           path: build/v4.1/
           if-no-files-found: error
+      - name: Package V4.2 rider transform fix
+        run: python3 tools/package_v4.py --version V4.2
+      - name: Upload V4.2 Studio build
+        uses: actions/upload-artifact@v4
+        with:
+          name: BikeEvolutionSimulator-V4.2
+          path: build/v4.2/
+          if-no-files-found: error

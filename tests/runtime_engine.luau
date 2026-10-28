@@ -25,22 +25,28 @@ local function engine()
   end
   e.Now=untilTime
  end
- local vector,meta={},{}
- function vector.new(x,y,z) return setmetatable({X=x or 0,Y=y or 0,Z=z or 0},meta) end
- meta.__add=function(a,b) return vector.new(a.X+b.X,a.Y+b.Y,a.Z+b.Z) end
- meta.__sub=function(a,b) return vector.new(a.X-b.X,a.Y-b.Y,a.Z-b.Z) end
- meta.__unm=function(a) return vector.new(-a.X,-a.Y,-a.Z) end
- meta.__index=function(a,k) if k=="Magnitude" then return math.sqrt(a.X*a.X+a.Y*a.Y+a.Z*a.Z) end end
- vector.zero=vector.new();e.Vector3=vector;e.Vector2={new=function(x,y) return vector.new(x,y) end,zero=vector.zero}
- local cf,cm={},{}
- function cf.new(x,y,z) return setmetatable({Position=if type(x)=="table" then x else vector.new(x,y,z)},cm) end
- function cf.Angles() return cf.new() end
- function cf.lookAt(p,_) return cf.new(p) end
- cm.__mul=function(a,b) return cf.new(a.Position+b.Position) end
- cm.__index={ToObjectSpace=function(a,b) return cf.new(b.Position-a.Position) end}
- e.CFrame=cf
+ local vector,cf=modules.rigidMath()
+ e.Vector3=vector;e.Vector2={new=function(x,y) return vector.new(x,y) end,zero=vector.zero};e.CFrame=cf
+ local links={};e.CFrameWrites={}
+ local function jointActive(j) return j.Parent and j.Part0 and j.Part1 and j:IsDescendantOf(e.Workspace) end
+ local function propagate(root)
+  local queue={root};local seen={[root]=true};local index=1
+  while queue[index] do
+   local p=queue[index];index+=1
+   for j in pairs(links[p] or {}) do
+    if not jointActive(j) then continue end
+    local c0=j.C0 or cf.identity;local c1=j.C1 or cf.identity
+    local a,b=j.Part0,j.Part1;local other=if a==p then b else a
+    if other._properties.LeafJoint==j then continue end
+    if seen[other] then continue end
+    local value=if a==p then p.CFrame*c0*(j.Transform or cf.identity)*c1:Inverse() else p.CFrame*c1*(c0*(j.Transform or cf.identity)):Inverse()
+    other._properties.CFrame=value;other._properties.Position=value.Position
+    seen[other]=true;table.insert(queue,other)
+   end
+  end
+ end
  local function object(cls,name)
-  local properties={ClassName=cls,Name=name or cls,Position=vector.zero,CFrame=cf.new(),Size=vector.new(1,1,1),AbsoluteSize=vector.new(1000,700),Visible=true,CanvasPosition=vector.zero}
+  local properties={ClassName=cls,Name=name or cls,Position=vector.zero,CFrame=cf.new(),Size=vector.new(1,1,1),AbsoluteSize=vector.new(1000,700),C0=cf.identity,C1=cf.identity,Transform=cf.identity,PivotOffset=cf.identity,Visible=true,CanvasPosition=vector.zero}
   local children,attributes,changed={},{},{};local self;local methods={}
   for _,event in ipairs({"Activated","MouseEnter","MouseLeave","Triggered","CharacterRemoving","CharacterAdded","AttributeChanged","Destroying","DescendantAdded"}) do properties[event]=signal() end
   if cls=="RemoteEvent" then properties.OnServerEvent=signal();properties.OnClientEvent=signal() end
@@ -54,29 +60,52 @@ local function engine()
   function methods:GetPropertyChangedSignal(key) if not changed[key] then changed[key]=signal() end;return changed[key] end
   function methods:SetAttribute(key,value) attributes[key]=value;properties.AttributeChanged:Fire(key) end
   function methods:GetAttribute(key) return attributes[key] end
+  function methods:GetAttributeChangedSignal(key)
+   local sig=signal();properties.AttributeChanged:Connect(function(k) if k==key then sig:Fire() end end);return sig
+  end
+  function methods:GetScale() return 1 end
   function methods:Destroy() properties.Destroying:Fire();self.Parent=nil end
   function methods:Clone() local c=object(cls,properties.Name);for k,v in pairs(properties) do if k~="Parent" and k~="PrimaryPart" then c[k]=v end end;for _,child in ipairs(children) do child:Clone().Parent=c end;return c end
+  function methods:Move(value) properties.MoveDirection=value end
+  function methods:SetStateEnabled(state,value) properties.StateEnabled=properties.StateEnabled or {};properties.StateEnabled[state]=value end
+  function methods:GetStateEnabled(state) return not properties.StateEnabled or properties.StateEnabled[state]~=false end
   function methods:ChangeState(state) properties.State=state end
   function methods:Kick(reason) properties.Kicks=(properties.Kicks or 0)+1;properties.KickReason=reason end
-  function methods:GetPivot() return properties.Pivot or cf.new() end
-  function methods:PivotTo(value) properties.Pivot=value end
+  function methods:GetPivot() return if properties.PrimaryPart then properties.PrimaryPart.CFrame*properties.PrimaryPart.PivotOffset else properties.Pivot or cf.new() end
+  function methods:PivotTo(value)
+   local delta=value*self:GetPivot():Inverse()
+   for _,node in ipairs(self:GetDescendants()) do if node:IsA("BasePart") then local v=delta*node.CFrame;node._properties.CFrame=v;node._properties.Position=v.Position end end
+   properties.Pivot=value
+  end
   function methods:GetBoundingBox() return cf.new(0,2,0),vector.new(3,4,6) end
   function methods:FireServer(payload) self.OnServerEvent:Fire(e.Player,payload) end
   function methods:FireClient(player,payload) assert(player==e.Player);self.OnClientEvent:Fire(payload) end
   function methods:InvokeServer(payload) return self.OnServerInvoke(e.Player,payload) end
-  self=setmetatable({},{__index=function(_,k) if methods[k]~=nil then return methods[k] end;if properties[k]~=nil then return properties[k] end;return if k=="_children" then children else methods.FindFirstChild(self,k) end,__newindex=function(_,k,v)
+  self=setmetatable({},{__index=function(_,k)
+   if (k=="CFrame" or k=="Position") and properties.LeafJoint and jointActive(properties.LeafJoint) then
+    local j=properties.LeafJoint;local value=j.Part0.CFrame*j.C0*j.C1:Inverse()
+    return if k=="CFrame" then value else value.Position
+   end
+   if methods[k]~=nil then return methods[k] end;if properties[k]~=nil then return properties[k] end;return if k=="_children" then children elseif k=="_properties" then properties else methods.FindFirstChild(self,k) end,__newindex=function(_,k,v)
    if k=="Parent" then
     if properties.Parent then local i=table.find(properties.Parent._children,self);if i then table.remove(properties.Parent._children,i) end end
     if v then table.insert(v._children,self) end
    elseif k=="CFrame" then properties.Position=v.Position end
    properties[k]=v
+   if k=="CFrame" then e.CFrameWrites[self]=(e.CFrameWrites[self] or 0)+1;propagate(self) end
+   if (cls=="Weld" or cls=="Motor6D") and (k=="Parent" or k=="Part0" or k=="Part1") then
+    for _,part in ipairs({properties.Part0,properties.Part1}) do links[part]=links[part] or {};links[part][self]=true end
+    if properties.Part0 then properties.Part0._properties.LeafJoint=nil end
+    if cls=="Weld" and properties.Part1 and properties.Name~="PermanentRiderMount" then properties.Part1._properties.LeafJoint=self end
+   end
+   if (cls=="Weld" or cls=="Motor6D") and (k=="C0" or k=="C1" or k=="Parent") and jointActive(self) then propagate(self.Part0) end
   end})
   return self
  end
  e.Instance={new=function(cls) return object(cls) end}
  function e.add(parent,cls,name,x,y,z,sx,sy,sz) local n=object(cls,name);if x then n.CFrame=cf.new(x,y,z) end;if sx then n.Size=vector.new(sx,sy,sz) end;n.Parent=parent;return n end
  local game=object("DataModel","game");game.JobId="integration";game.PrivateServerId="";game.PrivateServerOwnerId=0
- e.Workspace=e.add(game,"Workspace","Workspace");e.Rep=e.add(game,"ReplicatedStorage","ReplicatedStorage");e.add(e.Rep,"Folder","Shared")
+ e.Workspace=e.add(game,"Workspace","Workspace");e.Workspace.TestCFrame=cf;e.Rep=e.add(game,"ReplicatedStorage","ReplicatedStorage");e.add(e.Rep,"Folder","Shared")
  e.Players=e.add(game,"Players","Players");e.Players.PlayerAdded=signal();e.Players.PlayerRemoving=signal()
  e.Players.GetPlayers=function() local all={};for _,p in ipairs(e.Players:GetChildren()) do if p:IsA("Player") then table.insert(all,p) end end;return all end
  e.Player=e.add(e.Players,"Player","Tester");e.Player.UserId=123;e.Players.LocalPlayer=e.Player
@@ -89,12 +118,12 @@ local function engine()
  e.Workspace.Raycast=function(_,origin,_) return if e.NoGround then nil else {Position=vector.new(origin.X,e.GroundY,origin.Z)} end
  e.Workspace.Blockcast=function() return if e.Collision then {} else nil end
  e.RaycastParams={new=function() return {} end}
- e.Move=vector.zero;e.Controls={GetMoveVector=function() return e.Move end}
+ e.Move=vector.zero;e.Controls={GetMoveVector=function() return e.Move end,moveFunction=function() e.DefaultMoves=(e.DefaultMoves or 0)+1 end}
  e.PlayerModule={GetControls=function() return e.Controls end}
  e.Workspace.CurrentCamera={ViewportSize=vector.new(1000,700),CFrame=cf.new(0,20,30)}
  local serial=0
  local store=modules.StudioStore.new();e.Store=store;e.StoreCalls=0;e.FailStoreCreation=false
- local services={Players=e.Players,ReplicatedStorage=e.Rep,RunService={IsStudio=function() return e.Studio~=false end},
+ local services={Players=e.Players,ReplicatedStorage=e.Rep,RunService={PreSimulation=signal(),RenderStepped=signal(),IsStudio=function() return e.Studio~=false end},
  HttpService={GenerateGUID=function() serial+=1;return "integration-"..serial end,JSONEncode=function() return "[]" end},
  DataStoreService={GetDataStore=function(_,name) e.StoreCalls+=1;e.StoreName=name;if e.FailStoreCreation then error("Publish place first") end;return store end},
  ContextActionService={BindActionAtPriority=function(_,_,callback) e.BrakeCallback=callback end,SetTitle=function() end,SetPosition=function() end,UnbindAction=function() e.BrakeCallback=nil end},

@@ -13,7 +13,7 @@ function Rig.prepare(model: Model): any
   for _,part in ipairs(container:GetDescendants()) do
    if part:IsA("BasePart") then
     part.Anchored=false;part.Massless=true;part.CanCollide=false;part.CanTouch=false
-    if part~=base then local weld=Instance.new("WeldConstraint");weld.Part0=base;weld.Part1=part;weld.Parent=part end
+    if part~=base then local weld=Instance.new("Weld");weld.Part0=base;weld.Part1=part;weld.C0=base.CFrame:ToObjectSpace(part.CFrame);weld.Parent=part end
    end
   end
   if pivot then
@@ -26,6 +26,6 @@ function Rig.prepare(model: Model): any
  local steering=group("Steering",frame)
  group("FrontWheel",steering);group("RearWheel",frame);if model:FindFirstChild("Crank") then group("Crank",frame) end
  root.Anchored=true
- return {Root=root,Motors=motors}
+ return {Root=root,Frame=frame,FrameFromRoot=root.CFrame:ToObjectSpace(frame.CFrame),Motors=motors}
 end
 return Rig

@@ -58,7 +58,7 @@ function Visuals.new(settings:any,ui:any):any
      if motor.Name=="SteeringMotor" then motor.C0=base*CFrame.Angles(0,record.Steer,0)
      elseif motor.Name=="CrankMotor" then motor.C0=base*CFrame.Angles(-record.Crank,0,0)
      elseif motor.Name=="FrameMotor" then motor.C0=base*CFrame.new(0,if bike:GetAttribute("Pedaling")==false and speed>0 then math.sin(os.clock()*28)*0.015 else 0,0)*CFrame.Angles(0,0,-record.Steer*0.4)
-     else motor.C0=base*CFrame.Angles(-record.Wheel,0,0) end
+     elseif motor.Name=="FrontWheelMotor" or motor.Name=="RearWheelMotor" then motor.C0=base*CFrame.Angles(-record.Wheel,0,0) end
     end
     -- A small visual roll of the frame group, without moving authoritative root/path.
    end
