@@ -1,0 +1,13 @@
+# V4.4 — Datenvertrag vor Implementierung
+
+Schema 3 erweitert Schema 2 additiv: `Boosts={Energy=0,Cash=0}` (verbleibende aktive Sekunden), `Receipts={}` (PurchaseId → ProductId). Schema 1/2 werden nach vollständiger alter Validierung kopiert; Energy/Cash/Rebirths, Besitz, Inventar und Equip werden unverändert übernommen. Keine Neuinitialisierung bestehender Profile, keine Produktionsaufrufe durch Build/Tests.
+
+Exklusive Pets sind getrennt von den 96 stabilen Katalogarten: `{SpeciesId=0,ExclusiveId="Sunfox",Variant="Normal"}` beziehungsweise `ExclusiveId="PrismRay"`. Normale Arten/IDs bleiben unverändert. Discovery enthält weiterhin ausschließlich reguläre IDs. Alte Server dürfen Schema 3 nicht laden (bestehende Future-Schema-Sperre); vor Produktaktivierung müssen alte Server vollständig beendet sein.
+
+Developer-Product-Gutschriften und Receipt-Markierung werden in EINEM gesperrten Profil-Snapshot über die bestehende UpdateAsync-/Session-Lock-Architektur gespeichert. PurchaseGranted erst nach bestätigter dauerhafter Speicherung. Bei unklarem Speicherergebnis bleibt die identische Kandidatenkopie im Speicher und wird erneut gespeichert; weitere Profilmutationen sind bis zur Klärung gesperrt. Rejoin liest die gespeicherte Receipt-ID und quittiert ohne erneute Gutschrift. Kein separates Receipt-Store mit nicht-atomarer zweiter Gutschrift. Maximal 2000 Receipt-IDs pro Profil; kein unsicheres Löschen alter IDs. Bei Kapazitätsgrenze NotProcessedYet; vor realer Monetarisierung Betriebs-/Archivierungsstrategie erforderlich.
+
+Boost-Zeit zählt serverseitig nur für bereit geladene, verbundene Profile in aktiver Sitzung, nicht offline. Ein laufender Save blockiert Zeit-/Wirtschaftsmutationen. Bei Crash kann maximal seit letztem Save verbrauchte Zeit erneut verfügbar werden. Cash/Pets und Receipt-ID werden dagegen beim Kauf vor Quittierung dauerhaft geschrieben. Bei Disconnect während einer Receipt-Speicherung wartet die bestehende Release-Serialisierung. Nicht bestätigte Käufe bleiben Roblox-seitig ausstehend.
+
+Gamepass-Besitz ist keine Client-/Profilbehauptung: MarketplaceService prüft serverseitig, bei API-Fehler kein Bonus. IDs sind standardmäßig 0 (deaktiviert), vorgeschlagene Robux-Preise nur Beschreibung; echte Preise kontrolliert Roblox. Keine Produkte werden erstellt/veröffentlicht. VIP-Inhalte bleiben zukünftiger Inhalt; VIP-Kauf bleibt gesperrt, bis Vorteile tatsächlich aktiviert sind.
+
+Nicht persistenter Studio-Preview darf keine Marketplace-Receipts quittieren und keine Kaufprompts öffnen. Diese Sperre wird zusätzlich serverseitig anhand des tatsächlichen Datenmodus geprüft; Memory-Store-Unit-Tests sind kein Zahlungsnachweis.
