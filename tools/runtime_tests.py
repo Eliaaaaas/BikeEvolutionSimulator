@@ -38,18 +38,20 @@ def adapters():
  import re
  out=[]
  for filename,params in [
+  ('server/PremiumService','game,workspace,task,os,warn,Enum'),
+  ('server/AutomationService','game,os'),
   ('server/MountedBikeService','game,workspace,task,os,warn,Instance,CFrame,Vector3,Enum,RaycastParams'),
   ('shared/BikeSurface','CFrame,Vector3,RaycastParams,Enum'),
-  ('client/RidePrediction','game,workspace,Instance,CFrame,os'),
+  ('client/RidePrediction','game,workspace,Instance,CFrame,os,Enum'),
   ('client/AvatarPose','Instance,CFrame,Vector3,Enum'),
   ('client/Visuals','game,workspace,task,os,CFrame,Vector3'),
-  ('client/RaceCamera','game,workspace,CFrame,Vector3,Enum'),
+  ('client/RaceCamera','game,workspace,CFrame,Vector3,Enum,Instance'),
   ('client/BikeInput','game,task,UDim2,Enum,Vector3'),
   ('shared/RiderMount','CFrame'),
   ('server/GameplayService','game,workspace,task,os,warn,Instance,Random'),
   ('server/RemoteService','game,task,os,Instance'),
   ('client/UI','game,task,os,Instance,Color3,ColorSequence,Vector2,Vector3,CFrame,UDim,UDim2,Enum,TweenInfo'),
-  ('client/Icons','Instance,UDim2,UDim,Color3,Enum'),
+  ('client/Icons','Instance,UDim2,UDim,Color3,Enum,ColorSequence'),
   ('client/TrainingInput','game,os,Enum,Vector2'),
   ('client/StationEffects','game,workspace,task,os,Instance,Vector3,UDim2,Color3,ColorSequence,Enum'),
   ('client/ClientApp','game,workspace,task,Instance,Vector2'),

@@ -28,8 +28,7 @@ function Prediction.new(ui:any,stateRemote:RemoteEvent):any
   if api.Bike then api.Bike:Destroy() end
   if api.Character then api.Character:Destroy() end
   api.Bike=nil;api.Character=nil;rig=nil;rendered=nil;vehicle=0
-  local camera=workspace.CurrentCamera
-  if camera and player.Character then camera.CameraSubject=player.Character:FindFirstChildOfClass("Humanoid") end
+  -- Camera ownership belongs exclusively to RaceCamera (manual and race).
  end
  local function hide(model:Model)
   for _,part in ipairs(model:GetDescendants()) do
@@ -49,7 +48,7 @@ function Prediction.new(ui:any,stateRemote:RemoteEvent):any
   local copy=character:Clone();character.Archivable=was
   local bike=asset:Clone();bike.Name="PredictedRider";copy.Name="PredictedAvatar"
   for _,node in ipairs(copy:GetDescendants()) do
-   if node:IsA("Script") or node:IsA("LocalScript") or node:IsA("IKControl") or node.Name=="LocalRiderTarget" then node:Destroy()
+   if node:IsA("Script") or node:IsA("LocalScript") or node:IsA("IKControl") or node.Name=="LocalRiderTarget" or node.Name=="LocalRiderPole" then node:Destroy()
    elseif node:IsA("Motor6D") then
     node.Transform=CFrame.identity
     local base=node:GetAttribute("RiderBaseC0")
@@ -85,14 +84,14 @@ function Prediction.new(ui:any,stateRemote:RemoteEvent):any
   -- Ignore stale epochs before changing the currently visible assembly.
   if type(message.Epoch)~="number" or message.Epoch<math.max(reconciler.Epoch,player:GetAttribute("DriveEpoch") or 0) then return end
   if message.Epoch==reconciler.Epoch and (message.Ack<=reconciler.Ack or message.Sequence<reconciler.Sequence) then return end
-  if message.Mode~="Manual" or player:GetAttribute("Racing")==true then reset();return end
+  if message.Mode~="Manual" or player:GetAttribute("Racing")==true or player:GetAttribute("AutoDriving")==true then reset();return end
   local changed=not api.Active or vehicle~=message.VehicleId or message.Epoch~=reconciler.Epoch
   if changed and not build(message.VehicleId,message.State) then return end
   if Replay.accept(reconciler,message,scene) then
    lastAck=os.clock();api.Epoch=reconciler.Epoch;api.Sequence=message.Sequence;api.JumpId=message.State.JumpId;maxSpeed=message.MaxSpeed
   end
  end)
- local render=Run.RenderStepped:Connect(function(dt:number)
+ Run:BindToRenderStep("BikePresentation",Enum.RenderPriority.Camera.Value-2,function(dt:number)
   if not api.Active or not rig or not reconciler.State or player:GetAttribute("Racing")==true then return end
   if os.clock()-lastAck>Config.Bike.InputTimeout+.2 then reset();return end
   local state=table.clone(reconciler.State)
@@ -105,12 +104,11 @@ function Prediction.new(ui:any,stateRemote:RemoteEvent):any
   local authority=workspace:FindFirstChild("PlayerBikes")
   if authority then local model=authority:FindFirstChild("Rider_"..player.UserId);if model and model:IsA("Model") then hide(model) end end
   if player.Character then hide(player.Character) end
-  local camera=workspace.CurrentCamera
-  if camera then camera.CameraSubject=api.Character:FindFirstChildOfClass("Humanoid") end
+  -- Camera reads the rendered bike AFTER this presentation update.
  end)
  local racing=player:GetAttributeChangedSignal("Racing"):Connect(function() if player:GetAttribute("Racing")==true then reset() end end)
  local removing=player.CharacterRemoving:Connect(function() reset();reconciler=Replay.new() end)
- ui.Gui.Destroying:Connect(function() ack:Disconnect();render:Disconnect();racing:Disconnect();removing:Disconnect();reset();folder:Destroy() end)
+ ui.Gui.Destroying:Connect(function() ack:Disconnect();Run:UnbindFromRenderStep("BikePresentation");racing:Disconnect();removing:Disconnect();reset();folder:Destroy() end)
  return api
 end
 return Prediction

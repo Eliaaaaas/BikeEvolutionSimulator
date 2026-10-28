@@ -4,12 +4,16 @@ local Catalog=require(script.Parent.Catalog)
 local Numbers=require(script.Parent.Numbers)
 local Config=require(script.Parent.Config)
 local Rules=require(script.Parent.Rules)
+local Premium=require(script.Parent.PremiumConfig)
 local Pets={}
+function Pets.definition(pet:any):any
+ return if pet.ExclusiveId then Premium.Exclusives[pet.ExclusiveId] else Catalog.Pets[pet.SpeciesId]
+end
 type Candidate={Id:string,Score:number,EquippedRank:number}
 -- A pending catalogue species is locked, not an invented balancing value.
 function Pets.stats(pet:any):{Energy:number,Cash:number,Score:number}?
  if type(pet)~="table" or type(pet.SpeciesId)~="number" or pet.SpeciesId%1~=0 then return nil end
- local definition=Catalog.Pets[pet.SpeciesId]
+ local definition=Pets.definition(pet)
  local factor=Content.Variants[pet.Variant]
  if not definition or not definition.Playable or not factor then return nil end
  local energy=Numbers.add(1,Numbers.multiply(definition.EnergyMultiplier-1,factor))

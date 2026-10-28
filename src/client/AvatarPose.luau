@@ -3,7 +3,7 @@
 local Pose={}
 function Pose.new(character:Model,bike:Model?):any
  local hum=character:FindFirstChildOfClass("Humanoid");if not hum then return nil end
- local record:any={Character=character,Motors={},IK={},Attachments={},Tracks={}}
+ local record:any={Character=character,Motors={},IK={},Attachments={},Tracks={},Connections={},Dirty=false}
  local animator=hum:FindFirstChildOfClass("Animator")
  if animator then for _,track in ipairs(animator:GetPlayingAnimationTracks()) do track:Stop(0) end end
  local animate=character:FindFirstChild("Animate")
@@ -12,22 +12,43 @@ function Pose.new(character:Model,bike:Model?):any
   if motor:IsA("Motor6D") then record.Motors[motor]={C0=motor:GetAttribute("RiderBaseC0") or motor.C0,RestoreC0=motor.C0,Transform=motor.Transform} end
  end
  if bike and hum.RigType==Enum.HumanoidRigType.R15 then
-  local modelScale=bike:GetScale()
-  local steering=bike:FindFirstChild("Steering") :: Model
-  local crank=bike:FindFirstChild("Crank") :: Model
-  local function ik(upper:string,lower:string,parent:BasePart,position:Vector3)
-   local a=character:FindFirstChild(upper);local b=character:FindFirstChild(lower)
-   if not a or not b or not a:IsA("BasePart") or not b:IsA("BasePart") then return end
-   local target=Instance.new("Attachment");target.Name="LocalRiderTarget";target.Position=position*modelScale;target.Parent=parent;table.insert(record.Attachments,target)
+  local frame=bike:FindFirstChild("Frame")
+  local frameRoot=if frame then frame:FindFirstChild("Pivot") else nil
+  if not frameRoot or not frameRoot:IsA("BasePart") then return record end
+  local function contact(group:Instance?,name:string,side:number):BasePart?
+   if not group then return nil end
+   for _,part in ipairs(group:GetDescendants()) do
+    if part:IsA("BasePart") and part.Name==name and frameRoot.CFrame:PointToObjectSpace(part.Position).X*side>0 then return part end
+   end
+   return nil
+  end
+  local function ik(side:string,limb:string,tip:string,part:BasePart?,sign:number)
+   local a=character:FindFirstChild(side..limb);local b=character:FindFirstChild(side..tip)
+   if not a or not b or not a:IsA("BasePart") or not b:IsA("BasePart") or not part then return end
+   local target=Instance.new("Attachment");target.Name="LocalRiderTarget"
+   target.Position=Vector3.new(0,part.Size.Y/2+.035,0);target.Parent=part;table.insert(record.Attachments,target)
+   local pole=Instance.new("Attachment");pole.Name="LocalRiderPole"
+   -- Pole remains on its anatomical side, outside the frame. It does NOT rotate with the crank.
+   local arm=tip=="Hand"
+   pole.Position=Vector3.new(sign*(if arm then 2.2 else math.max(1.3,b.Size.X+1)),if arm then 3.7 else 2.4,if arm then -1 else -1.5)
+   pole.Parent=frameRoot;table.insert(record.Attachments,pole)
    local control=Instance.new("IKControl");control.Name="ProceduralBikeIK";control.Type=Enum.IKControlType.Position
-   control.ChainRoot=a;control.EndEffector=b;control.Target=target;control.Weight=1;control.SmoothTime=0.06;control.Parent=hum;table.insert(record.IK,control)
+   control.ChainRoot=a;control.EndEffector=b;control.Target=target;control.Pole=pole
+   -- Solve the palm/sole contact rather than the center of the hand or foot.
+   control.EndEffectorOffset=CFrame.new(0,-b.Size.Y*.45,0)
+   control.Weight=1;control.SmoothTime=0;control.Priority=10;control.Parent=hum;table.insert(record.IK,control)
   end
-  local steer=steering:FindFirstChild("Pivot") :: BasePart;local pedal=if crank then crank:FindFirstChild("Pivot") :: BasePart else bike:FindFirstChild("Root") :: BasePart
+  local steering=bike:FindFirstChild("Steering");local crank=bike:FindFirstChild("Crank")
   for _,side in ipairs({"Left","Right"}) do
-   local x=if side=="Left" then -1 else 1
-   ik(side.."UpperArm",side.."Hand",steer,Vector3.new(x*1.13,0.7,-0.2))
-   ik(side.."UpperLeg",side.."Foot",pedal,if crank then Vector3.new(x*0.65,x*0.7,0) else Vector3.new(x*0.8,1.7,0))
+   local sign=if side=="Left" then -1 else 1
+   ik(side,"UpperArm","Hand",contact(steering,"Grip",sign),sign)
+   ik(side,"UpperLeg","Foot",contact(crank or frame,if crank then "Pedal" else "FootRest",sign),sign)
   end
+ end
+ -- CharacterAdded may precede streamed limbs/appearance sizing. Rebuild rather than keeping incomplete IK forever.
+ table.insert(record.Connections,character.DescendantAdded:Connect(function() record.Dirty=true end))
+ for _,part in ipairs(character:GetChildren()) do
+  if part:IsA("BasePart") then table.insert(record.Connections,part:GetPropertyChangedSignal("Size"):Connect(function() record.Dirty=true end)) end
  end
  return record
 end
@@ -49,6 +70,7 @@ function Pose.fade(record:any,weight:number)
  for _,control in ipairs(record.IK) do control.Weight=math.max(0,control.Weight-weight) end
 end
 function Pose.destroy(record:any)
+ for _,connection in ipairs(record.Connections) do connection:Disconnect() end
  for motor,base in pairs(record.Motors) do if motor.Parent then motor.C0=base.RestoreC0;motor.Transform=base.Transform end end
  for _,control in ipairs(record.IK) do control:Destroy() end
  for _,target in ipairs(record.Attachments) do target:Destroy() end

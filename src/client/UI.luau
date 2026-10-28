@@ -6,6 +6,8 @@ local Format=require(Shared:WaitForChild("Format"))
 local Presentation=require(Shared:WaitForChild("Presentation"))
 local Catalog=require(Shared:WaitForChild("Catalog"))
 local Content=require(Shared:WaitForChild("World1Content"))
+local Premium=require(Shared:WaitForChild("PremiumConfig"))
+local PetRules=require(Shared:WaitForChild("PetRules"))
 local State=require(Shared:WaitForChild("ClientState"))
 local Icons=require(script.Parent.Icons)
 local UI={}
@@ -24,7 +26,7 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
  end
  local gui=make("ScreenGui",playerGui,{Name="BikeHUDV4",ResetOnSpawn=false,ScreenInsets=Enum.ScreenInsets.CoreUISafeInsets,ZIndexBehavior=Enum.ZIndexBehavior.Sibling})
  local root=make("Frame",gui,{Size=UDim2.new(1,-16,1,-16),Position=UDim2.fromOffset(8,8),BackgroundTransparency=1})
- local sidebar=make("Frame",root,{Name="MenuSidebar",Size=UDim2.fromOffset(160,400),Position=UDim2.fromOffset(0,4),BackgroundTransparency=1,BorderSizePixel=0})
+ local sidebar=make("Frame",root,{Name="MenuSidebar",Size=UDim2.fromOffset(160,400),AnchorPoint=Vector2.new(0,.5),Position=UDim2.new(0,0,.5,0),BackgroundTransparency=1,BorderSizePixel=0})
  local scale=make("UIScale",sidebar,{Scale=1})
  local toggle=make("TextButton",sidebar,{Name="MenuToggle",Size=UDim2.fromOffset(44,28),Text="☰",TextColor3=white,TextSize=22,Font=Enum.Font.GothamBold,BackgroundTransparency=1,BorderSizePixel=0})
  local list=make("Frame",sidebar,{Name="Navigation",Position=UDim2.fromOffset(0,32),Size=UDim2.new(1,0,1,-32),BackgroundTransparency=1,BorderSizePixel=0})
@@ -44,13 +46,16 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
  local resourceValues:any={};local resourceRows:any={};local resourceIcons:any={}
  for i,name in ipairs({"Energy","Cash","Rebirths"}) do
   local holder=make("Frame",resourceHUD,{Name=name.."Status",Size=UDim2.new(1,0,0,36),Position=UDim2.fromOffset(0,(i-1)*36),BackgroundTransparency=1,BorderSizePixel=0})
-  local icon=Icons.resource(holder,name);resourceIcons[name]=icon;resourceRows[name]=holder
+  local icon=Icons.resource(holder,name);make("UIScale",icon,{Scale=1});resourceIcons[name]=icon;resourceRows[name]=holder
   resourceValues[name]=make("TextLabel",holder,{Name="Value",Position=UDim2.fromOffset(40,0),Size=UDim2.new(1,-40,1,0),BackgroundTransparency=1,BorderSizePixel=0,Text="—",TextColor3=white,TextSize=27,Font=Enum.Font.GothamBold,TextXAlignment=Enum.TextXAlignment.Left,TextStrokeColor3=Color3.fromRGB(14,45,61),TextStrokeTransparency=0.25,TextWrapped=false})
  end
  api.ResourceHUD=resourceHUD;api.ResourceValues=resourceValues
  for i,name in ipairs({"Garage","Pets","Race","Worlds","Rebirths","Shop","Settings"}) do
-  local button=make("TextButton",list,{Name=name,LayoutOrder=i,Size=UDim2.new(1,-4,0,47),BackgroundColor3=palette[name],BackgroundTransparency=0.08,BorderSizePixel=0,Text="",AutoButtonColor=false})
-  corner(button,12);make("UIGradient",button,{Color=ColorSequence.new(white,Color3.fromRGB(185,226,241)),Rotation=32})
+  local button=make("TextButton",list,{Name=name,LayoutOrder=i,Size=UDim2.new(1,-4,0,47),BackgroundColor3=white,BackgroundTransparency=0.04,BorderSizePixel=0,Text="",AutoButtonColor=false})
+  local ends={Garage={Color3.fromRGB(44,224,220),Color3.fromRGB(42,88,218)},Pets={Color3.fromRGB(247,118,206),Color3.fromRGB(136,69,217)},Race={Color3.fromRGB(255,179,68),Color3.fromRGB(232,65,74)},Worlds={Color3.fromRGB(65,222,243),Color3.fromRGB(36,174,114)},Rebirths={Color3.fromRGB(172,106,245),Color3.fromRGB(65,112,234)},Shop={Color3.fromRGB(172,234,72),Color3.fromRGB(39,195,176)},Settings={Color3.fromRGB(112,203,251),Color3.fromRGB(40,102,180)}}
+  corner(button,12)
+  make("Frame",button,{Name="ButtonDepth",Size=UDim2.new(1,-4,0,4),Position=UDim2.new(0,2,1,-1),BackgroundColor3=palette[name],BorderSizePixel=0})
+  make("UIGradient",button,{Color=ColorSequence.new(ends[name][1],ends[name][2]),Rotation=30})
   make("UIStroke",button,{Color=white,Transparency=0.8,Thickness=1})
   Icons.draw(button,name)
   labels[name]=make("TextLabel",button,{Position=UDim2.fromOffset(48,0),Size=UDim2.new(1,-52,1,0),BackgroundTransparency=1,Text=name,TextColor3=white,TextSize=14,TextStrokeTransparency=0.65,TextStrokeColor3=Color3.fromRGB(16,72,95),TextXAlignment=Enum.TextXAlignment.Left,Font=Enum.Font.GothamBold,TextWrapped=true})
@@ -64,6 +69,19 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
    api.CurrentMenu=name;api.OnMenu(name)
   end)
  end
+ local autoBar=make("Frame",root,{Name="AutomationControls",AnchorPoint=Vector2.new(.5,0),Position=UDim2.new(.5,0,0,0),Size=UDim2.fromOffset(270,38),BackgroundTransparency=1})
+ local switches:any={}
+ for index,key in ipairs({"AutoTrain","AutoRace","SlowMode"}) do
+  local parent=if key=="SlowMode" then root else autoBar
+  local b=make("TextButton",parent,{Name=key,Size=UDim2.fromOffset(128,38),Position=if key=="SlowMode" then UDim2.new(0,0,1,-42) else UDim2.fromOffset((index-1)*136,0),BackgroundColor3=white,TextColor3=white,TextStrokeTransparency=.45,TextStrokeColor3=Color3.fromRGB(15,65,85),TextSize=13,Font=Enum.Font.GothamBold,BorderSizePixel=0,Text="",AutoButtonColor=false})
+  corner(b,12);make("UIGradient",b,{Color=ColorSequence.new(Color3.fromRGB(79,212,207),Color3.fromRGB(65,110,207)),Rotation=25})
+  switches[key]=b
+  b.Activated:Connect(function()
+   if not api.Snapshot then return end
+   local mode=api.Snapshot.Automation or {};api.OnAction("Automation",{Setting=key,Enabled=not mode[key],Difficulty=api.Difficulty})
+  end)
+ end
+ local boostText=make("TextLabel",autoBar,{Name="ActiveBoosts",Size=UDim2.new(1,80,0,32),Position=UDim2.fromOffset(-40,39),BackgroundTransparency=1,Text="",TextColor3=white,TextStrokeTransparency=.25,TextStrokeColor3=Color3.fromRGB(15,55,75),TextSize=12,Font=Enum.Font.GothamBold})
  local noticeToast=make("TextLabel",root,{Name="ActionNotice",Visible=false,AnchorPoint=Vector2.new(0.5,0),Size=UDim2.new(0.7,0,0,58),Position=UDim2.fromScale(0.6,0.14),BackgroundTransparency=1,Text="",TextWrapped=true,TextColor3=white,TextStrokeColor3=Color3.fromRGB(15,55,68),TextStrokeTransparency=0.2,TextSize=15,Font=Enum.Font.GothamBold})
  local overlay=make("TextButton",root,{Visible=false,Size=UDim2.fromScale(1,1),BackgroundColor3=Color3.fromRGB(12,51,68),BackgroundTransparency=0.3,Text="",AutoButtonColor=false,ZIndex=20})
  local window=make("Frame",overlay,{AnchorPoint=Vector2.new(0.5,0.5),Size=UDim2.new(0.9,0,0.85,0),Position=UDim2.fromScale(0.5,0.5),BackgroundColor3=Color3.fromRGB(26,98,134),BorderSizePixel=0,ZIndex=21});corner(window,22)
@@ -155,8 +173,19 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
    command("− Leiser",function() State.setting(settings,"Volume",settings.Volume-0.1);volume.Text="Lautstärke: "..math.floor(settings.Volume*100).." %";api.OnSetting() end)
    command("+ Lauter",function() State.setting(settings,"Volume",settings.Volume+0.1);volume.Text="Lautstärke: "..math.floor(settings.Volume*100).." %";api.OnSetting() end)
   elseif name=="Shop" then
-   row("PALM SHOP • Cash sinnvoll einsetzen",45)
-   row("Fahrzeuge und Eier verwenden deine vorhandenen Cash-Käufe. Keine Robux- oder VIP-Käufe in diesem Build.",65)
+   row("PREMIUM SHOP",40)
+   row("Roblox bestätigt Preis und Zahlung. Unkonfigurierte Angebote und Käufe im nicht persistenten Studio-Preview bleiben deaktiviert.",65)
+   for _,category in ipairs({"Gamepasses","Cash Bundles","Boost Potions","Exclusive Pets"}) do
+    row(category,32)
+    local offers=if category=="Gamepasses" then Premium.Passes else Premium.Products
+    local keys={};for key,def in pairs(offers) do if category=="Gamepasses" or def.Category==category then table.insert(keys,key) end end;table.sort(keys)
+    for _,key in ipairs(keys) do
+     local def=offers[key];local enabled=def.Id>0 and not def.Unavailable and snap and snap.PremiumAvailable==true
+     if def.ExclusiveId then local pet=Premium.Exclusives[def.ExclusiveId];api.preview(game:GetService("ReplicatedStorage").PetModels,pet.Model,true);row("Energy ×"..pet.EnergyMultiplier.." / Cash ×"..pet.CashMultiplier,30) end
+     local b=command(def.Name..(if enabled then " • Roblox-Kauf öffnen" elseif def.Id<=0 then " • NOCH NICHT KONFIGURIERT" else " • IM PREVIEW GESPERRT"),function() if enabled then api.OnAction("Premium",{Offer=key}) end end)
+     b.Active=enabled;b.AutoButtonColor=enabled;b.BackgroundTransparency=if enabled then 0 else .4
+    end
+   end
    command("Fahrzeuge kaufen",function() api.open("Garage") end)
    command("Eier kaufen / öffnen",function() api.open("Eggs") end)
    command("Pet-Inventar",function() api.open("Pets") end)
@@ -185,7 +214,7 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
    row("Einmalig die drei besten Pets • Energy und Cash gleich gewichtet",35)
    command("UNEQUIP ALL",function() api.OnAction("UnequipAll") end)
    local activeNames={}
-   for _,id in ipairs(snap.EquippedPets or {}) do local pet=snap.Pets[id];if pet then table.insert(activeNames,Catalog.Pets[pet.SpeciesId].Name or "Unbekannt") end end
+   for _,id in ipairs(snap.EquippedPets or {}) do local pet=snap.Pets[id];if pet then table.insert(activeNames,PetRules.definition(pet).Name or "Unbekannt") end end
    row("Slots: "..(if #activeNames==0 then "leer / leer / leer" else table.concat(activeNames," / ")),50)
    command("Eier öffnen",function() api.open("Eggs") end)
    command("Pet-Index",function() api.open("Index") end)
@@ -194,7 +223,7 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
    local page=math.clamp(api.PetPage or 1,1,math.max(1,math.ceil(#ids/20)));api.PetPage=page
    row("Inventarseite "..page.." / "..math.max(1,math.ceil(#ids/20)),25)
    for i=(page-1)*20+1,math.min(page*20,#ids) do
-    local id=ids[i];local pet=snap.Pets[id];local d=Catalog.Pets[pet.SpeciesId]
+    local id=ids[i];local pet=snap.Pets[id];local d=PetRules.definition(pet)
     local b=command((if table.find(snap.EquippedPets,id) then "✓ " else "")..(d.Name or "Unbekannte Art").." • "..pet.Variant..(if d.Playable then "\nEnergy ×"..Format.multiplier(1+(d.EnergyMultiplier-1)*Content.Variants[pet.Variant]).." • Cash ×"..Format.multiplier(1+(d.CashMultiplier-1)*Content.Variants[pet.Variant]) else ""),function() api.PetId=id;api.open("Pet") end)
     b.TextSize=14;b.TextWrapped=true;b.Size=UDim2.new(1,-20,0,58)
     local rarity=b:FindFirstChildOfClass("UIStroke");if rarity then rarity.Color=if d.Rarity=="Legendary" then Color3.fromRGB(255,222,109) elseif d.Rarity=="Rare" then Color3.fromRGB(194,149,255) else Color3.fromRGB(135,240,217) end
@@ -204,9 +233,9 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
   elseif name=="Pet" and snap then
    local id=api.PetId;local pet=snap.Pets[id]
    if pet then
-    local d=Catalog.Pets[pet.SpeciesId];local factor=Content.Variants[pet.Variant]
+    local d=PetRules.definition(pet);local factor=Content.Variants[pet.Variant]
     row((d.Name or "Unbekannte Art").." • "..pet.Variant.." • "..(d.Rarity or "Offen"),45)
-    if d.Playable then api.preview(game:GetService("ReplicatedStorage").PetModels,"Pet"..pet.SpeciesId,true);row("Energy ×"..Format.multiplier(1+(d.EnergyMultiplier-1)*factor).." • Cash ×"..Format.multiplier(1+(d.CashMultiplier-1)*factor),35) end
+    if d.Playable then api.preview(game:GetService("ReplicatedStorage").PetModels,d.Model or "Pet"..pet.SpeciesId,true);row("Energy ×"..Format.multiplier(1+(d.EnergyMultiplier-1)*factor).." • Cash ×"..Format.multiplier(1+(d.CashMultiplier-1)*factor),35) end
     local equipped=table.find(snap.EquippedPets,id)~=nil
     command(if equipped then "Ablegen" else "Ausrüsten",function() api.OnAction(if equipped then "UnequipPet" else "EquipPet",{PetId=id}) end)
    end
@@ -240,7 +269,7 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
    command("Abbrechen",hide)
   elseif name=="Race" then
    row("WORLD 1 • 800 Studs • 5 Bots\nEnergy wird nicht verbraucht.",55)
-   for _,tier in ipairs({"Easy","Medium","Hard"}) do command((if api.Difficulty==tier then "✓ " else "")..tier,function() api.Difficulty=tier;api.open("Race") end) end
+   for _,tier in ipairs({"Easy","Medium","Hard"}) do command((if api.Difficulty==tier then "✓ " else "")..tier,function() api.Difficulty=tier;if api.Snapshot and api.Snapshot.Automation and api.Snapshot.Automation.AutoRace then api.OnAction("Automation",{Setting="AutoRace",Enabled=true,Difficulty=tier}) end;api.open("Race") end) end
    local tier=Content.Difficulties[api.Difficulty]
    row("Bot-Tempo: "..table.concat(tier.Speeds," / ").."\nCash Plätze 1–6: "..table.concat(tier.Rewards," / "),60)
    api.RaceInfo=row("",70);api.RaceBar=bar(0)
@@ -257,7 +286,23 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
   if oldRevision~=nil and snap.InventoryRevision~=oldRevision and overlay.Visible and not api.Closing and (api.CurrentMenu=="Garage" or api.CurrentMenu=="Pets" or api.CurrentMenu=="Pet" or api.CurrentMenu=="Index") then
    api.open(api.CurrentMenu)
   end
-  for _,name in ipairs({"Energy","Cash","Rebirths"}) do resourceValues[name].Text=Format.number(snap[name]) end
+  for _,name in ipairs({"Energy","Cash","Rebirths"}) do
+   local old=resourceValues[name]:GetAttribute("ConfirmedValue")
+   resourceValues[name].Text=Format.number(snap[name]);resourceValues[name]:SetAttribute("ConfirmedValue",snap[name])
+   if old and snap[name]>old and settings.Animations then
+    local glint=resourceIcons[name]:FindFirstChild(if name=="Energy" then "BoltGlint" else "CoinGlint")
+    if glint then glint.BackgroundTransparency=0;task.delay(.12,function() if glint.Parent then tween(glint,{BackgroundTransparency=.75},.25) end end) end
+    local pop=resourceIcons[name]:FindFirstChildOfClass("UIScale");if pop then tween(pop,{Scale=1.17},.08);task.delay(.1,function() if pop.Parent then tween(pop,{Scale=1},.17) end end) end
+   end
+  end
+  local mode=snap.Automation or {}
+  for key,b in pairs(switches) do
+   local label=({AutoTrain="AUTO TRAIN",AutoRace="AUTO RACE",SlowMode="SLOW MODE"})[key]
+   b.Text=label..(if mode[key] then " • ON" else " • OFF")
+  end
+  local boosts=snap.Boosts or {};local active={}
+  for _,kind in ipairs({"Energy","Cash"}) do if (boosts[kind] or 0)>0 then table.insert(active,kind.." ×2 • "..math.ceil(boosts[kind]).."s") end end
+  boostText.Text=table.concat(active,"  /  ")
   if api.RebirthInfo and api.RebirthInfo.Parent then
    local r=Presentation.rebirth(snap);api.RebirthInfo.Text="Rebirths: "..Format.number(r.Current).."\nMultiplikator ×"..Format.multiplier(r.Multiplier).." → ×"..Format.multiplier(r.NextMultiplier).."\nBenötigt: "..Format.number(r.Requirement).." Energy\nEnergy wird auf 0 gesetzt. Laufbandzugang kann entfallen."
    tween(api.RebirthBar,{Size=UDim2.fromScale(r.Ratio,1)});api.RebirthConfirm.Text=if r.Allowed then "Rebirth bestätigen" else "Noch nicht genug Energy";api.RebirthConfirm.Active=r.Allowed;api.RebirthConfirm.AutoButtonColor=r.Allowed
@@ -308,13 +353,13 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
  arrange=function()
   local size=root.AbsoluteSize
   local short=size.Y<420
-  local columns=if short then 4 else 1
+  local columns=1
   local compact=settings.Collapsed or short or size.X<320
   local width=if compact then 48 else 158
   local height=44;local gap=6
   local rows=math.ceil(7/columns)
   sidebarHeight=32+rows*(height+gap)-gap
-  local available=math.max(120,size.Y-(if UserInputService.TouchEnabled then 100 else 12))
+  local available=math.max(100,size.Y-126)
   scale.Scale=math.min(1,available/sidebarHeight)
   sidebar.Size=UDim2.fromOffset(columns*(width+gap)-gap,sidebarHeight)
   for i,name in ipairs({"Garage","Pets","Race","Worlds","Rebirths","Shop","Settings"}) do

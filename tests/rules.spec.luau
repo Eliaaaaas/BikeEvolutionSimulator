@@ -175,7 +175,7 @@ test("all treadmill strengths and requirement progression", function()
   local t = Catalog.Treadmills[id]
   equal(t.TrainingMultiplier, 2 ^ (id - 1)); equal(t.CashCost, 0)
   if id > 1 then
-   equal(t.EnergyRequirement, 4 ^ (id - 2))
+   equal(t.EnergyRequirement, 84 * (id-1) * 2 ^ (id-2))
    -- Repeated multiplication and exponentiation may differ by an ULP.
    assert(math.abs(t.RebirthRequirement / (3 ^ (id - 2)) - 1) < 1e-14)
   end
@@ -185,7 +185,7 @@ test("treadmill world AND energy OR rebirth; rebirth revokes access", function()
  assert(Rules.canUseTreadmill(1, 0, 0, {1}))
  assert(Rules.canUseTreadmill(6, Catalog.Treadmills[6].EnergyRequirement, 0, {1,2}))
  assert(not Rules.canUseTreadmill(6, 1e100, 1e9, {1}))
- assert(Rules.canUseTreadmill(3, 4, 0, {1}))
+ assert(Rules.canUseTreadmill(3, Catalog.Treadmills[3].EnergyRequirement, 0, {1}))
  assert(Rules.canUseTreadmill(3, 0, 3, {1}))
  assert(not Rules.canUseTreadmill(3, 3, 2, {1}))
  local reborn = Rules.rebirth(1000, 0)

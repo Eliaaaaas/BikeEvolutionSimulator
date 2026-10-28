@@ -55,3 +55,11 @@ jobs:
           name: BikeEvolutionSimulator-V4.3
           path: build/v4.3/
           if-no-files-found: error
+      - name: Package V4.4 complete overhaul
+        run: python3 tools/package_v4.py --version V4.4
+      - name: Upload V4.4 Studio build
+        uses: actions/upload-artifact@v4
+        with:
+          name: BikeEvolutionSimulator-V4.4
+          path: build/v4.4/
+          if-no-files-found: error

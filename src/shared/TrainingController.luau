@@ -3,6 +3,7 @@
 local Config = require(script.Parent.Config)
 local Rules = require(script.Parent.Rules)
 local Numbers = require(script.Parent.Numbers)
+local PremiumRules=require(script.Parent.PremiumRules)
 local PetRules=require(script.Parent.PetRules)
 local Catalog = require(script.Parent.Catalog)
 local Controller: any = {}
@@ -49,7 +50,7 @@ function Controller.impulse(self: any, player: any, click: boolean): (boolean, s
   allowed = Rules.canUseTreadmill(id, data.Energy, data.Rebirths, data.OwnedWorlds)
   if not allowed then return false end
   local before=data.Energy
-  data.Energy = Numbers.add(data.Energy, Numbers.multiply(Rules.trainingGain(data.Rebirths, Catalog.Treadmills[id].TrainingMultiplier),PetRules.bonus(data,"Energy")))
+  data.Energy = Numbers.add(data.Energy, Numbers.multiply(Rules.trainingGain(data.Rebirths, Catalog.Treadmills[id].TrainingMultiplier),Numbers.multiply(PetRules.bonus(data,"Energy"),if self.Premium then (self.Premium :: any)(player,data,"Energy") else PremiumRules.bonus(data,"Energy"))))
   gain=data.Energy-before
   return true
  end)

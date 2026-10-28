@@ -14,7 +14,7 @@ test("v1 migration preserves balances, inventory IDs and equips; v2 is idempoten
  assert(migrated.ActiveVehicle==1 and migrated.Energy==123.5 and migrated.Cash==321 and migrated.Rebirths==7)
  assert(migrated.Pets.uuid.Variant=="Golden" and migrated.EquippedPets[1]=="uuid" and migrated.DiscoveredPets[1]==12)
  assert(raw.SchemaVersion==1 and raw.ActiveVehicle==nil)
- local again=modules.Profile.migrate(migrated);assert(again.SchemaVersion==2 and again.Cash==321 and again~=migrated)
+ local again=modules.Profile.migrate(migrated);assert(again.SchemaVersion==modules.Config.Data.SchemaVersion and again.Cash==321 and again~=migrated)
  raw.Energy=-1;assert(not modules.Profile.migrate(raw));raw.SchemaVersion=999;assert(not modules.Profile.migrate(raw))
 end)
 test("migration honors foreign locks and only commits through UpdateAsync",function()
@@ -23,7 +23,7 @@ test("migration honors foreign locks and only commits through UpdateAsync",funct
  local store={UpdateAsync=function(_,_,cb) local result=cb(record);if result then record=result end;return result end}
  local backend=modules.Persistence.new(store,modules.Profile,modules.Config.Data,"new",function() return 100 end,function() end)
  assert(not backend:load("p"));assert(record.Data.SchemaVersion==1)
- record.Lock.Expires=99;assert(backend:load("p"));assert(record.Data.SchemaVersion==2 and record.Lock.Id=="new")
+ record.Lock.Expires=99;assert(backend:load("p"));assert(record.Data.SchemaVersion==modules.Config.Data.SchemaVersion and record.Lock.Id=="new")
 end)
 test("vehicle prices and classes preserve all stable catalogue IDs",function()
  local prices={0,250,750,2000,5000,12000,25000,50000,100000,200000}

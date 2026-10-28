@@ -59,7 +59,7 @@ local function render(data:any):boolean
 end
 local snapshotEvent=remotes:WaitForChild("SnapshotChanged") :: RemoteEvent
 snapshotEvent.OnClientEvent:Connect(render)
-local errors={TooFar="Stelle dich auf dein Laufband.",Locked="Energy- oder Rebirth-Anforderung fehlt.",NotReady="Daten noch nicht bereit.",Saving="Speichern läuft – kurz warten.",NoTreadmill="Bitte zuerst ein Laufband auswählen.",NotEnoughEnergy="Nicht genug Energy.",NotAlive="Aktion nur mit lebendem Charakter.",AlreadyRacing="Während des Rennens nicht verfügbar.",RaceUnavailable="Gehe zur Race-Zone vorne auf der Insel.",NotEnoughCash="Nicht genug Cash.",AlreadyOwned="Dieses Fahrzeug gehört dir bereits.",InventoryFull="Pet-Inventar voll.",EquipLimit="Maximal drei Pets ausrüstbar.",DuplicateRequest="Diese Anfrage wurde bereits verarbeitet.",PetUnavailable="Dieses Pet ist nicht verfügbar oder noch gesperrt.",ServiceUnavailable="Aktion vorübergehend nicht verfügbar. Bitte erneut versuchen."}
+local errors={ProductUnavailable="Dieses Robux-Angebot ist noch nicht konfiguriert.",NavigationBlocked="Automatik angehalten: Weg blockiert. Bitte manuell freifahren.",TooFar="Stelle dich auf dein Laufband.",Locked="Energy- oder Rebirth-Anforderung fehlt.",NotReady="Daten noch nicht bereit.",Saving="Speichern läuft – kurz warten.",NoTreadmill="Bitte zuerst ein Laufband auswählen.",NotEnoughEnergy="Nicht genug Energy.",NotAlive="Aktion nur mit lebendem Charakter.",AlreadyRacing="Während des Rennens nicht verfügbar.",RaceUnavailable="Gehe zur Race-Zone vorne auf der Insel.",NotEnoughCash="Nicht genug Cash.",AlreadyOwned="Dieses Fahrzeug gehört dir bereits.",InventoryFull="Pet-Inventar voll.",EquipLimit="Maximal drei Pets ausrüstbar.",DuplicateRequest="Diese Anfrage wurde bereits verarbeitet.",PetUnavailable="Dieses Pet ist nicht verfügbar oder noch gesperrt.",ServiceUnavailable="Aktion vorübergehend nicht verfügbar. Bitte erneut versuchen."}
 local resultEvent=remotes:WaitForChild("ActionResult") :: RemoteEvent
 resultEvent.OnClientEvent:Connect(function(result)
  if type(result)=="table" and result.Error=="Cooldown" and (result.Action=="StartRace" or result.Action=="Hatch") then ui.message("Bitte kurz warten und dann erneut versuchen.") end
@@ -79,7 +79,7 @@ feedbackEvent.OnClientEvent:Connect(function(event)
  elseif event.Kind=="Purchase" then audio.play("Success")
  elseif event.Kind=="RaceStarted" then ui.LastRaceResult=nil
  elseif event.Kind=="RaceEnded" then
-  if event.Reason=="Finished" then ui.LastRaceResult=event;ui.open("Race");audio.play("Success")
+  if event.Reason=="Finished" then ui.LastRaceResult=event;if not snapshot or not snapshot.Automation or not snapshot.Automation.AutoRace then ui.open("Race") end;audio.play("Success")
   else ui.message(if event.Reason=="RewardUnavailable" then "Auszahlung nicht verfügbar – keine doppelte Forderung erzeugt." else "Rennen abgebrochen. Keine Belohnung.") end
  end
 end)

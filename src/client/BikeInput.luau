@@ -38,7 +38,7 @@ function Driver.new(ui:any,remote:RemoteEvent,stateRemote:RemoteEvent)
  Actions:SetTitle("BikeBrake","BREMSE")
  Actions:SetPosition("BikeBrake",UDim2.fromScale(.32,.68))
  Actions:BindActionAtPriority("BikeJump",function(_,state)
-  if state==Enum.UserInputState.Begin and focused and not ui.isMenuOpen() and player:GetAttribute("Racing")~=true and ui.Snapshot then jumpId+=1 end
+  if state==Enum.UserInputState.Begin and focused and not ui.isMenuOpen() and player:GetAttribute("Racing")~=true and player:GetAttribute("AutoDriving")~=true and ui.Snapshot then jumpId+=1 end
   return Enum.ContextActionResult.Sink
  end,true,3001,Enum.KeyCode.Space)
  Actions:SetTitle("BikeJump","SPRUNG");Actions:SetPosition("BikeJump",UDim2.new(1,-90,1,-90))
@@ -48,7 +48,7 @@ function Driver.new(ui:any,remote:RemoteEvent,stateRemote:RemoteEvent)
   while ui.Gui.Parent do
    controls.moveFunction=suppressMove
    local move=controls:GetMoveVector()
-   local blocked=not focused or ui.isMenuOpen() or Input:GetFocusedTextBox()~=nil or player:GetAttribute("Racing")==true or not ui.Snapshot
+   local blocked=not focused or ui.isMenuOpen() or Input:GetFocusedTextBox()~=nil or player:GetAttribute("Racing")==true or not ui.Snapshot or player:GetAttribute("AutoDriving")==true
    sequence=math.max(sequence,prediction.Sequence or 0)+1;jumpId=math.max(jumpId,prediction.JumpId or 0)
    local intent={Throttle=if blocked then 0 else math.clamp(-move.Z,-1,1),Steer=if blocked then 0 else math.clamp(move.X,-1,1),Brake=blocked or brake,JumpId=jumpId}
    prediction.intent(intent);prediction.command(sequence,intent)

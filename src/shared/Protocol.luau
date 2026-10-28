@@ -16,6 +16,15 @@ local function integer(value:any,max:number):boolean
 end
 function Protocol.validAction(payload:any):boolean
  if type(payload)~="table" or payload.Version~=1 then return false end
+ if payload.Action=="Automation" then
+  local allowed={Version=true,Action=true,Setting=true,Enabled=true,Difficulty=true}
+  for key in pairs(payload) do if not allowed[key] then return false end end
+  return (payload.Setting=="AutoTrain" or payload.Setting=="AutoRace" or payload.Setting=="SlowMode") and type(payload.Enabled)=="boolean" and (payload.Difficulty==nil or payload.Difficulty=="Easy" or payload.Difficulty=="Medium" or payload.Difficulty=="Hard")
+ end
+ if payload.Action=="Premium" then
+  local n=0;for key in pairs(payload) do n+=1;if key~="Version" and key~="Action" and key~="Offer" then return false end end
+  return n==3 and type(payload.Offer)=="string" and #payload.Offer<=32
+ end
  local specifications:any={Select={TreadmillId=5},BuyVehicle={VehicleId=10},EquipVehicle={VehicleId=10},Hatch={EggId=3},EquipPet={PetId=true},UnequipPet={PetId=true},EquipBest={},UnequipAll={}}
  local spec=specifications[payload.Action]
  local economic=payload.Action=="BuyVehicle" or payload.Action=="EquipVehicle" or payload.Action=="Hatch" or payload.Action=="EquipPet" or payload.Action=="UnequipPet" or payload.Action=="EquipBest" or payload.Action=="UnequipAll"

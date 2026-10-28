@@ -15,13 +15,15 @@ local function integration(preview,remove,live,predict)
   local record=e.Mounts.ensure(e.Player)
   e.Mounts.teleport(e.Player,e.CFrame.new(x,y,z)*record.Offset:Inverse())
  end
+ modules.PremiumService=modules.make_PremiumService(e.Game,e.Workspace,e.Task,e.OS,e.Warn,e.Enum)
+ modules.AutomationService=modules.make_AutomationService(e.Game,e.OS)
  modules.GameplayService=modules.make_GameplayService(e.Game,e.Workspace,e.Task,e.OS,e.Warn,e.Instance,e.Random)
  modules.RemoteService=modules.make_RemoteService(e.Game,e.Task,e.OS,e.Instance)
  local booted,bootError=pcall(modules.make_init_server,e.Game,e.Workspace,e.Instance,serverScript,e.Warn)
  if remove then assert(not booted);e.BootError=bootError;return e end
  assert(booted,tostring(bootError))
  e.Data=modules.PlayerDataService;e.advance(0)
- modules.Icons=modules.make_Icons(e.Instance,e.UDim2,e.UDim,e.Color3,e.Enum)
+ modules.Icons=modules.make_Icons(e.Instance,e.UDim2,e.UDim,e.Color3,e.Enum,e.ColorSequence)
  local uiModule=modules.make_UI(e.Game,e.Task,e.OS,e.Instance,e.Color3,e.ColorSequence,e.Vector2,e.Vector3,e.CFrame,e.UDim,e.UDim2,e.Enum,e.TweenInfo)
  modules.UI={new=function(...) e.UI=uiModule.new(...);return e.UI end}
  e.TrainingPopups={}
@@ -30,7 +32,7 @@ local function integration(preview,remove,live,predict)
  modules.Effects={new=function(gui) assert(gui and gui:IsA("ScreenGui"),"Actual UI did not export Gui");return {refresh=noop,training=function(amount) table.insert(e.TrainingPopups,amount) end,rebirth=noop} end}
  for _,name in ipairs({"Visuals","PetFollowers","IslandEffects","StationEffects","RaceCamera"}) do modules[name]={new=function() return {refresh=noop} end} end
  modules.PlayerModule=e.PlayerModule
- modules.RidePrediction=if predict then modules.make_RidePrediction(e.Game,e.Workspace,e.Instance,e.CFrame,e.OS) else {new=function() return {intent=function() end,command=function() end} end}
+ modules.RidePrediction=if predict then modules.make_RidePrediction(e.Game,e.Workspace,e.Instance,e.CFrame,e.OS,e.Enum) else {new=function() return {intent=function() end,command=function() end} end}
  modules.BikeInput=modules.make_BikeInput(e.Game,e.Task,e.UDim2,e.Enum,e.Vector3)
  modules.TrainingInput=modules.make_TrainingInput(e.Game,e.OS,e.Enum,e.Vector2)
  modules.ClientApp=modules.make_ClientApp(e.Game,e.Workspace,e.Task,e.Instance,e.Vector2)
@@ -43,7 +45,7 @@ local function integration(preview,remove,live,predict)
   else e.UI.OnAction(kind,fields) end
   e.advance(.26)
  end
- function e.onBelt(id) local z=e.Workspace.World1.Training:FindFirstChild("Treadmill_"..id).Zone;e.teleport(z.Position.X,z.Position.Y+3,z.Position.Z);e.advance(1.5) end
+ function e.onBelt(id) local z=e.Workspace.World1.Training:FindFirstChild("Treadmill_"..id).Zone;e.teleport(z.Position.X,z.Position.Y+e.Mounts.ensure(e.Player).Offset.Position.Y,z.Position.Z);e.advance(1.5) end
  function e.press(text)
   for _,node in ipairs(e.UI.Gui:GetDescendants()) do
    if node:IsA("TextButton") and node.Text==text then node.Activated:Fire();e.advance(.3);return end
@@ -63,6 +65,7 @@ test("real bootstraps publish readiness, create remotes and connect actual UI",f
  local e=integration(true)
  assert(e.Rep.BikeRuntime:GetAttribute("State")=="Ready")
  assert(e.Data.status(e.Player)=="StudioPreviewReady" and e.StoreCalls==0)
+ assert(e.Data.context(e.Player).Pets==nil and e.Data.context(e.Player).Receipts==nil,"High frequency state must not copy full inventory/receipts")
  assert(e.UI and e.UI.Gui and e.UI.Gui.Parent==e.Player.PlayerGui and e.UI.Snapshot.Energy==0)
  assert(e.Rep.BikeRemotes.GetSnapshot.OnServerInvoke)
  assert(string.find(e.Player.PlayerGui.BikeDiagnostics:FindFirstChildOfClass("TextLabel").Text,"Spielerdaten und Remotes bereit",1,true))
@@ -72,7 +75,7 @@ test("real bootstraps publish readiness, create remotes and connect actual UI",f
 end)
 test("step-on and prompt rejection communicate through real services and client",function()
  local e=integration(true);e.onBelt(1)
- assert(e.UI.Snapshot.SelectedTreadmill==1 and e.UI.Snapshot.Energy>=1,"selected="..e.UI.Snapshot.SelectedTreadmill.." energy="..e.UI.Snapshot.Energy)
+ assert(e.UI.Snapshot.SelectedTreadmill==1 and e.UI.Snapshot.Energy>=1,"selected="..e.UI.Snapshot.SelectedTreadmill.." energy="..e.UI.Snapshot.Energy.." y="..e.Mounts.ensure(e.Player).State.Y.." z="..e.Mounts.ensure(e.Player).State.Z.." notice="..e.UI.Notice.Text.." warns="..tostring(e.Warnings[1] and e.Warnings[1][2]))
  local before=e.UI.Snapshot.Energy;e.action("Training");assert(e.UI.Snapshot.Energy>before)
  e.teleport(0,11,0);e.advance(.3)
  assert(not e.Workspace.World1.Training.Treadmill_5.Zone:FindFirstChild("SelectTraining"))
@@ -154,7 +157,7 @@ test("V2 HUD binds confirmed resources without sidebar duplicates or background 
  end
  for _,child in ipairs(hud:GetDescendants()) do assert(not child:IsA("UIStroke"),"HUD must have no visible frames") end
  assert(hud.CashStatus.CashIcon:FindFirstChild("Coin"))
- assert(hud.EnergyStatus.EnergyIcon.Symbol.Text=="ϟ" and hud.RebirthsStatus.RebirthsIcon.Symbol.Text=="↻")
+ assert(hud.EnergyStatus.EnergyIcon:FindFirstChild("BoltFace") and hud.RebirthsStatus.RebirthsIcon:FindFirstChild("RebirthArc") and not hud.EnergyStatus.EnergyIcon:FindFirstChild("Symbol"))
  assert(e.Data.change(e.Player,function(profile) profile.Energy=1.5e12;profile.Cash=2.5e9;profile.Rebirths=1234;return true end))
  assert(e.UI.ResourceValues.Energy.Text=="0","No optimistic resource values")
  e.advance(.3)
@@ -279,7 +282,7 @@ test("locked belt and rebirth access loss stop both automatic and tapped trainin
  local e=integration(true);local input=e.Game:GetService("UserInputService")
  e.onBelt(5);assert(e.Data.snapshot(e.Player).Energy==0 and e.UI.Snapshot.SelectedTreadmill==0)
  input.TouchTap:Fire({e.Vector2.new(300,200)},false);assert(e.Data.snapshot(e.Player).Energy==0)
- assert(e.Data.change(e.Player,function(profile) profile.Energy=1000;return true end));e.advance(1.5)
+ assert(e.Data.change(e.Player,function(profile) profile.Energy=modules.Catalog.Treadmills[5].EnergyRequirement;return true end));e.advance(1.5)
  assert(e.UI.Snapshot.SelectedTreadmill==5)
  e.UI.Buttons.Rebirths.Activated:Fire();e.press("Rebirth bestätigen");e.advance(1.1)
  assert(e.Data.snapshot(e.Player).Energy==0 and e.UI.Snapshot.SelectedTreadmill==0)
@@ -529,16 +532,16 @@ test("V4.2 stationary steering preserves the vehicle and seat positions",functio
  closeFrame(r.Rig.Root.CFrame,start);closeFrame(e.Root.CFrame,r.Rig.Frame.CFrame*r.Weld.C0)
 end)
 test("V4.2 actual camera follows the current mounted humanoid and switches back after races",function()
- local e=integration(true);local camera=modules.make_RaceCamera(e.Game,e.Workspace,e.CFrame,e.Vector3,e.Enum)
+ local e=integration(true);local camera=modules.make_RaceCamera(e.Game,e.Workspace,e.CFrame,e.Vector3,e.Enum,e.Instance)
  camera.new(e.UI.Settings,e.UI)
  local cam=e.Workspace.CurrentCamera
- assert(cam.CameraSubject==e.Player.Character:FindFirstChildOfClass("Humanoid") and cam.CameraType==e.Enum.CameraType.Custom)
+ assert(cam.CameraSubject and cam.CameraSubject.Name=="BikeCameraTarget" and cam.CameraType==e.Enum.CameraType.Custom)
  local bike=e.Workspace.PlayerBikes:GetChildren()[1]
  e.teleport(0,12,63);e.action("StartRace",{Difficulty="Easy"})
  e.Game:GetService("RunService").RenderStepped:Fire(.016)
  assert(cam.CameraType==e.Enum.CameraType.Scriptable)
- e.action("AbortRace");assert(cam.CameraType==e.Enum.CameraType.Custom)
- assert(cam.CameraSubject==e.Player.Character:FindFirstChildOfClass("Humanoid") and e.Workspace.PlayerBikes:GetChildren()[1]==bike)
+ e.action("AbortRace");e.Game:GetService("RunService").RenderStepped:Fire(.016);assert(cam.CameraType==e.Enum.CameraType.Custom)
+ assert(cam.CameraSubject and cam.CameraSubject.Name=="BikeCameraTarget" and e.Workspace.PlayerBikes:GetChildren()[1]==bike)
 end)
 test("V4.3 driving up the authored approach starts training without any prompt",function()
  local e=integration(true);local r=e.Mounts.ensure(e.Player)
@@ -547,9 +550,9 @@ test("V4.3 driving up the authored approach starts training without any prompt",
  local deadline=e.Now+3
  while r.State.Z> -50 and e.Now<deadline do e.advance(.05) end
  e.BrakeCallback("BikeBrake",e.Enum.UserInputState.Begin);e.advance(1.3)
- assert(r.State.Z< -50 and r.State.Z> -55 and r.State.Grounded and math.abs(r.State.Y-9.3)<.1)
+ assert(r.State.Z< -50 and r.State.Z> -55 and r.State.Grounded and math.abs(r.State.Y-8.1)<.1)
  assert(e.UI.Snapshot.SelectedTreadmill==1 and e.Data.snapshot(e.Player).Energy>=1)
- assert(e.Workspace.World1.Training.Treadmill_1.AccessRamp:IsA("WedgePart"))
+ assert(not e.Workspace.World1.Training.Treadmill_1:FindFirstChild("AccessRamp"))
 end)
 test("V4.3 touch jump moves the mounted rider and immediately invalidates training contact",function()
  local e=integration(true);e.onBelt(1);local bike=e.Workspace.PlayerBikes:GetChildren()[1]
@@ -628,5 +631,140 @@ test("V4.3 low walls block the chassis while known raised deck surfaces remain t
  local scene=modules.BikeSurface.new(e.Workspace,{},6)
  assert(scene.block(0,10,0,0,0,0,-.2,8,true))
  obstacle.Name="Deck";assert(not scene.block(0,10,0,0,0,0,-.2,8,true))
+end)
+test("V4.4 actual sidebar toggles Slow Mode and Auto Train through validated server intents",function()
+ local e=integration(true)
+ e.press("SLOW MODE • OFF");assert(e.Player:GetAttribute("SlowMode")==true and e.UI.Snapshot.Automation.SlowMode)
+ e.press("AUTO TRAIN • OFF");assert(e.UI.Snapshot.Automation.AutoTrain)
+ local before=e.Data.snapshot(e.Player).Energy
+ e.advance(35)
+ local r=e.Mounts.ensure(e.Player)
+ assert(e.UI.Snapshot.SelectedTreadmill==1 and e.Data.snapshot(e.Player).Energy>before,"Auto train phase="..e.UI.Snapshot.Automation.Phase.." x="..r.State.X.." z="..r.State.Z)
+ assert(e.Player:GetAttribute("Mounted") and e.Player:GetAttribute("AutoDriving"))
+ local jump=r.State.JumpId;e.JumpCallback("BikeJump",e.Enum.UserInputState.Begin);e.advance(.1)
+ e.press("AUTO TRAIN • ON");assert(not e.UI.Snapshot.Automation.AutoTrain and not e.Player:GetAttribute("AutoDriving"))
+ assert(r.State.Grounded and r.State.JumpId==jump,"No queued jump may launch on return from automation")
+end)
+test("V4.4 Auto Train changes to a stronger allowed belt and revalidates after rebirth",function()
+ local e=integration(true);e.UI.OnAction("Automation",{Setting="AutoTrain",Enabled=true});e.advance(35)
+ assert(e.Data.change(e.Player,function(p) p.Energy=modules.Catalog.Treadmills[2].EnergyRequirement;return true end))
+ e.advance(18);assert(e.UI.Snapshot.SelectedTreadmill==2,"higher belt phase="..e.UI.Snapshot.Automation.Phase)
+ assert(e.Data.change(e.Player,function(p) p.Energy=1000;return true end));e.advance(.3);e.UI.OnAction("Rebirth");e.advance(25)
+ assert(e.Data.snapshot(e.Player).Rebirths==1 and e.UI.Snapshot.SelectedTreadmill==2)
+ -- Rebirth 1 still permits belt 2 via OR; never permits belt 3 (needs 3).
+ assert(e.UI.Snapshot.SelectedTreadmill~=3)
+end)
+test("V4.4 Auto Race drives to start uses real bots and stops further starts when disabled",function()
+ local e=integration(true)
+ e.UI.OnAction("Automation",{Setting="AutoTrain",Enabled=true})
+ e.UI.OnAction("Automation",{Setting="AutoRace",Enabled=true,Difficulty="Easy"})
+ e.advance(18);assert(e.Player:GetAttribute("Racing"),"AutoRace phase="..e.UI.Snapshot.Automation.Phase)
+ assert(#e.Workspace.ActiveRaceBikes:GetChildren()==5 and e.UI.Snapshot.SelectedTreadmill==0)
+ local energy=e.Data.snapshot(e.Player).Energy
+ e.UI.OnAction("Automation",{Setting="AutoRace",Enabled=false})
+ assert(e.Player:GetAttribute("Racing"),"Disabling must let the current race finish")
+ e.advance(70);assert(not e.Player:GetAttribute("Racing") and e.Data.snapshot(e.Player).Cash>0)
+ assert(e.Data.snapshot(e.Player).Energy>=energy and e.UI.Snapshot.Automation.AutoTrain)
+ e.advance(40);assert(not e.Player:GetAttribute("Racing") and e.UI.Snapshot.SelectedTreadmill>0)
+end)
+test("V4.4 blocked automatic navigation stops safely without teleport or free training",function()
+ local e=integration(true);local start=e.Mounts.ensure(e.Player).State
+ e.Collision=true;e.UI.OnAction("Automation",{Setting="AutoTrain",Enabled=true});e.advance(15)
+ local s=e.Mounts.ensure(e.Player).State
+ assert(math.abs(s.X-start.X)<1e-7 and math.abs(s.Z-start.Z)<1e-7 and not e.UI.Snapshot.Automation.AutoTrain and e.Data.snapshot(e.Player).Energy==0)
+end)
+test("V4.4 durable receipt failure blocks economy and retry/rejoin never duplicates grant",function()
+ local e=integration(false,nil,true)
+ local original=e.Store.UpdateAsync;local fail=3
+ e.Store.UpdateAsync=function(self,key,callback)
+  local result=original(self,key,callback)
+  if fail>0 then fail-=1;error("Lost committed receipt response") end
+  return result
+ end
+ local saved=nil
+ e.Task.spawn(function() saved=e.Data.receipt(e.Player,function(p) return modules.PremiumRules.grant(p,"receipt-durable",73,{Cash=5000},"id") end) end)
+ e.advance(8);assert(saved==false)
+ assert(not e.Data.change(e.Player,function(p) p.Cash+=1;return true end))
+ e.Task.spawn(function() saved=e.Data.receipt(e.Player,function(p) return modules.PremiumRules.grant(p,"receipt-durable",73,{Cash=5000},"id") end) end)
+ e.advance(1);assert(saved and e.Data.read(e.Player).Cash==5000)
+ e.Player.Parent=nil;e.Players.PlayerRemoving:Fire(e.Player);e.advance(.1)
+ e.Player.Parent=e.Players;e.Players.PlayerAdded:Fire(e.Player);e.advance(.5)
+ assert(e.Data.read(e.Player).Cash==5000 and e.Data.read(e.Player).Receipts['receipt-durable']==73)
+end)
+test("V4.4 ProcessReceipt owns decision and unknown/cancelled offers cannot grant",function()
+ local e=integration(false,nil,true);local real=modules.PremiumRules
+ modules.PremiumRules={product=function(id) return if id==73 then {Cash=5000} else nil end,bonus=real.bonus,grant=real.grant,registryValid=real.registryValid}
+ local service=modules.make_PremiumService(e.Game,e.Workspace,e.Task,e.OS,e.Warn,e.Enum).new(e.Data)
+ modules.PremiumRules=real
+ local decision=service.receipt({PlayerId=e.Player.UserId,PurchaseId="roblox-receipt",ProductId=73})
+ assert(decision==e.Enum.ProductPurchaseDecision.PurchaseGranted and e.Data.read(e.Player).Cash==5000)
+ assert(service.receipt({PlayerId=e.Player.UserId,PurchaseId="roblox-receipt",ProductId=73})==decision and e.Data.read(e.Player).Cash==5000)
+ assert(service.receipt({PlayerId=e.Player.UserId,PurchaseId="unknown",ProductId=74})==e.Enum.ProductPurchaseDecision.NotProcessedYet)
+ e.UI.open("Shop")
+ local disabled=0
+ for _,node in ipairs(e.UI.Gui:GetDescendants()) do
+  if node:IsA("TextButton") and string.find(node.Text,"NOCH NICHT KONFIGURIERT",1,true) then assert(node.Active==false);disabled+=1 end
+ end
+ assert(disabled==10)
+ local cash=e.Data.snapshot(e.Player).Cash;e.UI.OnAction("Premium",{Offer="Small"});e.advance(.3)
+ assert(e.Data.snapshot(e.Player).Cash==cash and not e.ProductPrompt)
+end)
+test("V4.4 boost timer counts active session time and changes actual training rewards",function()
+ local e=integration(true);assert(e.Data.receipt(e.Player,function(p) return modules.PremiumRules.grant(p,"boost",75,{Boost="Energy",Seconds=300},"id") end))
+ local start=e.Data.read(e.Player).Boosts.Energy;e.advance(5.1)
+ local remaining=e.Data.read(e.Player).Boosts.Energy
+ assert(remaining<start and remaining>start-7)
+ e.onBelt(1);local before=e.Data.snapshot(e.Player).Energy;e.action("Training")
+ assert(e.Data.snapshot(e.Player).Energy-before>=2 and e.UI.Snapshot.PremiumEnergy==2)
+end)
+test("V4.4 IK uses physical contacts and separated poles on all ten vehicles",function()
+ local e=integration(true);local char=e.Player.Character;local hum=char:FindFirstChildOfClass("Humanoid");hum.RigType=e.Enum.HumanoidRigType.R15
+ for _,side in ipairs({"Left","Right"}) do
+  for _,part in ipairs({"UpperArm","Hand","UpperLeg","Foot"}) do e.add(char,"Part",side..part) end
+ end
+ local Pose=modules.make_AvatarPose(e.Instance,e.CFrame,e.Vector3,e.Enum)
+ for id=1,10 do
+  local source=e.Rep.Vehicles:FindFirstChild(if id==1 then "Mountainbike" else "Vehicle"..id);local bike=source:Clone();modules.BikeRig.prepare(bike);bike.Parent=e.Workspace
+  local record=Pose.new(char,bike);assert(#record.IK==4 and #record.Attachments==8)
+  for _,ik in ipairs(record.IK) do
+   local sign=if string.find(ik.ChainRoot.Name,"Left") then -1 else 1
+   assert(ik.Pole.Position.X*sign>1 and ik.Pole.Parent==bike.Frame.Pivot)
+   assert(ik.Target.Parent.Name==(if string.find(ik.ChainRoot.Name,"Arm") then "Grip" elseif id<=6 then "Pedal" else "FootRest"))
+  end
+  char.LeftHand:GetPropertyChangedSignal("Size"):Fire();assert(record.Dirty,"Avatar resizing must invalidate IK targets")
+  Pose.destroy(record);for _,a in ipairs(record.Attachments) do assert(a.Parent==nil) end;bike:Destroy()
+ end
+end)
+test("V4.4 a single camera target follows prediction after presentation and survives race transitions",function()
+ local e=integration(true,nil,nil,true)
+ local camera=modules.make_RaceCamera(e.Game,e.Workspace,e.CFrame,e.Vector3,e.Enum,e.Instance)
+ camera.new(e.UI.Settings,e.UI);e.Move=e.Vector3.new(0,0,-1);e.advance(.3)
+ local render=e.Game:GetService("RunService").RenderStepped
+ render:Fire(.016);local cam=e.Workspace.CurrentCamera
+ assert(e.UI.Prediction.Active and cam.CameraSubject.Name=="BikeCameraTarget")
+ local first=cam.CameraSubject;render:Fire(.016);assert(cam.CameraSubject==first)
+ local root=e.UI.Prediction.Bike.Root;assert((first.Position-(root.Position+e.Vector3.new(0,4,0))).Magnitude<1)
+ e.UI.Gui:Destroy();assert(first.Parent==nil)
+end)
+test("V4.4 boost time pauses offline and resumes after durable rejoin",function()
+ local e=integration(true)
+ assert(e.Data.receipt(e.Player,function(p) return modules.PremiumRules.grant(p,"persistent-potion",75,{Boost="Energy",Seconds=300},"id") end))
+ e.advance(4);local before=e.Data.read(e.Player).Boosts.Energy
+ e.Player.Parent=nil;e.Players.PlayerRemoving:Fire(e.Player);e.advance(120)
+ e.Player.Parent=e.Players;e.Players.PlayerAdded:Fire(e.Player);e.advance(.4)
+ local profile=e.Data.read(e.Player)
+ assert(profile and profile.Boosts.Energy<=before and profile.Boosts.Energy>=before-1 and profile.Receipts['persistent-potion']==75)
+end)
+test("V4.4 pass bonuses require Marketplace ownership rather than purchase-finished claims",function()
+ local e=integration(true);local config=modules.PremiumConfig;local mock=table.clone(config)
+ mock.Passes=table.clone(config.Passes);mock.Passes.Energy=table.clone(config.Passes.Energy);mock.Passes.Energy.Id=501
+ modules.PremiumConfig=mock
+ local marketplace=e.Game:GetService("MarketplaceService");local owns=true;local checks=0
+ marketplace.UserOwnsGamePassAsync=function(_,user,id) assert(user==e.Player.UserId and id==501);checks+=1;return owns end
+ local service=modules.make_PremiumService(e.Game,e.Workspace,e.Task,e.OS,e.Warn,e.Enum).new(e.Data);modules.PremiumConfig=config
+ service.start();e.advance(.1)
+ assert(checks>0 and service.bonus(e.Player,e.Data.read(e.Player),"Energy")==2)
+ owns=false;marketplace.PromptGamePassPurchaseFinished:Fire(e.Player,501,true);e.advance(.1)
+ assert(service.bonus(e.Player,e.Data.read(e.Player),"Energy")==1)
 end)
 print(string.format("%d actual runtime wiring tests passed (engine doubles; NOT Roblox Studio)",count))

@@ -10,6 +10,7 @@ local Geometry=require(Shared:WaitForChild("RiderMount"))
 local Rig=require(Shared:WaitForChild("BikeRig"))
 local Protocol=require(Shared:WaitForChild("Protocol"))
 local Limiter=require(Shared:WaitForChild("RateLimiter"))
+local Progression=require(Shared:WaitForChild("Progression"))
 local Service={}
 function Service.new(data:any):any
  local folder=Instance.new("Folder");folder.Name="PlayerBikes";folder.Parent=workspace
@@ -110,10 +111,20 @@ function Service.new(data:any):any
   return record
  end
  function api.setStateSink(callback:any) stateSink=callback end
+ local function maxSpeed(player:Player,r:any):number
+  local snap=data.snapshot(player)
+  return Progression.islandSpeed(if snap then snap.Energy else 0,Content.Vehicles[r.VehicleId].Speed,player:GetAttribute("SlowMode")==true)
+ end
+ function api.auto(player:Player,input:any)
+  local r=records[player];if not r then return end
+  local changed=(r.Auto~=nil)~=(input~=nil)
+  r.Auto=input;player:SetAttribute("AutoDriving",input~=nil)
+  if changed then r.Queue={};r.LastCommand=nil;r.Speed=0;r.State.Speed=0 end
+ end
  local function sendState(player:Player,r:any)
   if not r.State then return end
   r.Ack=(r.Ack or 0)+1
-  stateSink(player,{Ack=r.Ack,Epoch=r.Epoch,Sequence=r.Processed,State=table.clone(r.State),Mode=r.Mode,VehicleId=r.VehicleId,MaxSpeed=math.min(Config.Bike.MaxSpeed,Config.Bike.BaseSpeed*Content.Vehicles[r.VehicleId].Speed)})
+  stateSink(player,{Ack=r.Ack,Epoch=r.Epoch,Sequence=r.Processed,State=table.clone(r.State),Mode=r.Mode,VehicleId=r.VehicleId,MaxSpeed=maxSpeed(player,r)})
  end
  function api.input(player:Player,payload:any):boolean
   if player.Parent~=Players or not gate:allow(player) or not Protocol.validDrive(payload) then return false end
@@ -180,8 +191,13 @@ function Service.new(data:any):any
     if command then record.LastCommand=command
     elseif record.LastCommand and os.clock()-record.Input.At<Config.Bike.InputTimeout then command=table.clone(record.LastCommand :: {[string]:any});command.Sequence=nil
     else command={Throttle=0,Steer=0,Brake=true,JumpId=record.State.JumpId} end
+    if record.Auto then
+     if command.Sequence then record.Processed=command.Sequence end
+     record.State.JumpId=math.max(record.State.JumpId,command.JumpId or record.State.JumpId)
+     command=record.Auto
+    end
     ran=true
-    record.State=Sim.command(record.State,command,math.min(Config.Bike.MaxSpeed,Config.Bike.BaseSpeed*Content.Vehicles[record.VehicleId].Speed),scene)
+    record.State=Sim.command(record.State,command,maxSpeed(player,record),scene)
     if command.Sequence then record.Processed=command.Sequence end
     player:SetAttribute("DriveJumpId",record.State.JumpId)
     record.Speed=record.State.Speed;record.Yaw=record.State.Yaw

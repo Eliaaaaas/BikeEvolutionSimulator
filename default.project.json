@@ -76,6 +76,12 @@
         },
         "Pet12": {
           "$path": "src/models/Pet12.rbxmx"
+        },
+        "ExclusiveSunfox": {
+          "$path": "src/models/ExclusiveSunfox.rbxmx"
+        },
+        "ExclusivePrismRay": {
+          "$path": "src/models/ExclusivePrismRay.rbxmx"
         }
       }
     },

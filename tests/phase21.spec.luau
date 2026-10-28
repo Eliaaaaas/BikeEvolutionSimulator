@@ -15,8 +15,8 @@ test("settings immediate session state and event deduplication",function()
  assert(modules.ClientState.event(s,1));assert(not modules.ClientState.event(s,1));assert(not modules.ClientState.event(s,0));assert(modules.ClientState.event(s,2))
 end)
 test("progress and rebirth preview use current thresholds and permanent bonus",function()
- local s={Energy=2,Rebirths=0,SelectedTreadmill=2,ImpulseGain=2}
- local p=modules.Presentation.training(s);assert(p.Next==3 and p.Missing==2 and p.Ratio==0.5 and p.RebirthRequirement==3)
+ local s={Energy=modules.Catalog.Treadmills[3].EnergyRequirement/2,Rebirths=0,SelectedTreadmill=2,ImpulseGain=2}
+ local p=modules.Presentation.training(s);assert(p.Next==3 and p.Missing==modules.Catalog.Treadmills[3].EnergyRequirement/2 and p.Ratio==0.5 and p.RebirthRequirement==3)
  s.Rebirths=3;assert(modules.Presentation.training(s).Ratio==1)
  s.Rebirths=0;s.Energy=1000;local r=modules.Presentation.rebirth(s);assert(r.Allowed and r.Multiplier==1 and r.NextMultiplier==1.5)
  s.Energy=0;assert(not modules.Presentation.rebirth(s).Allowed)

@@ -3,6 +3,7 @@ local Players=game:GetService("Players")
 local Http=game:GetService("HttpService")
 local RunService=game:GetService("RunService")
 local Models=game:GetService("ReplicatedStorage"):WaitForChild("PetModels")
+local Premium=require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("PremiumConfig"))
 local Followers={}
 function Followers.new(settings:any,gui:ScreenGui)
  local entries:any={};local connection:RBXScriptConnection?=nil
@@ -38,7 +39,8 @@ function Followers.new(settings:any,gui:ScreenGui)
     local ok,pets=pcall(function() return Http:JSONDecode(raw) end)
     if ok and type(pets)=="table" and #pets<=3 then
      for _,pet in ipairs(pets) do
-      local source=Models:FindFirstChild("Pet"..tostring(pet.SpeciesId))
+      local exclusive=Premium.Exclusives[pet.ExclusiveId]
+      local source=Models:FindFirstChild(if exclusive then exclusive.Model else "Pet"..tostring(pet.SpeciesId))
       if source and source:IsA("Model") then
        local model=source:Clone()
        for _,part in ipairs(model:GetDescendants()) do if part:IsA("BasePart") then

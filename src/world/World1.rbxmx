@@ -22785,7 +22785,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">1</token>
@@ -22823,7 +22823,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -22861,7 +22861,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -23046,7 +23046,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">2</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -23118,7 +23120,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">5</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -24679,43 +24683,6 @@
         <Properties>
           <string name="Name">Treadmill_1</string>
         </Properties>
-        <Item class="WedgePart">
-          <Properties>
-            <string name="Name">AccessRamp</string>
-            <bool name="Anchored">true</bool>
-            <bool name="CanCollide">true</bool>
-            <bool name="CanTouch">false</bool>
-            <bool name="CanQuery">true</bool>
-            <float name="Transparency">0</float>
-            <token name="Material">256</token>
-            <token name="TopSurface">0</token>
-            <token name="BottomSurface">0</token>
-            <Vector3 name="size">
-              <X>9</X>
-              <Y>1.3</Y>
-              <Z>11</Z>
-            </Vector3>
-            <Color3 name="Color">
-              <R>0.16862745098039217</R>
-              <G>0.8823529411764706</G>
-              <B>0.6509803921568628</B>
-            </Color3>
-            <CoordinateFrame name="CFrame">
-              <X>-54</X>
-              <Y>8.65</Y>
-              <Z>-40</Z>
-              <R00>-1.0</R00>
-              <R01>0</R01>
-              <R02>1.2246467991473532e-16</R02>
-              <R10>0</R10>
-              <R11>1</R11>
-              <R12>0</R12>
-              <R20>-1.2246467991473532e-16</R20>
-              <R21>0</R21>
-              <R22>-1.0</R22>
-            </CoordinateFrame>
-          </Properties>
-        </Item>
         <Item class="Part">
           <Properties>
             <string name="Name">RoundedBase</string>
@@ -24740,7 +24707,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-54</X>
-              <Y>8.25</Y>
+              <Y>7.05</Y>
               <Z>-51</Z>
               <R00>0</R00>
               <R01>-1</R01>
@@ -24778,7 +24745,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-54</X>
-              <Y>8.54</Y>
+              <Y>8.035</Y>
               <Z>-51</Z>
               <R00>0</R00>
               <R01>-1</R01>
@@ -24816,7 +24783,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-54</X>
-              <Y>8.75</Y>
+              <Y>7.55</Y>
               <Z>-51</Z>
               <R00>0</R00>
               <R01>-1</R01>
@@ -24854,7 +24821,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-54</X>
-              <Y>8.8</Y>
+              <Y>7.6</Y>
               <Z>-51</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -24892,7 +24859,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-54</X>
-              <Y>9.15</Y>
+              <Y>7.95</Y>
               <Z>-51</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -24930,7 +24897,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-54</X>
-              <Y>9.3</Y>
+              <Y>8.05</Y>
               <Z>-51</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -24968,7 +24935,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-59.4</X>
-              <Y>9.2</Y>
+              <Y>8.09</Y>
               <Z>-51</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -24997,7 +24964,7 @@
             <Vector3 name="size">
               <X>0.4</X>
               <Y>0.4</Y>
-              <Z>3.9799497484264803</Z>
+              <Z>3.841874542459709</Z>
             </Vector3>
             <Color3 name="Color">
               <R>0.4823529411764706</R>
@@ -25006,17 +24973,17 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-58.5</X>
-              <Y>10.4</Y>
+              <Y>9.3</Y>
               <Z>-56.0</Z>
-              <R00>-0.7071067811865475</R00>
-              <R01>-0.49746833816309105</R01>
-              <R02>0.5025189076296059</R02>
+              <R00>-0.7071067811865476</R00>
+              <R01>-0.4785366129910017</R01>
+              <R02>0.5205792062953536</R02>
               <R10>0.0</R10>
-              <R11>0.7106690545187012</R11>
-              <R12>0.7035264706814486</R12>
-              <R20>-0.7071067811865475</R20>
-              <R21>0.49746833816309105</R21>
-              <R22>-0.5025189076296059</R22>
+              <R11>0.7362101738323104</R11>
+              <R12>0.6767529681839596</R12>
+              <R20>-0.7071067811865476</R20>
+              <R21>0.4785366129910017</R21>
+              <R22>-0.5205792062953536</R22>
             </CoordinateFrame>
           </Properties>
         </Item>
@@ -25044,7 +25011,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-57.5</X>
-              <Y>11.8</Y>
+              <Y>10.6</Y>
               <Z>-57</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -25082,7 +25049,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-48.6</X>
-              <Y>9.2</Y>
+              <Y>8.09</Y>
               <Z>-51</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -25111,7 +25078,7 @@
             <Vector3 name="size">
               <X>0.4</X>
               <Y>0.4</Y>
-              <Z>3.9799497484264803</Z>
+              <Z>3.841874542459709</Z>
             </Vector3>
             <Color3 name="Color">
               <R>0.4823529411764706</R>
@@ -25120,17 +25087,17 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-49.5</X>
-              <Y>10.4</Y>
+              <Y>9.3</Y>
               <Z>-56.0</Z>
-              <R00>-0.7071067811865475</R00>
-              <R01>0.49746833816309105</R01>
-              <R02>-0.5025189076296059</R02>
+              <R00>-0.7071067811865476</R00>
+              <R01>0.4785366129910017</R01>
+              <R02>-0.5205792062953536</R02>
               <R10>0.0</R10>
-              <R11>0.7106690545187012</R11>
-              <R12>0.7035264706814486</R12>
-              <R20>0.7071067811865475</R20>
-              <R21>0.49746833816309105</R21>
-              <R22>-0.5025189076296059</R22>
+              <R11>0.7362101738323104</R11>
+              <R12>0.6767529681839596</R12>
+              <R20>0.7071067811865476</R20>
+              <R21>0.4785366129910017</R21>
+              <R22>-0.5205792062953536</R22>
             </CoordinateFrame>
           </Properties>
         </Item>
@@ -25158,7 +25125,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-50.5</X>
-              <Y>11.8</Y>
+              <Y>10.6</Y>
               <Z>-57</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -25196,7 +25163,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-54</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-56.0</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -25234,7 +25201,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-54</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-54.6</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -25272,7 +25239,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-54</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-53.2</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -25310,7 +25277,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-54</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-51.8</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -25348,7 +25315,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-54</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-50.4</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -25386,7 +25353,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-54</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-49.0</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -25424,7 +25391,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-54</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-47.6</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -25462,7 +25429,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-54</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-46.2</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -25500,7 +25467,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-54.35</X>
-              <Y>9.28</Y>
+              <Y>8.08</Y>
               <Z>-54</Z>
               <R00>0.8191520442889918</R00>
               <R01>0</R01>
@@ -25538,7 +25505,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-53.65</X>
-              <Y>9.28</Y>
+              <Y>8.08</Y>
               <Z>-54</Z>
               <R00>0.8191520442889918</R00>
               <R01>0</R01>
@@ -25576,7 +25543,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-54.35</X>
-              <Y>9.28</Y>
+              <Y>8.08</Y>
               <Z>-51</Z>
               <R00>0.8191520442889918</R00>
               <R01>0</R01>
@@ -25614,7 +25581,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-53.65</X>
-              <Y>9.28</Y>
+              <Y>8.08</Y>
               <Z>-51</Z>
               <R00>0.8191520442889918</R00>
               <R01>0</R01>
@@ -25652,7 +25619,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-54.35</X>
-              <Y>9.28</Y>
+              <Y>8.08</Y>
               <Z>-48</Z>
               <R00>0.8191520442889918</R00>
               <R01>0</R01>
@@ -25690,7 +25657,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-53.65</X>
-              <Y>9.28</Y>
+              <Y>8.08</Y>
               <Z>-48</Z>
               <R00>0.8191520442889918</R00>
               <R01>0</R01>
@@ -25728,7 +25695,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-54</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-57.2</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -25766,7 +25733,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-54.0</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-55.1</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -25804,7 +25771,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-52.358153886817135</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-55.890671416096666</Z>
               <R00>0.766044443118978</R00>
               <R01>0</R01>
@@ -25842,7 +25809,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-51.95265138441817</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-57.66729396130826</Z>
               <R00>0.17364817766693041</R00>
               <R01>0</R01>
@@ -25880,7 +25847,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-53.08884414785313</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-59.09203462259508</Z>
               <R00>-0.4999999999999998</R00>
               <R01>0</R01>
@@ -25918,7 +25885,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-54.91115585214687</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-59.09203462259509</Z>
               <R00>-0.9396926207859083</R00>
               <R01>0</R01>
@@ -25956,7 +25923,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-56.04734861558183</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-57.66729396130826</Z>
               <R00>-0.9396926207859084</R00>
               <R01>0</R01>
@@ -25994,7 +25961,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-55.641846113182865</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-55.890671416096666</Z>
               <R00>-0.5000000000000004</R00>
               <R01>0</R01>
@@ -26031,7 +25998,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-48.3</X>
-              <Y>9.7</Y>
+              <Y>8.5</Y>
               <Z>-54</Z>
               <R00>6.123233995736766e-17</R00>
               <R01>0</R01>
@@ -26068,7 +26035,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-59.7</X>
-              <Y>9.7</Y>
+              <Y>8.5</Y>
               <Z>-54</Z>
               <R00>6.123233995736766e-17</R00>
               <R01>0</R01>
@@ -26105,7 +26072,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-48.3</X>
-              <Y>9.7</Y>
+              <Y>8.5</Y>
               <Z>-52</Z>
               <R00>6.123233995736766e-17</R00>
               <R01>0</R01>
@@ -26124,43 +26091,6 @@
         <Properties>
           <string name="Name">Treadmill_2</string>
         </Properties>
-        <Item class="WedgePart">
-          <Properties>
-            <string name="Name">AccessRamp</string>
-            <bool name="Anchored">true</bool>
-            <bool name="CanCollide">true</bool>
-            <bool name="CanTouch">false</bool>
-            <bool name="CanQuery">true</bool>
-            <float name="Transparency">0</float>
-            <token name="Material">256</token>
-            <token name="TopSurface">0</token>
-            <token name="BottomSurface">0</token>
-            <Vector3 name="size">
-              <X>9</X>
-              <Y>1.3</Y>
-              <Z>11</Z>
-            </Vector3>
-            <Color3 name="Color">
-              <R>0.20392156862745098</R>
-              <G>0.7254901960784313</G>
-              <B>1.0</B>
-            </Color3>
-            <CoordinateFrame name="CFrame">
-              <X>-36</X>
-              <Y>8.65</Y>
-              <Z>-40</Z>
-              <R00>-1.0</R00>
-              <R01>0</R01>
-              <R02>1.2246467991473532e-16</R02>
-              <R10>0</R10>
-              <R11>1</R11>
-              <R12>0</R12>
-              <R20>-1.2246467991473532e-16</R20>
-              <R21>0</R21>
-              <R22>-1.0</R22>
-            </CoordinateFrame>
-          </Properties>
-        </Item>
         <Item class="Part">
           <Properties>
             <string name="Name">RoundedBase</string>
@@ -26185,7 +26115,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-36</X>
-              <Y>8.25</Y>
+              <Y>7.05</Y>
               <Z>-51</Z>
               <R00>0</R00>
               <R01>-1</R01>
@@ -26223,7 +26153,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-36</X>
-              <Y>8.54</Y>
+              <Y>8.035</Y>
               <Z>-51</Z>
               <R00>0</R00>
               <R01>-1</R01>
@@ -26261,7 +26191,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-36</X>
-              <Y>8.75</Y>
+              <Y>7.55</Y>
               <Z>-51</Z>
               <R00>0</R00>
               <R01>-1</R01>
@@ -26299,7 +26229,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-36</X>
-              <Y>8.8</Y>
+              <Y>7.6</Y>
               <Z>-51</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -26337,7 +26267,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-36</X>
-              <Y>9.15</Y>
+              <Y>7.95</Y>
               <Z>-51</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -26375,7 +26305,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-36</X>
-              <Y>9.3</Y>
+              <Y>8.05</Y>
               <Z>-51</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -26413,7 +26343,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-41.4</X>
-              <Y>9.2</Y>
+              <Y>8.09</Y>
               <Z>-51</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -26442,7 +26372,7 @@
             <Vector3 name="size">
               <X>0.4</X>
               <Y>0.4</Y>
-              <Z>3.9799497484264803</Z>
+              <Z>3.841874542459709</Z>
             </Vector3>
             <Color3 name="Color">
               <R>0.4823529411764706</R>
@@ -26451,17 +26381,17 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-40.5</X>
-              <Y>10.4</Y>
+              <Y>9.3</Y>
               <Z>-56.0</Z>
-              <R00>-0.7071067811865475</R00>
-              <R01>-0.49746833816309105</R01>
-              <R02>0.5025189076296059</R02>
+              <R00>-0.7071067811865476</R00>
+              <R01>-0.4785366129910017</R01>
+              <R02>0.5205792062953536</R02>
               <R10>0.0</R10>
-              <R11>0.7106690545187012</R11>
-              <R12>0.7035264706814486</R12>
-              <R20>-0.7071067811865475</R20>
-              <R21>0.49746833816309105</R21>
-              <R22>-0.5025189076296059</R22>
+              <R11>0.7362101738323104</R11>
+              <R12>0.6767529681839596</R12>
+              <R20>-0.7071067811865476</R20>
+              <R21>0.4785366129910017</R21>
+              <R22>-0.5205792062953536</R22>
             </CoordinateFrame>
           </Properties>
         </Item>
@@ -26489,7 +26419,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-39.5</X>
-              <Y>11.8</Y>
+              <Y>10.6</Y>
               <Z>-57</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -26527,7 +26457,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-30.6</X>
-              <Y>9.2</Y>
+              <Y>8.09</Y>
               <Z>-51</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -26556,7 +26486,7 @@
             <Vector3 name="size">
               <X>0.4</X>
               <Y>0.4</Y>
-              <Z>3.9799497484264803</Z>
+              <Z>3.841874542459709</Z>
             </Vector3>
             <Color3 name="Color">
               <R>0.4823529411764706</R>
@@ -26565,17 +26495,17 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-31.5</X>
-              <Y>10.4</Y>
+              <Y>9.3</Y>
               <Z>-56.0</Z>
-              <R00>-0.7071067811865475</R00>
-              <R01>0.49746833816309105</R01>
-              <R02>-0.5025189076296059</R02>
+              <R00>-0.7071067811865476</R00>
+              <R01>0.4785366129910017</R01>
+              <R02>-0.5205792062953536</R02>
               <R10>0.0</R10>
-              <R11>0.7106690545187012</R11>
-              <R12>0.7035264706814486</R12>
-              <R20>0.7071067811865475</R20>
-              <R21>0.49746833816309105</R21>
-              <R22>-0.5025189076296059</R22>
+              <R11>0.7362101738323104</R11>
+              <R12>0.6767529681839596</R12>
+              <R20>0.7071067811865476</R20>
+              <R21>0.4785366129910017</R21>
+              <R22>-0.5205792062953536</R22>
             </CoordinateFrame>
           </Properties>
         </Item>
@@ -26603,7 +26533,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-32.5</X>
-              <Y>11.8</Y>
+              <Y>10.6</Y>
               <Z>-57</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -26641,7 +26571,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-36</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-56.0</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -26679,7 +26609,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-36</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-54.6</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -26717,7 +26647,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-36</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-53.2</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -26755,7 +26685,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-36</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-51.8</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -26793,7 +26723,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-36</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-50.4</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -26831,7 +26761,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-36</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-49.0</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -26869,7 +26799,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-36</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-47.6</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -26907,7 +26837,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-36</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-46.2</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -26945,7 +26875,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-36.35</X>
-              <Y>9.28</Y>
+              <Y>8.08</Y>
               <Z>-54</Z>
               <R00>0.8191520442889918</R00>
               <R01>0</R01>
@@ -26983,7 +26913,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-35.65</X>
-              <Y>9.28</Y>
+              <Y>8.08</Y>
               <Z>-54</Z>
               <R00>0.8191520442889918</R00>
               <R01>0</R01>
@@ -27021,7 +26951,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-36.35</X>
-              <Y>9.28</Y>
+              <Y>8.08</Y>
               <Z>-51</Z>
               <R00>0.8191520442889918</R00>
               <R01>0</R01>
@@ -27059,7 +26989,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-35.65</X>
-              <Y>9.28</Y>
+              <Y>8.08</Y>
               <Z>-51</Z>
               <R00>0.8191520442889918</R00>
               <R01>0</R01>
@@ -27097,7 +27027,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-36.35</X>
-              <Y>9.28</Y>
+              <Y>8.08</Y>
               <Z>-48</Z>
               <R00>0.8191520442889918</R00>
               <R01>0</R01>
@@ -27135,7 +27065,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-35.65</X>
-              <Y>9.28</Y>
+              <Y>8.08</Y>
               <Z>-48</Z>
               <R00>0.8191520442889918</R00>
               <R01>0</R01>
@@ -27173,7 +27103,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-36</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-57.2</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -27211,7 +27141,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-36.0</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-55.1</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -27249,7 +27179,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-34.51507575950825</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-55.71507575950825</Z>
               <R00>0.766044443118978</R00>
               <R01>0</R01>
@@ -27287,7 +27217,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-33.9</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-57.2</Z>
               <R00>0.17364817766693041</R00>
               <R01>0</R01>
@@ -27325,7 +27255,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-34.51507575950825</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-58.68492424049175</Z>
               <R00>-0.4999999999999998</R00>
               <R01>0</R01>
@@ -27363,7 +27293,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-36.0</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-59.300000000000004</Z>
               <R00>-0.9396926207859083</R00>
               <R01>0</R01>
@@ -27401,7 +27331,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-37.48492424049175</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-58.68492424049175</Z>
               <R00>-0.9396926207859084</R00>
               <R01>0</R01>
@@ -27439,7 +27369,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-38.1</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-57.2</Z>
               <R00>-0.5000000000000004</R00>
               <R01>0</R01>
@@ -27477,7 +27407,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-37.48492424049175</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-55.71507575950825</Z>
               <R00>0.17364817766692997</R00>
               <R01>0</R01>
@@ -27514,7 +27444,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-30.3</X>
-              <Y>9.7</Y>
+              <Y>8.5</Y>
               <Z>-54</Z>
               <R00>6.123233995736766e-17</R00>
               <R01>0</R01>
@@ -27551,7 +27481,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-41.7</X>
-              <Y>9.7</Y>
+              <Y>8.5</Y>
               <Z>-54</Z>
               <R00>6.123233995736766e-17</R00>
               <R01>0</R01>
@@ -27588,7 +27518,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-30.3</X>
-              <Y>9.7</Y>
+              <Y>8.5</Y>
               <Z>-52</Z>
               <R00>6.123233995736766e-17</R00>
               <R01>0</R01>
@@ -27625,7 +27555,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-41.7</X>
-              <Y>9.7</Y>
+              <Y>8.5</Y>
               <Z>-52</Z>
               <R00>6.123233995736766e-17</R00>
               <R01>0</R01>
@@ -27644,43 +27574,6 @@
         <Properties>
           <string name="Name">Treadmill_3</string>
         </Properties>
-        <Item class="WedgePart">
-          <Properties>
-            <string name="Name">AccessRamp</string>
-            <bool name="Anchored">true</bool>
-            <bool name="CanCollide">true</bool>
-            <bool name="CanTouch">false</bool>
-            <bool name="CanQuery">true</bool>
-            <float name="Transparency">0</float>
-            <token name="Material">256</token>
-            <token name="TopSurface">0</token>
-            <token name="BottomSurface">0</token>
-            <Vector3 name="size">
-              <X>9</X>
-              <Y>1.3</Y>
-              <Z>11</Z>
-            </Vector3>
-            <Color3 name="Color">
-              <R>1.0</R>
-              <G>0.803921568627451</G>
-              <B>0.2549019607843137</B>
-            </Color3>
-            <CoordinateFrame name="CFrame">
-              <X>-18</X>
-              <Y>8.65</Y>
-              <Z>-40</Z>
-              <R00>-1.0</R00>
-              <R01>0</R01>
-              <R02>1.2246467991473532e-16</R02>
-              <R10>0</R10>
-              <R11>1</R11>
-              <R12>0</R12>
-              <R20>-1.2246467991473532e-16</R20>
-              <R21>0</R21>
-              <R22>-1.0</R22>
-            </CoordinateFrame>
-          </Properties>
-        </Item>
         <Item class="Part">
           <Properties>
             <string name="Name">RoundedBase</string>
@@ -27705,7 +27598,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-18</X>
-              <Y>8.25</Y>
+              <Y>7.05</Y>
               <Z>-51</Z>
               <R00>0</R00>
               <R01>-1</R01>
@@ -27743,7 +27636,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-18</X>
-              <Y>8.54</Y>
+              <Y>8.035</Y>
               <Z>-51</Z>
               <R00>0</R00>
               <R01>-1</R01>
@@ -27781,7 +27674,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-18</X>
-              <Y>8.75</Y>
+              <Y>7.55</Y>
               <Z>-51</Z>
               <R00>0</R00>
               <R01>-1</R01>
@@ -27819,7 +27712,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-18</X>
-              <Y>8.8</Y>
+              <Y>7.6</Y>
               <Z>-51</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -27857,7 +27750,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-18</X>
-              <Y>9.15</Y>
+              <Y>7.95</Y>
               <Z>-51</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -27895,7 +27788,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-18</X>
-              <Y>9.3</Y>
+              <Y>8.05</Y>
               <Z>-51</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -27933,7 +27826,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-23.4</X>
-              <Y>9.2</Y>
+              <Y>8.09</Y>
               <Z>-51</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -27962,7 +27855,7 @@
             <Vector3 name="size">
               <X>0.4</X>
               <Y>0.4</Y>
-              <Z>3.9799497484264803</Z>
+              <Z>3.841874542459709</Z>
             </Vector3>
             <Color3 name="Color">
               <R>0.4823529411764706</R>
@@ -27971,17 +27864,17 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-22.5</X>
-              <Y>10.4</Y>
+              <Y>9.3</Y>
               <Z>-56.0</Z>
-              <R00>-0.7071067811865475</R00>
-              <R01>-0.49746833816309105</R01>
-              <R02>0.5025189076296059</R02>
+              <R00>-0.7071067811865476</R00>
+              <R01>-0.4785366129910017</R01>
+              <R02>0.5205792062953536</R02>
               <R10>0.0</R10>
-              <R11>0.7106690545187012</R11>
-              <R12>0.7035264706814486</R12>
-              <R20>-0.7071067811865475</R20>
-              <R21>0.49746833816309105</R21>
-              <R22>-0.5025189076296059</R22>
+              <R11>0.7362101738323104</R11>
+              <R12>0.6767529681839596</R12>
+              <R20>-0.7071067811865476</R20>
+              <R21>0.4785366129910017</R21>
+              <R22>-0.5205792062953536</R22>
             </CoordinateFrame>
           </Properties>
         </Item>
@@ -28009,7 +27902,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-21.5</X>
-              <Y>11.8</Y>
+              <Y>10.6</Y>
               <Z>-57</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -28047,7 +27940,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-12.6</X>
-              <Y>9.2</Y>
+              <Y>8.09</Y>
               <Z>-51</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -28076,7 +27969,7 @@
             <Vector3 name="size">
               <X>0.4</X>
               <Y>0.4</Y>
-              <Z>3.9799497484264803</Z>
+              <Z>3.841874542459709</Z>
             </Vector3>
             <Color3 name="Color">
               <R>0.4823529411764706</R>
@@ -28085,17 +27978,17 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-13.5</X>
-              <Y>10.4</Y>
+              <Y>9.3</Y>
               <Z>-56.0</Z>
-              <R00>-0.7071067811865475</R00>
-              <R01>0.49746833816309105</R01>
-              <R02>-0.5025189076296059</R02>
+              <R00>-0.7071067811865476</R00>
+              <R01>0.4785366129910017</R01>
+              <R02>-0.5205792062953536</R02>
               <R10>0.0</R10>
-              <R11>0.7106690545187012</R11>
-              <R12>0.7035264706814486</R12>
-              <R20>0.7071067811865475</R20>
-              <R21>0.49746833816309105</R21>
-              <R22>-0.5025189076296059</R22>
+              <R11>0.7362101738323104</R11>
+              <R12>0.6767529681839596</R12>
+              <R20>0.7071067811865476</R20>
+              <R21>0.4785366129910017</R21>
+              <R22>-0.5205792062953536</R22>
             </CoordinateFrame>
           </Properties>
         </Item>
@@ -28123,7 +28016,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-14.5</X>
-              <Y>11.8</Y>
+              <Y>10.6</Y>
               <Z>-57</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -28161,7 +28054,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-18</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-56.0</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -28199,7 +28092,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-18</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-54.6</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -28237,7 +28130,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-18</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-53.2</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -28275,7 +28168,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-18</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-51.8</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -28313,7 +28206,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-18</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-50.4</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -28351,7 +28244,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-18</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-49.0</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -28389,7 +28282,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-18</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-47.6</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -28427,7 +28320,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-18</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-46.2</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -28465,7 +28358,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-18.35</X>
-              <Y>9.28</Y>
+              <Y>8.08</Y>
               <Z>-54</Z>
               <R00>0.8191520442889918</R00>
               <R01>0</R01>
@@ -28503,7 +28396,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-17.65</X>
-              <Y>9.28</Y>
+              <Y>8.08</Y>
               <Z>-54</Z>
               <R00>0.8191520442889918</R00>
               <R01>0</R01>
@@ -28541,7 +28434,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-18.35</X>
-              <Y>9.28</Y>
+              <Y>8.08</Y>
               <Z>-51</Z>
               <R00>0.8191520442889918</R00>
               <R01>0</R01>
@@ -28579,7 +28472,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-17.65</X>
-              <Y>9.28</Y>
+              <Y>8.08</Y>
               <Z>-51</Z>
               <R00>0.8191520442889918</R00>
               <R01>0</R01>
@@ -28617,7 +28510,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-18.35</X>
-              <Y>9.28</Y>
+              <Y>8.08</Y>
               <Z>-48</Z>
               <R00>0.8191520442889918</R00>
               <R01>0</R01>
@@ -28655,7 +28548,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-17.65</X>
-              <Y>9.28</Y>
+              <Y>8.08</Y>
               <Z>-48</Z>
               <R00>0.8191520442889918</R00>
               <R01>0</R01>
@@ -28693,7 +28586,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-18</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-57.2</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -28731,7 +28624,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-18.0</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-55.1</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -28769,7 +28662,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-16.65014601965827</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-55.59130666945015</Z>
               <R00>0.766044443118978</R00>
               <R01>0</R01>
@@ -28807,7 +28700,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-15.931903718674363</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-56.83533882689945</Z>
               <R00>0.17364817766693041</R00>
               <R01>0</R01>
@@ -28845,7 +28738,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-16.181346652052678</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-58.25</Z>
               <R00>-0.4999999999999998</R00>
               <R01>0</R01>
@@ -28883,7 +28776,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-17.281757699016094</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-59.17335450365041</Z>
               <R00>-0.9396926207859083</R00>
               <R01>0</R01>
@@ -28921,7 +28814,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-18.718242300983903</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-59.17335450365041</Z>
               <R00>-0.9396926207859084</R00>
               <R01>0</R01>
@@ -28959,7 +28852,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-19.818653347947322</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-58.25000000000001</Z>
               <R00>-0.5000000000000004</R00>
               <R01>0</R01>
@@ -28997,7 +28890,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-20.068096281325637</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-56.83533882689945</Z>
               <R00>0.17364817766692997</R00>
               <R01>0</R01>
@@ -29035,7 +28928,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-19.349853980341734</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-55.59130666945015</Z>
               <R00>0.7660444431189778</R00>
               <R01>0</R01>
@@ -29072,7 +28965,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-12.3</X>
-              <Y>9.7</Y>
+              <Y>8.5</Y>
               <Z>-54</Z>
               <R00>6.123233995736766e-17</R00>
               <R01>0</R01>
@@ -29109,7 +29002,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-23.7</X>
-              <Y>9.7</Y>
+              <Y>8.5</Y>
               <Z>-54</Z>
               <R00>6.123233995736766e-17</R00>
               <R01>0</R01>
@@ -29146,7 +29039,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-12.3</X>
-              <Y>9.7</Y>
+              <Y>8.5</Y>
               <Z>-52</Z>
               <R00>6.123233995736766e-17</R00>
               <R01>0</R01>
@@ -29183,7 +29076,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-23.7</X>
-              <Y>9.7</Y>
+              <Y>8.5</Y>
               <Z>-52</Z>
               <R00>6.123233995736766e-17</R00>
               <R01>0</R01>
@@ -29220,7 +29113,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-12.3</X>
-              <Y>9.7</Y>
+              <Y>8.5</Y>
               <Z>-50</Z>
               <R00>6.123233995736766e-17</R00>
               <R01>0</R01>
@@ -29239,43 +29132,6 @@
         <Properties>
           <string name="Name">Treadmill_4</string>
         </Properties>
-        <Item class="WedgePart">
-          <Properties>
-            <string name="Name">AccessRamp</string>
-            <bool name="Anchored">true</bool>
-            <bool name="CanCollide">true</bool>
-            <bool name="CanTouch">false</bool>
-            <bool name="CanQuery">true</bool>
-            <float name="Transparency">0</float>
-            <token name="Material">256</token>
-            <token name="TopSurface">0</token>
-            <token name="BottomSurface">0</token>
-            <Vector3 name="size">
-              <X>9</X>
-              <Y>1.3</Y>
-              <Z>11</Z>
-            </Vector3>
-            <Color3 name="Color">
-              <R>1.0</R>
-              <G>0.49411764705882355</G>
-              <B>0.2549019607843137</B>
-            </Color3>
-            <CoordinateFrame name="CFrame">
-              <X>24</X>
-              <Y>8.65</Y>
-              <Z>-40</Z>
-              <R00>-1.0</R00>
-              <R01>0</R01>
-              <R02>1.2246467991473532e-16</R02>
-              <R10>0</R10>
-              <R11>1</R11>
-              <R12>0</R12>
-              <R20>-1.2246467991473532e-16</R20>
-              <R21>0</R21>
-              <R22>-1.0</R22>
-            </CoordinateFrame>
-          </Properties>
-        </Item>
         <Item class="Part">
           <Properties>
             <string name="Name">RoundedBase</string>
@@ -29300,7 +29156,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>24</X>
-              <Y>8.25</Y>
+              <Y>7.05</Y>
               <Z>-51</Z>
               <R00>0</R00>
               <R01>-1</R01>
@@ -29338,7 +29194,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>24</X>
-              <Y>8.54</Y>
+              <Y>8.035</Y>
               <Z>-51</Z>
               <R00>0</R00>
               <R01>-1</R01>
@@ -29376,7 +29232,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>24</X>
-              <Y>8.75</Y>
+              <Y>7.55</Y>
               <Z>-51</Z>
               <R00>0</R00>
               <R01>-1</R01>
@@ -29414,7 +29270,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>24</X>
-              <Y>8.8</Y>
+              <Y>7.6</Y>
               <Z>-51</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -29452,7 +29308,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>24</X>
-              <Y>9.15</Y>
+              <Y>7.95</Y>
               <Z>-51</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -29490,7 +29346,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>24</X>
-              <Y>9.3</Y>
+              <Y>8.05</Y>
               <Z>-51</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -29528,7 +29384,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>18.6</X>
-              <Y>9.2</Y>
+              <Y>8.09</Y>
               <Z>-51</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -29557,7 +29413,7 @@
             <Vector3 name="size">
               <X>0.4</X>
               <Y>0.4</Y>
-              <Z>3.9799497484264803</Z>
+              <Z>3.841874542459709</Z>
             </Vector3>
             <Color3 name="Color">
               <R>0.4823529411764706</R>
@@ -29566,17 +29422,17 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>19.5</X>
-              <Y>10.4</Y>
+              <Y>9.3</Y>
               <Z>-56.0</Z>
-              <R00>-0.7071067811865475</R00>
-              <R01>-0.49746833816309105</R01>
-              <R02>0.5025189076296059</R02>
+              <R00>-0.7071067811865476</R00>
+              <R01>-0.4785366129910017</R01>
+              <R02>0.5205792062953536</R02>
               <R10>0.0</R10>
-              <R11>0.7106690545187012</R11>
-              <R12>0.7035264706814486</R12>
-              <R20>-0.7071067811865475</R20>
-              <R21>0.49746833816309105</R21>
-              <R22>-0.5025189076296059</R22>
+              <R11>0.7362101738323104</R11>
+              <R12>0.6767529681839596</R12>
+              <R20>-0.7071067811865476</R20>
+              <R21>0.4785366129910017</R21>
+              <R22>-0.5205792062953536</R22>
             </CoordinateFrame>
           </Properties>
         </Item>
@@ -29604,7 +29460,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>20.5</X>
-              <Y>11.8</Y>
+              <Y>10.6</Y>
               <Z>-57</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -29642,7 +29498,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>29.4</X>
-              <Y>9.2</Y>
+              <Y>8.09</Y>
               <Z>-51</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -29671,7 +29527,7 @@
             <Vector3 name="size">
               <X>0.4</X>
               <Y>0.4</Y>
-              <Z>3.9799497484264803</Z>
+              <Z>3.841874542459709</Z>
             </Vector3>
             <Color3 name="Color">
               <R>0.4823529411764706</R>
@@ -29680,17 +29536,17 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>28.5</X>
-              <Y>10.4</Y>
+              <Y>9.3</Y>
               <Z>-56.0</Z>
-              <R00>-0.7071067811865475</R00>
-              <R01>0.49746833816309105</R01>
-              <R02>-0.5025189076296059</R02>
+              <R00>-0.7071067811865476</R00>
+              <R01>0.4785366129910017</R01>
+              <R02>-0.5205792062953536</R02>
               <R10>0.0</R10>
-              <R11>0.7106690545187012</R11>
-              <R12>0.7035264706814486</R12>
-              <R20>0.7071067811865475</R20>
-              <R21>0.49746833816309105</R21>
-              <R22>-0.5025189076296059</R22>
+              <R11>0.7362101738323104</R11>
+              <R12>0.6767529681839596</R12>
+              <R20>0.7071067811865476</R20>
+              <R21>0.4785366129910017</R21>
+              <R22>-0.5205792062953536</R22>
             </CoordinateFrame>
           </Properties>
         </Item>
@@ -29718,7 +29574,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>27.5</X>
-              <Y>11.8</Y>
+              <Y>10.6</Y>
               <Z>-57</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -29756,7 +29612,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>24</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-56.0</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -29794,7 +29650,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>24</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-54.6</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -29832,7 +29688,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>24</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-53.2</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -29870,7 +29726,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>24</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-51.8</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -29908,7 +29764,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>24</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-50.4</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -29946,7 +29802,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>24</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-49.0</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -29984,7 +29840,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>24</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-47.6</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -30022,7 +29878,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>24</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-46.2</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -30060,7 +29916,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>23.65</X>
-              <Y>9.28</Y>
+              <Y>8.08</Y>
               <Z>-54</Z>
               <R00>0.8191520442889918</R00>
               <R01>0</R01>
@@ -30098,7 +29954,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>24.35</X>
-              <Y>9.28</Y>
+              <Y>8.08</Y>
               <Z>-54</Z>
               <R00>0.8191520442889918</R00>
               <R01>0</R01>
@@ -30136,7 +29992,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>23.65</X>
-              <Y>9.28</Y>
+              <Y>8.08</Y>
               <Z>-51</Z>
               <R00>0.8191520442889918</R00>
               <R01>0</R01>
@@ -30174,7 +30030,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>24.35</X>
-              <Y>9.28</Y>
+              <Y>8.08</Y>
               <Z>-51</Z>
               <R00>0.8191520442889918</R00>
               <R01>0</R01>
@@ -30212,7 +30068,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>23.65</X>
-              <Y>9.28</Y>
+              <Y>8.08</Y>
               <Z>-48</Z>
               <R00>0.8191520442889918</R00>
               <R01>0</R01>
@@ -30250,7 +30106,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>24.35</X>
-              <Y>9.28</Y>
+              <Y>8.08</Y>
               <Z>-48</Z>
               <R00>0.8191520442889918</R00>
               <R01>0</R01>
@@ -30288,7 +30144,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>24</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-57.2</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -30326,7 +30182,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>24.0</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-55.1</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -30364,7 +30220,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>25.234349029814194</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-55.50106431181261</Z>
               <R00>0.766044443118978</R00>
               <R01>0</R01>
@@ -30402,7 +30258,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>25.997218684219824</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-56.55106431181261</Z>
               <R00>0.17364817766693041</R00>
               <R01>0</R01>
@@ -30440,7 +30296,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>25.997218684219824</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-57.84893568818739</Z>
               <R00>-0.4999999999999998</R00>
               <R01>0</R01>
@@ -30478,7 +30334,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>25.234349029814194</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-58.89893568818739</Z>
               <R00>-0.9396926207859083</R00>
               <R01>0</R01>
@@ -30516,7 +30372,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>24.0</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-59.300000000000004</Z>
               <R00>-0.9396926207859084</R00>
               <R01>0</R01>
@@ -30554,7 +30410,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>22.765650970185806</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-58.89893568818739</Z>
               <R00>-0.5000000000000004</R00>
               <R01>0</R01>
@@ -30592,7 +30448,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>22.002781315780176</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-57.848935688187396</Z>
               <R00>0.17364817766692997</R00>
               <R01>0</R01>
@@ -30630,7 +30486,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>22.002781315780176</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-56.55106431181262</Z>
               <R00>0.7660444431189778</R00>
               <R01>0</R01>
@@ -30668,7 +30524,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>22.765650970185806</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-55.50106431181261</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -30705,7 +30561,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>29.7</X>
-              <Y>9.7</Y>
+              <Y>8.5</Y>
               <Z>-54</Z>
               <R00>6.123233995736766e-17</R00>
               <R01>0</R01>
@@ -30742,7 +30598,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>18.3</X>
-              <Y>9.7</Y>
+              <Y>8.5</Y>
               <Z>-54</Z>
               <R00>6.123233995736766e-17</R00>
               <R01>0</R01>
@@ -30779,7 +30635,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>29.7</X>
-              <Y>9.7</Y>
+              <Y>8.5</Y>
               <Z>-52</Z>
               <R00>6.123233995736766e-17</R00>
               <R01>0</R01>
@@ -30816,7 +30672,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>18.3</X>
-              <Y>9.7</Y>
+              <Y>8.5</Y>
               <Z>-52</Z>
               <R00>6.123233995736766e-17</R00>
               <R01>0</R01>
@@ -30853,7 +30709,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>29.7</X>
-              <Y>9.7</Y>
+              <Y>8.5</Y>
               <Z>-50</Z>
               <R00>6.123233995736766e-17</R00>
               <R01>0</R01>
@@ -30890,7 +30746,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>18.3</X>
-              <Y>9.7</Y>
+              <Y>8.5</Y>
               <Z>-50</Z>
               <R00>6.123233995736766e-17</R00>
               <R01>0</R01>
@@ -30909,43 +30765,6 @@
         <Properties>
           <string name="Name">Treadmill_5</string>
         </Properties>
-        <Item class="WedgePart">
-          <Properties>
-            <string name="Name">AccessRamp</string>
-            <bool name="Anchored">true</bool>
-            <bool name="CanCollide">true</bool>
-            <bool name="CanTouch">false</bool>
-            <bool name="CanQuery">true</bool>
-            <float name="Transparency">0</float>
-            <token name="Material">256</token>
-            <token name="TopSurface">0</token>
-            <token name="BottomSurface">0</token>
-            <Vector3 name="size">
-              <X>9</X>
-              <Y>1.3</Y>
-              <Z>11</Z>
-            </Vector3>
-            <Color3 name="Color">
-              <R>0.6235294117647059</R>
-              <G>0.4745098039215686</G>
-              <B>1.0</B>
-            </Color3>
-            <CoordinateFrame name="CFrame">
-              <X>42</X>
-              <Y>8.65</Y>
-              <Z>-40</Z>
-              <R00>-1.0</R00>
-              <R01>0</R01>
-              <R02>1.2246467991473532e-16</R02>
-              <R10>0</R10>
-              <R11>1</R11>
-              <R12>0</R12>
-              <R20>-1.2246467991473532e-16</R20>
-              <R21>0</R21>
-              <R22>-1.0</R22>
-            </CoordinateFrame>
-          </Properties>
-        </Item>
         <Item class="Part">
           <Properties>
             <string name="Name">RoundedBase</string>
@@ -30970,7 +30789,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>42</X>
-              <Y>8.25</Y>
+              <Y>7.05</Y>
               <Z>-51</Z>
               <R00>0</R00>
               <R01>-1</R01>
@@ -31008,7 +30827,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>42</X>
-              <Y>8.54</Y>
+              <Y>8.035</Y>
               <Z>-51</Z>
               <R00>0</R00>
               <R01>-1</R01>
@@ -31046,7 +30865,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>42</X>
-              <Y>8.75</Y>
+              <Y>7.55</Y>
               <Z>-51</Z>
               <R00>0</R00>
               <R01>-1</R01>
@@ -31084,7 +30903,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>42</X>
-              <Y>8.8</Y>
+              <Y>7.6</Y>
               <Z>-51</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -31122,7 +30941,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>42</X>
-              <Y>9.15</Y>
+              <Y>7.95</Y>
               <Z>-51</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -31160,7 +30979,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>42</X>
-              <Y>9.3</Y>
+              <Y>8.05</Y>
               <Z>-51</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -31198,7 +31017,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>36.6</X>
-              <Y>9.2</Y>
+              <Y>8.09</Y>
               <Z>-51</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -31227,7 +31046,7 @@
             <Vector3 name="size">
               <X>0.4</X>
               <Y>0.4</Y>
-              <Z>3.9799497484264803</Z>
+              <Z>3.841874542459709</Z>
             </Vector3>
             <Color3 name="Color">
               <R>0.4823529411764706</R>
@@ -31236,17 +31055,17 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>37.5</X>
-              <Y>10.4</Y>
+              <Y>9.3</Y>
               <Z>-56.0</Z>
-              <R00>-0.7071067811865475</R00>
-              <R01>-0.49746833816309105</R01>
-              <R02>0.5025189076296059</R02>
+              <R00>-0.7071067811865476</R00>
+              <R01>-0.4785366129910017</R01>
+              <R02>0.5205792062953536</R02>
               <R10>0.0</R10>
-              <R11>0.7106690545187012</R11>
-              <R12>0.7035264706814486</R12>
-              <R20>-0.7071067811865475</R20>
-              <R21>0.49746833816309105</R21>
-              <R22>-0.5025189076296059</R22>
+              <R11>0.7362101738323104</R11>
+              <R12>0.6767529681839596</R12>
+              <R20>-0.7071067811865476</R20>
+              <R21>0.4785366129910017</R21>
+              <R22>-0.5205792062953536</R22>
             </CoordinateFrame>
           </Properties>
         </Item>
@@ -31274,7 +31093,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>38.5</X>
-              <Y>11.8</Y>
+              <Y>10.6</Y>
               <Z>-57</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -31312,7 +31131,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>47.4</X>
-              <Y>9.2</Y>
+              <Y>8.09</Y>
               <Z>-51</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -31341,7 +31160,7 @@
             <Vector3 name="size">
               <X>0.4</X>
               <Y>0.4</Y>
-              <Z>3.9799497484264803</Z>
+              <Z>3.841874542459709</Z>
             </Vector3>
             <Color3 name="Color">
               <R>0.4823529411764706</R>
@@ -31350,17 +31169,17 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>46.5</X>
-              <Y>10.4</Y>
+              <Y>9.3</Y>
               <Z>-56.0</Z>
-              <R00>-0.7071067811865475</R00>
-              <R01>0.49746833816309105</R01>
-              <R02>-0.5025189076296059</R02>
+              <R00>-0.7071067811865476</R00>
+              <R01>0.4785366129910017</R01>
+              <R02>-0.5205792062953536</R02>
               <R10>0.0</R10>
-              <R11>0.7106690545187012</R11>
-              <R12>0.7035264706814486</R12>
-              <R20>0.7071067811865475</R20>
-              <R21>0.49746833816309105</R21>
-              <R22>-0.5025189076296059</R22>
+              <R11>0.7362101738323104</R11>
+              <R12>0.6767529681839596</R12>
+              <R20>0.7071067811865476</R20>
+              <R21>0.4785366129910017</R21>
+              <R22>-0.5205792062953536</R22>
             </CoordinateFrame>
           </Properties>
         </Item>
@@ -31388,7 +31207,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>45.5</X>
-              <Y>11.8</Y>
+              <Y>10.6</Y>
               <Z>-57</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -31426,7 +31245,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>42</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-56.0</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -31464,7 +31283,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>42</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-54.6</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -31502,7 +31321,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>42</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-53.2</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -31540,7 +31359,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>42</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-51.8</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -31578,7 +31397,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>42</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-50.4</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -31616,7 +31435,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>42</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-49.0</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -31654,7 +31473,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>42</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-47.6</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -31692,7 +31511,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>42</X>
-              <Y>9.265</Y>
+              <Y>8.065</Y>
               <Z>-46.2</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -31730,7 +31549,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>41.65</X>
-              <Y>9.28</Y>
+              <Y>8.08</Y>
               <Z>-54</Z>
               <R00>0.8191520442889918</R00>
               <R01>0</R01>
@@ -31768,7 +31587,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>42.35</X>
-              <Y>9.28</Y>
+              <Y>8.08</Y>
               <Z>-54</Z>
               <R00>0.8191520442889918</R00>
               <R01>0</R01>
@@ -31806,7 +31625,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>41.65</X>
-              <Y>9.28</Y>
+              <Y>8.08</Y>
               <Z>-51</Z>
               <R00>0.8191520442889918</R00>
               <R01>0</R01>
@@ -31844,7 +31663,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>42.35</X>
-              <Y>9.28</Y>
+              <Y>8.08</Y>
               <Z>-51</Z>
               <R00>0.8191520442889918</R00>
               <R01>0</R01>
@@ -31882,7 +31701,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>41.65</X>
-              <Y>9.28</Y>
+              <Y>8.08</Y>
               <Z>-48</Z>
               <R00>0.8191520442889918</R00>
               <R01>0</R01>
@@ -31920,7 +31739,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>42.35</X>
-              <Y>9.28</Y>
+              <Y>8.08</Y>
               <Z>-48</Z>
               <R00>0.8191520442889918</R00>
               <R01>0</R01>
@@ -31958,7 +31777,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>42</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-57.2</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -31996,7 +31815,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>42.0</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-55.1</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -32034,7 +31853,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>43.13534571665676</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-55.433367581054526</Z>
               <R00>0.766044443118978</R00>
               <R01>0</R01>
@@ -32072,7 +31891,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>43.91022719024449</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-56.32762847269604</Z>
               <R00>0.17364817766693041</R00>
               <R01>0</R01>
@@ -32110,7 +31929,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>44.07862502794996</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-57.4988611603739</Z>
               <R00>-0.4999999999999998</R00>
               <R01>0</R01>
@@ -32148,7 +31967,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>43.587074106143945</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-58.5752075412851</Z>
               <R00>-0.9396926207859083</R00>
               <R01>0</R01>
@@ -32186,7 +32005,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>42.591638369367004</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-59.21493524459045</Z>
               <R00>-0.9396926207859084</R00>
               <R01>0</R01>
@@ -32224,7 +32043,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>41.408361630632996</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-59.21493524459045</Z>
               <R00>-0.5000000000000004</R00>
               <R01>0</R01>
@@ -32262,7 +32081,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>40.412925893856055</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-58.5752075412851</Z>
               <R00>0.17364817766692997</R00>
               <R01>0</R01>
@@ -32300,7 +32119,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>39.92137497205004</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-57.4988611603739</Z>
               <R00>0.7660444431189778</R00>
               <R01>0</R01>
@@ -32338,7 +32157,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>40.08977280975551</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-56.32762847269604</Z>
               <R00>1.0</R00>
               <R01>0</R01>
@@ -32376,7 +32195,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>40.86465428334324</X>
-              <Y>11.3</Y>
+              <Y>10.1</Y>
               <Z>-55.433367581054526</Z>
               <R00>0.7660444431189781</R00>
               <R01>0</R01>
@@ -32413,7 +32232,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>47.7</X>
-              <Y>9.7</Y>
+              <Y>8.5</Y>
               <Z>-54</Z>
               <R00>6.123233995736766e-17</R00>
               <R01>0</R01>
@@ -32450,7 +32269,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>36.3</X>
-              <Y>9.7</Y>
+              <Y>8.5</Y>
               <Z>-54</Z>
               <R00>6.123233995736766e-17</R00>
               <R01>0</R01>
@@ -32487,7 +32306,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>47.7</X>
-              <Y>9.7</Y>
+              <Y>8.5</Y>
               <Z>-52</Z>
               <R00>6.123233995736766e-17</R00>
               <R01>0</R01>
@@ -32524,7 +32343,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>36.3</X>
-              <Y>9.7</Y>
+              <Y>8.5</Y>
               <Z>-52</Z>
               <R00>6.123233995736766e-17</R00>
               <R01>0</R01>
@@ -32561,7 +32380,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>47.7</X>
-              <Y>9.7</Y>
+              <Y>8.5</Y>
               <Z>-50</Z>
               <R00>6.123233995736766e-17</R00>
               <R01>0</R01>
@@ -32598,7 +32417,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>36.3</X>
-              <Y>9.7</Y>
+              <Y>8.5</Y>
               <Z>-50</Z>
               <R00>6.123233995736766e-17</R00>
               <R01>0</R01>
@@ -32635,7 +32454,7 @@
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>47.7</X>
-              <Y>9.7</Y>
+              <Y>8.5</Y>
               <Z>-48</Z>
               <R00>6.123233995736766e-17</R00>
               <R01>0</R01>
@@ -36581,7 +36400,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">1</token>
@@ -36619,7 +36438,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -36657,7 +36476,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -36842,7 +36661,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">2</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -36914,7 +36735,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">5</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -38445,7 +38268,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">1</token>
@@ -38483,7 +38306,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -38521,7 +38344,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -38706,12 +38529,14 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">2</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
                 <string name="Name">Caption</string>
-                <string name="Text">BIKE GARAGE</string>
+                <string name="Text">BIKE SHOP</string>
                 <bool name="TextScaled">true</bool>
                 <bool name="TextWrapped">false</bool>
                 <float name="BackgroundTransparency">1</float>
@@ -38778,12 +38603,14 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">5</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
                 <string name="Name">Caption</string>
-                <string name="Text">BIKE GARAGE</string>
+                <string name="Text">BIKE SHOP</string>
                 <bool name="TextScaled">true</bool>
                 <bool name="TextWrapped">false</bool>
                 <float name="BackgroundTransparency">1</float>
@@ -42371,9 +42198,9 @@
               <Z>0.65</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.13725490196078433</R>
-              <G>0.3803921568627451</G>
-              <B>0.4235294117647059</B>
+              <R>0.12156862745098039</R>
+              <G>0.2196078431372549</G>
+              <B>0.39215686274509803</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-45</X>
@@ -42409,9 +42236,9 @@
               <Z>5.4</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.13725490196078433</R>
-              <G>0.3803921568627451</G>
-              <B>0.4235294117647059</B>
+              <R>0.12156862745098039</R>
+              <G>0.2196078431372549</G>
+              <B>0.39215686274509803</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-55.6</X>
@@ -42447,9 +42274,9 @@
               <Z>5.4</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.13725490196078433</R>
-              <G>0.3803921568627451</G>
-              <B>0.4235294117647059</B>
+              <R>0.12156862745098039</R>
+              <G>0.2196078431372549</G>
+              <B>0.39215686274509803</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-34.4</X>
@@ -42475,7 +42302,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">1</token>
@@ -42513,7 +42340,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -42551,7 +42378,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -42599,9 +42426,9 @@
               <Z>0.28</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.2901960784313726</R>
-              <G>0.8</G>
-              <B>0.8823529411764706</B>
+              <R>0.2549019607843137</R>
+              <G>0.4627450980392157</G>
+              <B>0.8235294117647058</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-45</X>
@@ -42637,9 +42464,9 @@
               <Z>4</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.2901960784313726</R>
-              <G>0.8</G>
-              <B>0.8823529411764706</B>
+              <R>0.2549019607843137</R>
+              <G>0.4627450980392157</G>
+              <B>0.8235294117647058</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-55.5</X>
@@ -42675,9 +42502,9 @@
               <Z>4</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.2901960784313726</R>
-              <G>0.8</G>
-              <B>0.8823529411764706</B>
+              <R>0.2549019607843137</R>
+              <G>0.4627450980392157</G>
+              <B>0.8235294117647058</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-34.5</X>
@@ -42713,9 +42540,9 @@
               <Z>0.03</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.2901960784313726</R>
-              <G>0.8</G>
-              <B>0.8823529411764706</B>
+              <R>0.2549019607843137</R>
+              <G>0.4627450980392157</G>
+              <B>0.8235294117647058</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-45</X>
@@ -42736,7 +42563,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">2</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -42785,9 +42614,9 @@
               <Z>0.03</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.2901960784313726</R>
-              <G>0.8</G>
-              <B>0.8823529411764706</B>
+              <R>0.2549019607843137</R>
+              <G>0.4627450980392157</G>
+              <B>0.8235294117647058</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-45</X>
@@ -42808,7 +42637,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">5</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -49803,7 +49634,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">1</token>
@@ -49841,7 +49672,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -49879,7 +49710,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -50064,7 +49895,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">2</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -50136,7 +49969,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">5</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -52756,7 +52591,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">1</token>
@@ -52794,7 +52629,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -52832,7 +52667,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -53017,7 +52852,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">2</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -53089,7 +52926,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">5</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -55747,7 +55586,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">1</token>
@@ -55785,7 +55624,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -55823,7 +55662,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -56008,7 +55847,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">2</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -56080,7 +55921,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">5</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -58700,7 +58543,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">1</token>
@@ -58738,7 +58581,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -58776,7 +58619,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -58961,7 +58804,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">2</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -59033,7 +58878,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">5</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -61691,7 +61538,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">1</token>
@@ -61729,7 +61576,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -61767,7 +61614,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -61952,7 +61799,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">2</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -62024,7 +61873,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">5</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -64644,7 +64495,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">1</token>
@@ -64682,7 +64533,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -64720,7 +64571,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -64905,7 +64756,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">2</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -64977,7 +64830,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">5</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -67440,7 +67295,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">1</token>
@@ -67478,7 +67333,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -67516,7 +67371,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -67701,7 +67556,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">2</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -67773,7 +67630,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">5</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -70236,7 +70095,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">1</token>
@@ -70274,7 +70133,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -70312,7 +70171,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -70497,7 +70356,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">2</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -70569,7 +70430,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">5</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -73032,7 +72895,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">1</token>
@@ -73070,7 +72933,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -73108,7 +72971,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -73293,7 +73156,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">2</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -73365,7 +73230,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">5</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -75866,7 +75733,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">1</token>
@@ -75904,7 +75771,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -75942,7 +75809,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -76127,7 +75994,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">2</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -76199,7 +76068,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">5</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -76714,9 +76585,9 @@
               <Z>0.65</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.4196078431372549</R>
-              <G>0.19215686274509805</G>
-              <B>0.36470588235294116</B>
+              <R>0.3411764705882353</R>
+              <G>0.1411764705882353</G>
+              <B>0.34901960784313724</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>60</X>
@@ -76752,9 +76623,9 @@
               <Z>3.666666666666667</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.4196078431372549</R>
-              <G>0.19215686274509805</G>
-              <B>0.36470588235294116</B>
+              <R>0.3411764705882353</R>
+              <G>0.1411764705882353</G>
+              <B>0.34901960784313724</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>52.66666666666667</X>
@@ -76790,9 +76661,9 @@
               <Z>3.666666666666667</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.4196078431372549</R>
-              <G>0.19215686274509805</G>
-              <B>0.36470588235294116</B>
+              <R>0.3411764705882353</R>
+              <G>0.1411764705882353</G>
+              <B>0.34901960784313724</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>67.33333333333333</X>
@@ -76818,7 +76689,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">1</token>
@@ -76828,9 +76699,9 @@
               <Z>0.15</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>1.0</R>
-              <G>0.8588235294117647</G>
-              <B>0.4392156862745098</B>
+              <R>0.6784313725490196</R>
+              <G>0.4823529411764706</G>
+              <B>0.9647058823529412</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>60</X>
@@ -76856,7 +76727,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -76866,9 +76737,9 @@
               <Z>3.0833333333333335</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>1.0</R>
-              <G>0.8588235294117647</G>
-              <B>0.4392156862745098</B>
+              <R>0.6784313725490196</R>
+              <G>0.4823529411764706</G>
+              <B>0.9647058823529412</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>52.75</X>
@@ -76894,7 +76765,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -76904,9 +76775,9 @@
               <Z>3.0833333333333335</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>1.0</R>
-              <G>0.8588235294117647</G>
-              <B>0.4392156862745098</B>
+              <R>0.6784313725490196</R>
+              <G>0.4823529411764706</G>
+              <B>0.9647058823529412</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>67.25</X>
@@ -76942,9 +76813,9 @@
               <Z>0.28</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.8784313725490196</R>
-              <G>0.403921568627451</G>
-              <B>0.7647058823529411</B>
+              <R>0.7176470588235294</R>
+              <G>0.2980392156862745</G>
+              <B>0.7294117647058823</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>60</X>
@@ -76980,9 +76851,9 @@
               <Z>2.5</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.8784313725490196</R>
-              <G>0.403921568627451</G>
-              <B>0.7647058823529411</B>
+              <R>0.7176470588235294</R>
+              <G>0.2980392156862745</G>
+              <B>0.7294117647058823</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>52.75</X>
@@ -77018,9 +76889,9 @@
               <Z>2.5</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.8784313725490196</R>
-              <G>0.403921568627451</G>
-              <B>0.7647058823529411</B>
+              <R>0.7176470588235294</R>
+              <G>0.2980392156862745</G>
+              <B>0.7294117647058823</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>67.25</X>
@@ -77056,9 +76927,9 @@
               <Z>0.03</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.8784313725490196</R>
-              <G>0.403921568627451</G>
-              <B>0.7647058823529411</B>
+              <R>0.7176470588235294</R>
+              <G>0.2980392156862745</G>
+              <B>0.7294117647058823</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>60</X>
@@ -77079,7 +76950,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">2</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -77090,9 +76963,9 @@
                 <float name="BackgroundTransparency">1</float>
                 <token name="Font">20</token>
                 <Color3 name="TextColor3">
-                  <R>0.07</R>
-                  <G>0.2</G>
-                  <B>0.28</B>
+                  <R>1</R>
+                  <G>1</G>
+                  <B>1</B>
                 </Color3>
                 <UDim2 name="Size">
                   <XS>0.78</XS>
@@ -77128,9 +77001,9 @@
               <Z>0.03</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.8784313725490196</R>
-              <G>0.403921568627451</G>
-              <B>0.7647058823529411</B>
+              <R>0.7176470588235294</R>
+              <G>0.2980392156862745</G>
+              <B>0.7294117647058823</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>60</X>
@@ -77151,7 +77024,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">5</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -77162,9 +77037,9 @@
                 <float name="BackgroundTransparency">1</float>
                 <token name="Font">20</token>
                 <Color3 name="TextColor3">
-                  <R>0.07</R>
-                  <G>0.2</G>
-                  <B>0.28</B>
+                  <R>1</R>
+                  <G>1</G>
+                  <B>1</B>
                 </Color3>
                 <UDim2 name="Size">
                   <XS>0.78</XS>
@@ -77200,9 +77075,9 @@
               <Z>0.34500000000000003</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>1.0</R>
-              <G>0.8588235294117647</G>
-              <B>0.4392156862745098</B>
+              <R>0.6784313725490196</R>
+              <G>0.4823529411764706</G>
+              <B>0.9647058823529412</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>53.54</X>
@@ -77314,9 +77189,9 @@
               <Z>0.34500000000000003</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>1.0</R>
-              <G>0.8588235294117647</G>
-              <B>0.4392156862745098</B>
+              <R>0.6784313725490196</R>
+              <G>0.4823529411764706</G>
+              <B>0.9647058823529412</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>53.54</X>
@@ -77894,9 +77769,9 @@
               <Z>0.65</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.4196078431372549</R>
-              <G>0.19215686274509805</G>
-              <B>0.36470588235294116</B>
+              <R>0.3411764705882353</R>
+              <G>0.1411764705882353</G>
+              <B>0.34901960784313724</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>60</X>
@@ -77932,9 +77807,9 @@
               <Z>3.666666666666667</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.4196078431372549</R>
-              <G>0.19215686274509805</G>
-              <B>0.36470588235294116</B>
+              <R>0.3411764705882353</R>
+              <G>0.1411764705882353</G>
+              <B>0.34901960784313724</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>52.66666666666667</X>
@@ -77970,9 +77845,9 @@
               <Z>3.666666666666667</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.4196078431372549</R>
-              <G>0.19215686274509805</G>
-              <B>0.36470588235294116</B>
+              <R>0.3411764705882353</R>
+              <G>0.1411764705882353</G>
+              <B>0.34901960784313724</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>67.33333333333333</X>
@@ -77998,7 +77873,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">1</token>
@@ -78008,9 +77883,9 @@
               <Z>0.15</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>1.0</R>
-              <G>0.8588235294117647</G>
-              <B>0.4392156862745098</B>
+              <R>0.6784313725490196</R>
+              <G>0.4823529411764706</G>
+              <B>0.9647058823529412</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>60</X>
@@ -78036,7 +77911,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -78046,9 +77921,9 @@
               <Z>3.0833333333333335</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>1.0</R>
-              <G>0.8588235294117647</G>
-              <B>0.4392156862745098</B>
+              <R>0.6784313725490196</R>
+              <G>0.4823529411764706</G>
+              <B>0.9647058823529412</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>52.75</X>
@@ -78074,7 +77949,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -78084,9 +77959,9 @@
               <Z>3.0833333333333335</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>1.0</R>
-              <G>0.8588235294117647</G>
-              <B>0.4392156862745098</B>
+              <R>0.6784313725490196</R>
+              <G>0.4823529411764706</G>
+              <B>0.9647058823529412</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>67.25</X>
@@ -78122,9 +77997,9 @@
               <Z>0.28</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.8784313725490196</R>
-              <G>0.403921568627451</G>
-              <B>0.7647058823529411</B>
+              <R>0.7176470588235294</R>
+              <G>0.2980392156862745</G>
+              <B>0.7294117647058823</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>60</X>
@@ -78160,9 +78035,9 @@
               <Z>2.5</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.8784313725490196</R>
-              <G>0.403921568627451</G>
-              <B>0.7647058823529411</B>
+              <R>0.7176470588235294</R>
+              <G>0.2980392156862745</G>
+              <B>0.7294117647058823</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>52.75</X>
@@ -78198,9 +78073,9 @@
               <Z>2.5</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.8784313725490196</R>
-              <G>0.403921568627451</G>
-              <B>0.7647058823529411</B>
+              <R>0.7176470588235294</R>
+              <G>0.2980392156862745</G>
+              <B>0.7294117647058823</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>67.25</X>
@@ -78236,9 +78111,9 @@
               <Z>0.03</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.8784313725490196</R>
-              <G>0.403921568627451</G>
-              <B>0.7647058823529411</B>
+              <R>0.7176470588235294</R>
+              <G>0.2980392156862745</G>
+              <B>0.7294117647058823</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>60</X>
@@ -78259,7 +78134,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">2</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -78270,9 +78147,9 @@
                 <float name="BackgroundTransparency">1</float>
                 <token name="Font">20</token>
                 <Color3 name="TextColor3">
-                  <R>0.07</R>
-                  <G>0.2</G>
-                  <B>0.28</B>
+                  <R>1</R>
+                  <G>1</G>
+                  <B>1</B>
                 </Color3>
                 <UDim2 name="Size">
                   <XS>0.78</XS>
@@ -78308,9 +78185,9 @@
               <Z>0.03</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.8784313725490196</R>
-              <G>0.403921568627451</G>
-              <B>0.7647058823529411</B>
+              <R>0.7176470588235294</R>
+              <G>0.2980392156862745</G>
+              <B>0.7294117647058823</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>60</X>
@@ -78331,7 +78208,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">5</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -78342,9 +78221,9 @@
                 <float name="BackgroundTransparency">1</float>
                 <token name="Font">20</token>
                 <Color3 name="TextColor3">
-                  <R>0.07</R>
-                  <G>0.2</G>
-                  <B>0.28</B>
+                  <R>1</R>
+                  <G>1</G>
+                  <B>1</B>
                 </Color3>
                 <UDim2 name="Size">
                   <XS>0.78</XS>
@@ -78380,9 +78259,9 @@
               <Z>0.34500000000000003</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>1.0</R>
-              <G>0.8588235294117647</G>
-              <B>0.4392156862745098</B>
+              <R>0.6784313725490196</R>
+              <G>0.4823529411764706</G>
+              <B>0.9647058823529412</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>53.54</X>
@@ -78494,9 +78373,9 @@
               <Z>0.34500000000000003</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>1.0</R>
-              <G>0.8588235294117647</G>
-              <B>0.4392156862745098</B>
+              <R>0.6784313725490196</R>
+              <G>0.4823529411764706</G>
+              <B>0.9647058823529412</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>53.54</X>
@@ -79074,9 +78953,9 @@
               <Z>0.65</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.4196078431372549</R>
-              <G>0.19215686274509805</G>
-              <B>0.36470588235294116</B>
+              <R>0.3411764705882353</R>
+              <G>0.1411764705882353</G>
+              <B>0.34901960784313724</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>60</X>
@@ -79112,9 +78991,9 @@
               <Z>3.666666666666667</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.4196078431372549</R>
-              <G>0.19215686274509805</G>
-              <B>0.36470588235294116</B>
+              <R>0.3411764705882353</R>
+              <G>0.1411764705882353</G>
+              <B>0.34901960784313724</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>52.66666666666667</X>
@@ -79150,9 +79029,9 @@
               <Z>3.666666666666667</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.4196078431372549</R>
-              <G>0.19215686274509805</G>
-              <B>0.36470588235294116</B>
+              <R>0.3411764705882353</R>
+              <G>0.1411764705882353</G>
+              <B>0.34901960784313724</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>67.33333333333333</X>
@@ -79178,7 +79057,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">1</token>
@@ -79188,9 +79067,9 @@
               <Z>0.15</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>1.0</R>
-              <G>0.8588235294117647</G>
-              <B>0.4392156862745098</B>
+              <R>0.6784313725490196</R>
+              <G>0.4823529411764706</G>
+              <B>0.9647058823529412</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>60</X>
@@ -79216,7 +79095,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -79226,9 +79105,9 @@
               <Z>3.0833333333333335</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>1.0</R>
-              <G>0.8588235294117647</G>
-              <B>0.4392156862745098</B>
+              <R>0.6784313725490196</R>
+              <G>0.4823529411764706</G>
+              <B>0.9647058823529412</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>52.75</X>
@@ -79254,7 +79133,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -79264,9 +79143,9 @@
               <Z>3.0833333333333335</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>1.0</R>
-              <G>0.8588235294117647</G>
-              <B>0.4392156862745098</B>
+              <R>0.6784313725490196</R>
+              <G>0.4823529411764706</G>
+              <B>0.9647058823529412</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>67.25</X>
@@ -79302,9 +79181,9 @@
               <Z>0.28</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.8784313725490196</R>
-              <G>0.403921568627451</G>
-              <B>0.7647058823529411</B>
+              <R>0.7176470588235294</R>
+              <G>0.2980392156862745</G>
+              <B>0.7294117647058823</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>60</X>
@@ -79340,9 +79219,9 @@
               <Z>2.5</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.8784313725490196</R>
-              <G>0.403921568627451</G>
-              <B>0.7647058823529411</B>
+              <R>0.7176470588235294</R>
+              <G>0.2980392156862745</G>
+              <B>0.7294117647058823</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>52.75</X>
@@ -79378,9 +79257,9 @@
               <Z>2.5</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.8784313725490196</R>
-              <G>0.403921568627451</G>
-              <B>0.7647058823529411</B>
+              <R>0.7176470588235294</R>
+              <G>0.2980392156862745</G>
+              <B>0.7294117647058823</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>67.25</X>
@@ -79416,9 +79295,9 @@
               <Z>0.03</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.8784313725490196</R>
-              <G>0.403921568627451</G>
-              <B>0.7647058823529411</B>
+              <R>0.7176470588235294</R>
+              <G>0.2980392156862745</G>
+              <B>0.7294117647058823</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>60</X>
@@ -79439,7 +79318,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">2</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -79450,9 +79331,9 @@
                 <float name="BackgroundTransparency">1</float>
                 <token name="Font">20</token>
                 <Color3 name="TextColor3">
-                  <R>0.07</R>
-                  <G>0.2</G>
-                  <B>0.28</B>
+                  <R>1</R>
+                  <G>1</G>
+                  <B>1</B>
                 </Color3>
                 <UDim2 name="Size">
                   <XS>0.78</XS>
@@ -79488,9 +79369,9 @@
               <Z>0.03</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.8784313725490196</R>
-              <G>0.403921568627451</G>
-              <B>0.7647058823529411</B>
+              <R>0.7176470588235294</R>
+              <G>0.2980392156862745</G>
+              <B>0.7294117647058823</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>60</X>
@@ -79511,7 +79392,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">5</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -79522,9 +79405,9 @@
                 <float name="BackgroundTransparency">1</float>
                 <token name="Font">20</token>
                 <Color3 name="TextColor3">
-                  <R>0.07</R>
-                  <G>0.2</G>
-                  <B>0.28</B>
+                  <R>1</R>
+                  <G>1</G>
+                  <B>1</B>
                 </Color3>
                 <UDim2 name="Size">
                   <XS>0.78</XS>
@@ -79560,9 +79443,9 @@
               <Z>0.34500000000000003</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>1.0</R>
-              <G>0.8588235294117647</G>
-              <B>0.4392156862745098</B>
+              <R>0.6784313725490196</R>
+              <G>0.4823529411764706</G>
+              <B>0.9647058823529412</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>53.54</X>
@@ -79674,9 +79557,9 @@
               <Z>0.34500000000000003</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>1.0</R>
-              <G>0.8588235294117647</G>
-              <B>0.4392156862745098</B>
+              <R>0.6784313725490196</R>
+              <G>0.4823529411764706</G>
+              <B>0.9647058823529412</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>53.54</X>
@@ -80130,7 +80013,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">1</token>
@@ -80168,7 +80051,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -80206,7 +80089,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -80391,7 +80274,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">2</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -80463,7 +80348,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">5</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -81804,7 +81691,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">1</token>
@@ -81842,7 +81729,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -81880,7 +81767,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -82065,7 +81952,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">2</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -82137,7 +82026,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">5</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -82842,9 +82733,9 @@
               <Z>0.65</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.4196078431372549</R>
-              <G>0.19215686274509805</G>
-              <B>0.36470588235294116</B>
+              <R>0.3411764705882353</R>
+              <G>0.1411764705882353</G>
+              <B>0.34901960784313724</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>60</X>
@@ -82880,9 +82771,9 @@
               <Z>5.4</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.4196078431372549</R>
-              <G>0.19215686274509805</G>
-              <B>0.36470588235294116</B>
+              <R>0.3411764705882353</R>
+              <G>0.1411764705882353</G>
+              <B>0.34901960784313724</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>49.4</X>
@@ -82918,9 +82809,9 @@
               <Z>5.4</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.4196078431372549</R>
-              <G>0.19215686274509805</G>
-              <B>0.36470588235294116</B>
+              <R>0.3411764705882353</R>
+              <G>0.1411764705882353</G>
+              <B>0.34901960784313724</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>70.6</X>
@@ -82946,7 +82837,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">1</token>
@@ -82956,9 +82847,9 @@
               <Z>0.15</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>1.0</R>
-              <G>0.8588235294117647</G>
-              <B>0.4392156862745098</B>
+              <R>0.6784313725490196</R>
+              <G>0.4823529411764706</G>
+              <B>0.9647058823529412</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>60</X>
@@ -82984,7 +82875,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -82994,9 +82885,9 @@
               <Z>4.7</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>1.0</R>
-              <G>0.8588235294117647</G>
-              <B>0.4392156862745098</B>
+              <R>0.6784313725490196</R>
+              <G>0.4823529411764706</G>
+              <B>0.9647058823529412</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>49.5</X>
@@ -83022,7 +82913,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -83032,9 +82923,9 @@
               <Z>4.7</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>1.0</R>
-              <G>0.8588235294117647</G>
-              <B>0.4392156862745098</B>
+              <R>0.6784313725490196</R>
+              <G>0.4823529411764706</G>
+              <B>0.9647058823529412</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>70.5</X>
@@ -83070,9 +82961,9 @@
               <Z>0.28</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.8784313725490196</R>
-              <G>0.403921568627451</G>
-              <B>0.7647058823529411</B>
+              <R>0.7176470588235294</R>
+              <G>0.2980392156862745</G>
+              <B>0.7294117647058823</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>60</X>
@@ -83108,9 +82999,9 @@
               <Z>4</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.8784313725490196</R>
-              <G>0.403921568627451</G>
-              <B>0.7647058823529411</B>
+              <R>0.7176470588235294</R>
+              <G>0.2980392156862745</G>
+              <B>0.7294117647058823</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>49.5</X>
@@ -83146,9 +83037,9 @@
               <Z>4</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.8784313725490196</R>
-              <G>0.403921568627451</G>
-              <B>0.7647058823529411</B>
+              <R>0.7176470588235294</R>
+              <G>0.2980392156862745</G>
+              <B>0.7294117647058823</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>70.5</X>
@@ -83184,9 +83075,9 @@
               <Z>0.03</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.8784313725490196</R>
-              <G>0.403921568627451</G>
-              <B>0.7647058823529411</B>
+              <R>0.7176470588235294</R>
+              <G>0.2980392156862745</G>
+              <B>0.7294117647058823</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>60</X>
@@ -83207,7 +83098,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">2</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -83218,9 +83111,9 @@
                 <float name="BackgroundTransparency">1</float>
                 <token name="Font">20</token>
                 <Color3 name="TextColor3">
-                  <R>0.07</R>
-                  <G>0.2</G>
-                  <B>0.28</B>
+                  <R>1</R>
+                  <G>1</G>
+                  <B>1</B>
                 </Color3>
                 <UDim2 name="Size">
                   <XS>0.78</XS>
@@ -83256,9 +83149,9 @@
               <Z>0.03</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.8784313725490196</R>
-              <G>0.403921568627451</G>
-              <B>0.7647058823529411</B>
+              <R>0.7176470588235294</R>
+              <G>0.2980392156862745</G>
+              <B>0.7294117647058823</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>60</X>
@@ -83279,7 +83172,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">5</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -83290,9 +83185,9 @@
                 <float name="BackgroundTransparency">1</float>
                 <token name="Font">20</token>
                 <Color3 name="TextColor3">
-                  <R>0.07</R>
-                  <G>0.2</G>
-                  <B>0.28</B>
+                  <R>1</R>
+                  <G>1</G>
+                  <B>1</B>
                 </Color3>
                 <UDim2 name="Size">
                   <XS>0.78</XS>
@@ -83328,9 +83223,9 @@
               <Z>0.552</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>1.0</R>
-              <G>0.8588235294117647</G>
-              <B>0.4392156862745098</B>
+              <R>0.6784313725490196</R>
+              <G>0.4823529411764706</G>
+              <B>0.9647058823529412</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>50.5</X>
@@ -83442,9 +83337,9 @@
               <Z>0.552</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>1.0</R>
-              <G>0.8588235294117647</G>
-              <B>0.4392156862745098</B>
+              <R>0.6784313725490196</R>
+              <G>0.4823529411764706</G>
+              <B>0.9647058823529412</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>50.5</X>
@@ -83642,9 +83537,9 @@
               <Z>0.65</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.09411764705882353</R>
-              <G>0.396078431372549</G>
-              <B>0.43529411764705883</B>
+              <R>0.050980392156862744</R>
+              <G>0.30196078431372547</G>
+              <B>0.32941176470588235</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>0</X>
@@ -83680,9 +83575,9 @@
               <Z>5.6</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.09411764705882353</R>
-              <G>0.396078431372549</G>
-              <B>0.43529411764705883</B>
+              <R>0.050980392156862744</R>
+              <G>0.30196078431372547</G>
+              <B>0.32941176470588235</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-12.5</X>
@@ -83718,9 +83613,9 @@
               <Z>5.6</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.09411764705882353</R>
-              <G>0.396078431372549</G>
-              <B>0.43529411764705883</B>
+              <R>0.050980392156862744</R>
+              <G>0.30196078431372547</G>
+              <B>0.32941176470588235</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>12.5</X>
@@ -83746,7 +83641,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">1</token>
@@ -83757,8 +83652,8 @@
             </Vector3>
             <Color3 name="Color">
               <R>1.0</R>
-              <G>0.42745098039215684</G>
-              <B>0.7490196078431373</B>
+              <G>0.6509803921568628</G>
+              <B>0.26666666666666666</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>0</X>
@@ -83784,7 +83679,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -83795,8 +83690,8 @@
             </Vector3>
             <Color3 name="Color">
               <R>1.0</R>
-              <G>0.42745098039215684</G>
-              <B>0.7490196078431373</B>
+              <G>0.6509803921568628</G>
+              <B>0.26666666666666666</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-12.399999999999999</X>
@@ -83822,7 +83717,7 @@
             <bool name="CanTouch">false</bool>
             <bool name="CanQuery">true</bool>
             <float name="Transparency">0</float>
-            <token name="Material">288</token>
+            <token name="Material">256</token>
             <token name="TopSurface">0</token>
             <token name="BottomSurface">0</token>
             <token name="shape">2</token>
@@ -83833,8 +83728,8 @@
             </Vector3>
             <Color3 name="Color">
               <R>1.0</R>
-              <G>0.42745098039215684</G>
-              <B>0.7490196078431373</B>
+              <G>0.6509803921568628</G>
+              <B>0.26666666666666666</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>12.399999999999999</X>
@@ -83870,9 +83765,9 @@
               <Z>0.28</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.19607843137254902</R>
-              <G>0.8313725490196079</G>
-              <B>0.9098039215686274</B>
+              <R>0.11372549019607843</R>
+              <G>0.6313725490196078</G>
+              <B>0.6941176470588235</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>0</X>
@@ -83908,9 +83803,9 @@
               <Z>4.2</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.19607843137254902</R>
-              <G>0.8313725490196079</G>
-              <B>0.9098039215686274</B>
+              <R>0.11372549019607843</R>
+              <G>0.6313725490196078</G>
+              <B>0.6941176470588235</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-12.4</X>
@@ -83946,9 +83841,9 @@
               <Z>4.2</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.19607843137254902</R>
-              <G>0.8313725490196079</G>
-              <B>0.9098039215686274</B>
+              <R>0.11372549019607843</R>
+              <G>0.6313725490196078</G>
+              <B>0.6941176470588235</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>12.4</X>
@@ -83984,9 +83879,9 @@
               <Z>0.03</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.19607843137254902</R>
-              <G>0.8313725490196079</G>
-              <B>0.9098039215686274</B>
+              <R>0.11372549019607843</R>
+              <G>0.6313725490196078</G>
+              <B>0.6941176470588235</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>0</X>
@@ -84007,7 +83902,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">2</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -84056,9 +83953,9 @@
               <Z>0.03</Z>
             </Vector3>
             <Color3 name="Color">
-              <R>0.19607843137254902</R>
-              <G>0.8313725490196079</G>
-              <B>0.9098039215686274</B>
+              <R>0.11372549019607843</R>
+              <G>0.6313725490196078</G>
+              <B>0.6941176470588235</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>0</X>
@@ -84079,7 +83976,9 @@
             <Properties>
               <string name="Name">CaptionSurface</string>
               <token name="Face">5</token>
-              <float name="PixelsPerStud">48</float>
+              <float name="PixelsPerStud">64</float>
+              <float name="LightInfluence">0</float>
+              <float name="Brightness">1</float>
             </Properties>
             <Item class="TextLabel">
               <Properties>
@@ -84129,8 +84028,8 @@
             </Vector3>
             <Color3 name="Color">
               <R>1.0</R>
-              <G>0.42745098039215684</G>
-              <B>0.7490196078431373</B>
+              <G>0.6509803921568628</G>
+              <B>0.26666666666666666</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-11.07</X>
@@ -84167,8 +84066,8 @@
             </Vector3>
             <Color3 name="Color">
               <R>1.0</R>
-              <G>0.42745098039215684</G>
-              <B>0.7490196078431373</B>
+              <G>0.6509803921568628</G>
+              <B>0.26666666666666666</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-11.02</X>
@@ -84205,8 +84104,8 @@
             </Vector3>
             <Color3 name="Color">
               <R>1.0</R>
-              <G>0.42745098039215684</G>
-              <B>0.7490196078431373</B>
+              <G>0.6509803921568628</G>
+              <B>0.26666666666666666</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-10.969999999999999</X>
@@ -84243,8 +84142,8 @@
             </Vector3>
             <Color3 name="Color">
               <R>1.0</R>
-              <G>0.42745098039215684</G>
-              <B>0.7490196078431373</B>
+              <G>0.6509803921568628</G>
+              <B>0.26666666666666666</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-11.07</X>
@@ -84281,8 +84180,8 @@
             </Vector3>
             <Color3 name="Color">
               <R>1.0</R>
-              <G>0.42745098039215684</G>
-              <B>0.7490196078431373</B>
+              <G>0.6509803921568628</G>
+              <B>0.26666666666666666</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-11.02</X>
@@ -84319,8 +84218,8 @@
             </Vector3>
             <Color3 name="Color">
               <R>1.0</R>
-              <G>0.42745098039215684</G>
-              <B>0.7490196078431373</B>
+              <G>0.6509803921568628</G>
+              <B>0.26666666666666666</B>
             </Color3>
             <CoordinateFrame name="CFrame">
               <X>-10.969999999999999</X>

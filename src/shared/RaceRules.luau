@@ -2,6 +2,7 @@
 local Content=require(script.Parent.World1Content)
 local PetRules=require(script.Parent.PetRules)
 local Numbers=require(script.Parent.Numbers)
+local Premium=require(script.Parent.PremiumRules)
 local Rules={}
 function Rules.position(state:any):number
  local rank=1
@@ -14,12 +15,12 @@ function Rules.position(state:any):number
 end
 function Rules.reward(data:any,state:any):number
  local world=Content.RaceWorlds[state.WorldId or 1]
- if not world then return 0 end
+ if not world or not world.Playable then return 0 end
  local tier=Content.Difficulties[state.Difficulty]
  if not tier or not state.FinishedAt then return 0 end
  local base=tier.Rewards[state.Place]
  if not base then return 0 end
- return Numbers.multiply(Numbers.multiply(base,world.RewardMultiplier),PetRules.bonus(data,"Cash"))
+ return Numbers.multiply(Numbers.multiply(base,world.RewardMultiplier),Numbers.multiply(PetRules.bonus(data,"Cash"),Premium.bonus(data,"Cash",state.CashPass)))
 end
 function Rules.pay(data:any,state:any): (boolean,number)
  if type(state.RewardId)~="string" or #state.RewardId==0 or #state.RewardId>100 then return false,0 end

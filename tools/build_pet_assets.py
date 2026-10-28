@@ -50,4 +50,29 @@ for id,color in enumerate(colors,1):
  E.indent(tree);data=E.tostring(tree,encoding='utf-8',xml_declaration=True)+b'\n';path=ROOT/f'src/models/Pet{id}.rbxmx'
  if '--check' in sys.argv:assert path.exists() and path.read_bytes()==data
  else:path.write_bytes(data)
+# Exclusive model: fox ears, muzzle, split solar tail and floating crown, not a regular-species rename.
+tree=E.Element('roblox',version='4');model,_=item(tree,'Model','ExclusiveSunfox')
+for name,size,pos,color,shape in [
+ ('FoxBody',(1.6,1.2,1.8),(0,1,0),(246,172,59),0),('FoxHead',(1.5,1.15,1.15),(0,1.7,-.7),(255,214,102),0),
+ ('Muzzle',(.8,.45,.5),(0,1.45,-1.4),(255,247,212),0),('Nose',(.2,.2,.15),(0,1.6,-1.68),(60,70,95),0),
+ ('Tail',(1,.8,1.8),(0,1.3,1.4),(248,156,66),0),('TailTip',(.75,.6,.8),(0,1.55,2.2),(255,249,210),0)]:part(model,name,size,pos,color,collide=False,shape=shape)
+for sign in [-1,1]:
+ part(model,'FoxEar',(.65,1.1,.45),(sign*.5,2.5,-.65),(255,190,71),collide=False,cls='WedgePart',yaw=180)
+ part(model,'Eye',(.19,.23,.1),(sign*.36,1.85,-1.28),(43,74,106),collide=False,shape=0)
+ part(model,'SolarWing',(.35,.6,1.3),(sign*1.1,1.6,.3),(255,226,112),288,False,cls='WedgePart')
+ns['ring'](model,'SolarCrown',(0,3,-.5),.55,(255,221,105),8)
+E.indent(tree);data=E.tostring(tree,encoding='utf-8',xml_declaration=True)+b'\n';path=ROOT/'src/models/ExclusiveSunfox.rbxmx'
+if '--check' in sys.argv:assert path.exists() and path.read_bytes()==data
+else:path.write_bytes(data)
+tree=E.Element('roblox',version='4');model,_=item(tree,'Model','ExclusivePrismRay')
+part(model,'RayBody',(1.5,.55,1.9),(0,1,0),(108,201,236),1568,False,shape=0)
+for side in [-1,1]:
+ part(model,'PrismWing',(1.5,.35,1.5),(side*1.1,1,0),(170,134,241),256,False,cls='WedgePart',yaw=side*90)
+ part(model,'Eye',(.17,.17,.12),(side*.37,1.2,-.87),(29,61,92),256,False,shape=0)
+ for k in range(3):part(model,'WingGem',(.2,.2,.25),(side*(.7+k*.4),1.2,k*.18),(153+k*30,238,249),288,False,shape=0)
+for k in range(4):part(model,'RayTail',(.16,.16,.6),(0,1+k*.07,1+k*.45),(166,164+k*18,245),256,False)
+ns['ring'](model,'PrismOrbit',(0,1.9,0),.5,(182,231,255),8)
+E.indent(tree);data=E.tostring(tree,encoding='utf-8',xml_declaration=True)+b'\n';path=ROOT/'src/models/ExclusivePrismRay.rbxmx'
+if '--check' in sys.argv:assert path.exists() and path.read_bytes()==data
+else:path.write_bytes(data)
 print('Twelve distinct pet assets verified' if '--check' in sys.argv else 'Generated 12 pet models')

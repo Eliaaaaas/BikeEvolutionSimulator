@@ -21,17 +21,13 @@ by_name = {name(i):i for i in items}
 parts = [i for i in items if i.find("Properties/Vector3[@name='size']") is not None]
 
 class VisualV4Tests(unittest.TestCase):
-    def test_five_access_ramps_match_island_and_belt_heights(self):
-        ramps=[p for p in parts if name(p)=='AccessRamp']
-        self.assertEqual(len(ramps),5)
-        for ramp in ramps:
-            self.assertEqual(ramp.attrib['class'],'WedgePart')
-            self.assertEqual(ramp.findtext("Properties/bool[@name='CanCollide']"),'true')
-            self.assertGreaterEqual(size(ramp)[0],8)
-            self.assertAlmostEqual(xyz(ramp)[1]-size(ramp)[1]/2,8)
-            self.assertAlmostEqual(xyz(ramp)[1]+size(ramp)[1]/2,9.3)
-            self.assertAlmostEqual(rotation(ramp)[2][2],-1)
-            self.assertLess(size(ramp)[1]/size(ramp)[2],.15)
+    def test_five_flush_belts_have_no_access_ramps(self):
+        self.assertFalse(any(name(p)=='AccessRamp' for p in parts))
+        for id in range(1,6):
+            belt=by_name[f'Treadmill_{id}']
+            surface=next(p for p in belt.findall('Item') if name(p)=='Belt')
+            self.assertAlmostEqual(xyz(surface)[1]+size(surface)[1]/2,8.05)
+            self.assertTrue(surface.findtext("Properties/bool[@name='CanCollide']")=='true')
 
     def test_all_authored_transforms_are_finite_and_rigid(self):
         self.assertLessEqual(len(parts), 3300)

@@ -12,6 +12,7 @@ local function rigidMath()
  local function unit(a) return a/math.sqrt(dot(a,a)) end
  VM.__index=function(a,k)
   if k=="Magnitude" then return math.sqrt(dot(a,a)) elseif k=="Unit" then return unit(a)
+  elseif k=="Lerp" then return function(self,b,t) return self+(b-self)*t end
   elseif k=="Dot" then return dot elseif k=="Cross" then return cross end
  end
  V.zero=V.new()

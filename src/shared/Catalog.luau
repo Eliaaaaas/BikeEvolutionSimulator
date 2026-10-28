@@ -2,6 +2,7 @@
 local Config = require(script.Parent.Config)
 local Numbers = require(script.Parent.Numbers)
 local Content = require(script.Parent.World1Content)
+local Progression = require(script.Parent.Progression)
 local Metadata = require(script.Parent.CatalogMetadata)
 local Catalog: { Worlds: {any}, Vehicles: {any}, Treadmills: {any}, Eggs: {any}, Pets: {any} } = { Worlds = {}, Vehicles = {}, Treadmills = {}, Eggs = {}, Pets = {} }
 local function vehicleClass(id: number): string
@@ -19,7 +20,7 @@ for id = 1, Config.Rules.VehicleCount do
 end
 for id = 1, Config.Rules.TreadmillCount do
  Catalog.Treadmills[id] = table.freeze({ Id = id, WorldId = math.ceil(id / 5), TrainingMultiplier = Numbers.power(2, id - 1), CashCost = 0,
-  EnergyRequirement = if id == 1 then 0 else Numbers.multiply(Config.Treadmills.EnergyBase, Numbers.power(Config.Treadmills.EnergyFactor, id - 2)),
+  EnergyRequirement = Progression.energy(id),
   RebirthRequirement = if id == 1 then 0 else Numbers.multiply(Config.Treadmills.RebirthBase, Numbers.power(Config.Treadmills.RebirthFactor, id - 2)) })
 end
 for id = 1, Config.Rules.EggCount do

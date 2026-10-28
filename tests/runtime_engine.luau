@@ -139,8 +139,8 @@ local function engine()
    y=8
    if e.FloorY then y=e.FloorY(origin.X,origin.Z)
    else for _,x in ipairs({-54,-36,-18,24,42}) do
-    if math.abs(origin.X-x)<4.5 and origin.Z>=-45.5 and origin.Z<=-34.5 then y=8+1.3*(-34.5-origin.Z)/11 end
-    if math.abs(origin.X-x)<4 and origin.Z>=-57 and origin.Z<=-45 then y=9.25 end
+    -- V4.4 authored deck is flush; no analytic ramp.
+    if math.abs(origin.X-x)<4 and origin.Z>=-57 and origin.Z<=-45 then y=8.05 end
    end end
   end
   return if e.NoGround or y==nil then nil else {Position=vector.new(origin.X,y,origin.Z),Normal=vector.new(0,1,0)} end
@@ -151,11 +151,22 @@ local function engine()
  e.Workspace.CurrentCamera={ViewportSize=vector.new(1000,700),CFrame=cf.new(0,20,30)}
  local serial=0
  local store=modules.StudioStore.new();e.Store=store;e.StoreCalls=0;e.FailStoreCreation=false
- local services={Players=e.Players,ReplicatedStorage=e.Rep,RunService={PreSimulation=signal(),RenderStepped=signal(),IsStudio=function() return e.Studio~=false end},
+ local bindings={}
+ local render=signal()
+ local fireRender=render.Fire
+ function render:Fire(dt)
+  local ordered={};for name,entry in pairs(bindings) do table.insert(ordered,{Name=name,Entry=entry}) end
+  table.sort(ordered,function(a,b) return a.Entry.Priority<b.Entry.Priority end)
+  for _,entry in ipairs(ordered) do if bindings[entry.Name] then entry.Entry.Callback(dt) end end
+  fireRender(self,dt)
+ end
+ local market={PromptGamePassPurchaseFinished=signal(),UserOwnsGamePassAsync=function() return false end,PromptGamePassPurchase=function() e.PassPrompt=true end,PromptProductPurchase=function() e.ProductPrompt=true end}
+ local services={MarketplaceService=market,Players=e.Players,ReplicatedStorage=e.Rep,RunService={PreSimulation=signal(),RenderStepped=render,BindToRenderStep=function(_,name,priority,cb) bindings[name]={Priority=priority,Callback=cb} end,UnbindFromRenderStep=function(_,name) bindings[name]=nil end,IsStudio=function() return e.Studio~=false end},
  HttpService={GenerateGUID=function() serial+=1;return "integration-"..serial end,JSONEncode=function() return "[]" end},
  DataStoreService={GetDataStore=function(_,name) e.StoreCalls+=1;e.StoreName=name;if e.FailStoreCreation then error("Publish place first") end;return store end},
  ContextActionService={BindActionAtPriority=function(_,name,callback) if name=="BikeBrake" then e.BrakeCallback=callback else e.JumpCallback=callback end end,SetTitle=function() end,SetPosition=function() end,UnbindAction=function() e.BrakeCallback=nil end},
  UserInputService={TouchEnabled=false,InputBegan=signal(),TouchTap=signal(),WindowFocused=signal(),WindowFocusReleased=signal(),GetFocusedTextBox=function() return nil end},TweenService={Create=function(_,target,_,props) local done=signal();return {Completed=done,Cancel=function() end,Play=function() for k,v in pairs(props) do target[k]=v end;done:Fire() end} end}}
+ e.Players.GetPlayerByUserId=function(_,id) for _,player in ipairs(e.Players:GetPlayers()) do if player.UserId==id then return player end end;return nil end
  function game:GetService(name) return services[name] or self:FindFirstChild(name) end
  function game:BindToClose(cb) table.insert(e.Closes,cb) end
  e.Game=game;e.OS={clock=function() return e.Now end,time=function() return math.floor(e.Now) end}
@@ -164,7 +175,7 @@ local function engine()
  e.Color3={new=function(...) return {...} end,fromRGB=function(...) return {...} end}
  e.UDim={new=function(...) return {...} end};e.UDim2={new=function(...) return {...} end,fromScale=function(...) return {...} end,fromOffset=function(...) return {...} end}
  e.ColorSequence={new=function(...) return {...} end};e.TweenInfo={new=function(...) return {...} end}
- e.Enum=setmetatable({},{__index=function(_,name) return setmetatable({},{__index=function(_,key) return name.."."..key end}) end})
+ e.Enum=setmetatable({RenderPriority={Camera={Value=200}}},{__index=function(_,name) return setmetatable({},{__index=function(_,key) return name.."."..key end}) end})
  return e
 end
 modules.runtimeEngine=engine

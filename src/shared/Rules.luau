@@ -9,7 +9,7 @@ function Rules.trainingGain(rebirths: number, treadmillMultiplier: number?): num
 end
 function Rules.rebirthRequirement(rebirths: number): number
  assert(Numbers.validRebirth(rebirths), "Invalid rebirth count")
- return Numbers.multiply(Config.Economy.RebirthBaseEnergy, Numbers.add(rebirths, 1))
+ return Numbers.multiply(Numbers.multiply(Config.Economy.RebirthBaseEnergy, Numbers.add(rebirths, 1)), if rebirths >= Config.Economy.RebirthHardFrom then Config.Economy.RebirthHardFactor else 1)
 end
 function Rules.withinTrainingZone(dx: number, dy: number, dz: number, width: number, depth: number): boolean
  -- Reject NaN/infinite transforms, including malformed client-owned character motion.

@@ -48,6 +48,7 @@ function Race.new(data:any,stopTraining:(Player)->(),feedback:(Player,any)->(),m
  end
  function adapter.reward(player:Player,state:any): (boolean,number)
   local amount=0
+  if mounts.cashPass then state.CashPass=mounts.cashPass(player) end
   local ok=data.change(player,function(profile:any):boolean
    local accepted
    accepted,amount=RaceRules.pay(profile,state)

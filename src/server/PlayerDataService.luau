@@ -28,7 +28,7 @@ function Service.configure(value:any)
  if options.Preview then previewStore=StudioStore.new() end
 end
 function Service.status(player:Player):string return statuses[player] or "Loading" end
-type Session = { Data: Profile.Data, Expires: number, Saving: boolean, Backend: any, Closing: boolean, Revision: number, InventoryRevision: number }
+type Session = { Data: Profile.Data, Expires: number, Saving: boolean, Backend: any, Closing: boolean, Revision: number, InventoryRevision: number, PendingReceipt: boolean? }
 local sessions: {[Player]: Session} = {}
 local closing = false
 local loading = 0
@@ -45,6 +45,7 @@ local function save(player: Player, release: boolean)
  local ok, reason = SavePolicy.flush(session, key(player), release, function() return shutdownDeadline end, os.time,
   function() task.wait(2) end, log)
  session.Saving = false
+ if ok then session.PendingReceipt=nil end
  if ok and release or not ok and reason ~= "DataStoreUnavailable" then
   sessions[player] = nil
   if not ok then
@@ -63,7 +64,7 @@ end
 function Service.change(player: Player, transform: (Profile.Data) -> boolean, inventory: boolean?): (boolean, string?)
  local session = sessions[player]
  if closing or not session or session.Closing or player.Parent ~= Players or session.Expires <= os.time() then return false, "NotReady" end
- if session.Saving then return false, "Saving" end
+ if session.Saving or session.PendingReceipt then return false, "Saving" end
  local revision = session.Revision
  local candidate = Profile.copy(session.Data)
  local ok, accepted = pcall(transform, candidate)
@@ -76,6 +77,22 @@ function Service.change(player: Player, transform: (Profile.Data) -> boolean, in
  if inventory then session.InventoryRevision+=1 end
  return true, nil
 end
+-- Durable single-profile receipt transaction; no grant acknowledgement before UpdateAsync succeeds.
+function Service.receipt(player:Player,transform:(Profile.Data)->boolean):boolean
+ local session=sessions[player]
+ if closing or not session or session.Closing or session.Saving or player.Parent~=Players or session.Expires<=os.time() then return false end
+ local candidate=Profile.copy(session.Data)
+ local accepted,result=pcall(transform,candidate)
+ if not accepted or not result or not Profile.validate(candidate) then return false end
+ session.Saving=true
+ -- Keep this identical receipt-marked candidate even if the response is lost. No rollback/re-grant.
+ session.Data=candidate;session.Revision+=1;session.InventoryRevision+=1;session.PendingReceipt=true
+ local ok,reason,expires=session.Backend:save(key(player),candidate,false)
+ if ok then session.Expires=expires;session.PendingReceipt=nil
+ else log({Event="ReceiptSavePending",UserId=player.UserId,Reason=reason}) end
+ session.Saving=false
+ return ok
+end
 function Service.revision(player: Player): number
  local session=sessions[player];return if session then session.Revision else 0
 end
@@ -86,6 +103,13 @@ function Service.read(player: Player): Profile.Data?
  local session=sessions[player]
  if closing or not session or session.Closing or session.Expires<=os.time() then return nil end
  return Profile.copy(session.Data)
+end
+-- Small server-only view for automation/boost snapshots; never clone 500 pets/2000 receipts at 4–5Hz.
+function Service.context(player:Player):any
+ local session=sessions[player]
+ if closing or not session or session.Closing or session.Expires<=os.time() then return nil end
+ local value=session.Data
+ return {Energy=value.Energy,Rebirths=value.Rebirths,OwnedWorlds=table.clone(value.OwnedWorlds),Boosts=table.clone(value.Boosts)}
 end
 function Service.ownsVehicle(player: Player, id: number): boolean
  local session=sessions[player]

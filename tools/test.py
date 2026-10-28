@@ -11,7 +11,7 @@ LUAU = os.environ.get('LUAU_BIN', str(ROOT / '.tools/luau'))
 COMPILER = os.environ.get('LUAU_COMPILE_BIN', str(ROOT / '.tools/luau-compile'))
 for source in sorted((ROOT / 'src').rglob('*.luau')):
     subprocess.run([COMPILER, '--binary', str(source)], stdout=subprocess.DEVNULL, check=True)
-modules = ['Numbers', 'Config', 'CatalogMetadata', 'World1Content', 'Catalog', 'Rules', 'Profile', 'Protocol', 'Persistence', 'SavePolicy', 'StudioStore', 'PetRules', 'EconomyController', 'TrainingController', 'RateLimiter', 'Format', 'Presentation', 'ClientState', 'CourseData', 'RaceCourse', 'RaceRules', 'RaceController', 'RuntimeContract', 'TrainingTap', 'BikeMotion', 'RideSimulation', 'RideReconciliation']
+modules = ['Numbers', 'Config', 'PremiumConfig', 'Progression', 'AutoNavigation', 'CatalogMetadata', 'World1Content', 'Catalog', 'Rules', 'Profile', 'Protocol', 'Persistence', 'SavePolicy', 'StudioStore', 'PetRules', 'PremiumRules', 'EconomyController', 'TrainingController', 'RateLimiter', 'Format', 'Presentation', 'ClientState', 'CourseData', 'RaceCourse', 'RaceRules', 'RaceController', 'RuntimeContract', 'TrainingTap', 'BikeMotion', 'RideSimulation', 'RideReconciliation']
 bundle = ['--!strict\nlocal modules: any = {}']
 for name in modules:
     folder = 'server' if name in ('Persistence', 'SavePolicy', 'StudioStore') else 'shared'
@@ -50,6 +50,7 @@ bundle.append((ROOT / 'tests/pets_v3.spec.luau').read_text())
 bundle.append((ROOT / 'tests/training_tap.spec.luau').read_text())
 bundle.append((ROOT / 'tests/bike_motion.spec.luau').read_text())
 bundle.append((ROOT / 'tests/ride_simulation.spec.luau').read_text())
+bundle.append((ROOT / 'tests/overhaul_v44.spec.luau').read_text())
 bundle.append((ROOT / 'tests/runtime_integration.spec.luau').read_text())
 with tempfile.TemporaryDirectory(prefix='bike-tests-') as directory:
     analysis_file = Path(directory) / 'production.luau'
@@ -65,6 +66,7 @@ subprocess.run(['python3', str(ROOT / 'tests/world_test.py')], check=True)
 subprocess.run(['python3', str(ROOT / 'tests/visual_v4_test.py')], check=True)
 subprocess.run(['python3', str(ROOT / 'tools/build_race_assets.py'), '--check'], check=True)
 subprocess.run(['python3', str(ROOT / 'tests/race_assets_test.py')], check=True)
+subprocess.run(['python3', str(ROOT / 'tests/overhaul_v44_test.py')], check=True)
 subprocess.run(['python3', str(ROOT / 'tools/build_vehicle_fleet.py'), '--check'], check=True)
 subprocess.run(['python3', str(ROOT / 'tools/build_pet_assets.py'), '--check'], check=True)
 

@@ -72,7 +72,7 @@ function Visuals.new(settings:any,ui:any):any
    local training=(player:GetAttribute("SelectedTreadmill") or 0)>0
    local wanted=visible(character) and bike~=nil
    local current=poses[player]
-   if current and (current.Character~=character or wanted and current.Bike~=bike) then Pose.destroy(current.Record);poses[player]=nil;current=nil end
+   if current and (current.Character~=character or current.Record.Dirty or wanted and current.Bike~=bike) then Pose.destroy(current.Record);poses[player]=nil;current=nil end
    if current and not wanted then
     current.Exit=(current.Exit or 0)+dt;Pose.fade(current.Record,math.min(1,dt*18))
     if current.Exit>=0.2 then Pose.destroy(current.Record);poses[player]=nil;current=nil end

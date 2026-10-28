@@ -94,8 +94,8 @@ assert 'controls.moveFunction=suppressMove' in input_source
 print('V4.2 actual place: single vehicle transform owner, native movement dispatcher suppressed')
 
 for id in range(1,6):
- ramp=path('Workspace','World1','Training',f'Treadmill_{id}','AccessRamp')
- assert ramp.attrib['class']=='WedgePart' and ramp.findtext("Properties/bool[@name='CanCollide']")=='true'
+ belt=path('Workspace','World1','Training',f'Treadmill_{id}')
+ assert not any(name(p)=='AccessRamp' for p in belt.iter('Item'))
 for group in ['RidePrediction']:assert child(client,group) is not None
 for group in ['RideSimulation','RideReconciliation','BikeSurface']:path('ReplicatedStorage','Shared',group)
-print('V4.3 actual place: five physical ramps, shared jump/collision simulation and isolated local prediction')
+print('V4.4 actual place: five flush decks without ramps, retained jump/collision simulation and isolated local prediction')

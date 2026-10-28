@@ -15,6 +15,8 @@ local Http=game:GetService("HttpService")
 local RaceService=require(script.Parent.RaceService)
 local MountedBikes=require(script.Parent.MountedBikeService)
 local BikeMotion=require(Shared:WaitForChild("BikeMotion"))
+local PremiumService=require(script.Parent.PremiumService)
+local AutomationService=require(script.Parent.AutomationService)
 local Service = {}
 function Service.new(dataService: any): any
  local training = workspace:WaitForChild("World1"):WaitForChild("Training")
@@ -36,9 +38,13 @@ function Service.new(dataService: any): any
   sequence[player]=(sequence[player] or 0)+1;event.Id=sequence[player]
   local ok,err=pcall(sink,player,event);if not ok then warn("[Feedback]",player.UserId,tostring(err)) end
  end
+ local premium=PremiumService.new(dataService)
  local controller = Controller.new(dataService, os.clock, near,emit)
+ controller.Premium=premium.bonus
  mounts=MountedBikes.new(dataService)
+ mounts.cashPass=function(player:Player) return premium.bonus(player,{Boosts={}},"Cash")>1 end
  local race=RaceService.new(dataService,function(player) controller:stop(player) end,emit,mounts)
+ local automation=AutomationService.new(dataService,mounts,race,controller,zones,emit)
  local rng=Random.new()
  local economy=Economy.new(dataService,os.clock,function() return rng:NextInteger(1,10000) end,function() return Http:GenerateGUID(false) end,emit,function(player,event,reason) warn("[Economy]",event,player.UserId,reason) end)
  local limiter = Limiter.new(Config.Training.RemoteCapacity, Config.Training.RemoteRefillPerSecond, os.clock)
@@ -57,6 +63,12 @@ function Service.new(dataService: any): any
   if not limiter:allow(player) then return false, "RateLimited" end
   if not Protocol.validAction(payload) then return false, "BadRequest" end
   if not alive(player) then controller:stop(player); return false, "NotAlive" end
+  if payload.Action=="Automation" then
+   if not dataService.snapshot(player) then return false,"NotReady" end
+   if payload.Setting=="AutoTrain" and payload.Enabled then autoBlocked[player]=nil end
+   return automation.toggle(player,payload.Setting,payload.Enabled,payload.Difficulty),nil
+  end
+  if payload.Action=="Premium" then return premium.prompt(player,payload.Offer) end
   if payload.Action=="AbortRace" then race.abort(player);return true,nil end
   if race.active(player) then return false,"AlreadyRacing" end
   if payload.Action=="StartRace" then return race.start(player,payload.Difficulty or "Easy") end
@@ -77,6 +89,8 @@ function Service.new(dataService: any): any
   snapshot.SelectedTreadmill = selected
   player:SetAttribute("SelectedTreadmill",selected)
   snapshot.Race=race.snapshot(player)
+  local mode=automation.state(player)
+  snapshot.Automation={AutoTrain=mode.AutoTrain,AutoRace=mode.AutoRace,SlowMode=mode.SlowMode,Phase=mode.Phase}
   local inventoryRevision=dataService.inventoryRevision(player)
   local cached=inventoryCache[player]
   if not cached or cached.Revision~=inventoryRevision then
@@ -101,14 +115,20 @@ function Service.new(dataService: any): any
    player:SetAttribute("PetFollowers",Http:JSONEncode(followers))
   end
   snapshot.PetEnergyBonus=PetRules.bonus(profile,"Energy");snapshot.PetCashBonus=PetRules.bonus(profile,"Cash")
+  local live=dataService.context(player)
+  snapshot.Boosts=if live then live.Boosts else {Energy=0,Cash=0}
+  snapshot.PremiumAvailable=dataService.status(player)=="Ready"
+  snapshot.PremiumEnergy=if live then premium.bonus(player,live,"Energy") else 1
+  snapshot.PremiumCash=if live then premium.bonus(player,live,"Cash") else 1
   snapshot.Revision=dataService.revision(player)
-  snapshot.TrainingMultiplier = Numbers.multiply(Rules.trainingGain(snapshot.Rebirths),snapshot.PetEnergyBonus)
-  local impulse = if selected == 0 then 0 else Numbers.multiply(Rules.trainingGain(snapshot.Rebirths, Catalog.Treadmills[selected].TrainingMultiplier),snapshot.PetEnergyBonus)
+  snapshot.TrainingMultiplier = Numbers.multiply(Rules.trainingGain(snapshot.Rebirths),Numbers.multiply(snapshot.PetEnergyBonus,snapshot.PremiumEnergy))
+  local impulse = if selected == 0 then 0 else Numbers.multiply(Rules.trainingGain(snapshot.Rebirths, Catalog.Treadmills[selected].TrainingMultiplier),Numbers.multiply(snapshot.PetEnergyBonus,snapshot.PremiumEnergy))
   snapshot.ImpulseGain=Numbers.add(snapshot.Energy,impulse)-snapshot.Energy
   snapshot.RebirthRequirement = Rules.rebirthRequirement(snapshot.Rebirths)
   return snapshot
  end
  function result.start()
+  premium.start()
   local island=workspace:WaitForChild("World1")
   local function menuPrompt(part:BasePart,title:string,event:any)
    local prompt=Instance.new("ProximityPrompt");prompt.ActionText="Öffnen";prompt.ObjectText=title;prompt.MaxActivationDistance=12;prompt.Parent=part
@@ -128,7 +148,7 @@ function Service.new(dataService: any): any
   end
   Players.PlayerAdded:Connect(added)
   for _, player in ipairs(Players:GetPlayers()) do added(player) end
-  Players.PlayerRemoving:Connect(function(player) controller:remove(player); limiter:remove(player);sequence[player]=nil;inventorySent[player]=nil;inventoryCache[player]=nil;snapshotSequence[player]=nil;autoBlocked[player]=nil;economy:remove(player) end)
+  Players.PlayerRemoving:Connect(function(player) controller:remove(player); limiter:remove(player);sequence[player]=nil;inventorySent[player]=nil;inventoryCache[player]=nil;snapshotSequence[player]=nil;autoBlocked[player]=nil;economy:remove(player);automation.remove(player) end)
   task.spawn(function()
    local entered:{[Player]:number}={}
    local garageEntered:{[Player]:boolean}={}
@@ -138,6 +158,7 @@ function Service.new(dataService: any): any
    while true do
     task.wait(0.2)
     for _,player in ipairs(Players:GetPlayers()) do
+     automation.tick(player)
      local root=if player.Character then player.Character:FindFirstChild("HumanoidRootPart") else nil
      local inside=root and root:IsA("BasePart") and alive(player) and player:GetAttribute("Racing")~=true and BikeMotion.inGarage(root.Position.X,root.Position.Y,root.Position.Z,garage.Position.X,garage.Position.Y,garage.Position.Z,garage.Size.Z/2)
      if not inside then garageEntered[player]=nil
