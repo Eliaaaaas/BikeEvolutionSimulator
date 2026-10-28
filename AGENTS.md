@@ -31,3 +31,9 @@ auf der unverankerten Fahrerwurzel und keine abgeleitete Bewegungsposition aus A
 Explizite Gelenk-C0/C1, PivotOffset und Sattel-/R15-Bindmaße berücksichtigen.
 PlayerModule-Eingabesammlung bleibt aktiv; der normale Move-Dispatcher bleibt unterbunden.
 Neue Ausgabe BikeEvolutionSimulator-V4.2. Transformationsregressionen dürfen keine Identitätsrotationen vortäuschen.
+
+V4.3 hat Vorrang: [docs/MOVEMENT_TRAINING_V43.md](docs/MOVEMENT_TRAINING_V43.md).
+Space/Touch lösen einen servervalidierten Bike-Sprung aus; Shift bleibt Bremse. Avatar-Jump bleibt gesperrt.
+Rampen, vollständiger bodenberührender Bike-Footprint und bestehende Zugangsregeln bestimmen Training.
+Vorhersage darf nur die isolierte lokale Darstellung bewegen; repliziertes Bike/Avatar bleiben servergeführt.
+Neue Ausgabe BikeEvolutionSimulator-V4.3; keine weitere Dekoration im Bewegungsfix.

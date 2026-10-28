@@ -1,5 +1,7 @@
 # V4.2 — Fahrer und Bike als gemeinsame Fahrzeugeinheit
 
+> [V4.3](MOVEMENT_TRAINING_V43.md) ergänzt Rampenzugang, isolierte lokale Vorhersage und einen eigenen Bike-Sprung. Die Avatar-Sprungsperre bleibt; Space ist jetzt Bike-Sprung statt Bremse. Historische Aussagen zur fehlenden Vorhersage sind damit überholt.
+
 Der V4.1-Build ist nach tatsächlichem Studio-Feedback **nicht abgenommen**: normales Laufen und ein unabhängig um den Fahrer drehendes Bike. Dieser Auftrag repariert die Bewegungsintegration; keine zusätzliche Dekoration oder Wirtschaftssysteme. Branch und Draft PR #2 bleiben erhalten.
 
 ## Konkrete Ursachen im Code
