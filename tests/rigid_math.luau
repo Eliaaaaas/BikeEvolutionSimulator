@@ -51,6 +51,7 @@ local function rigidMath()
   return make(self.Position+(b.Position-self.Position)*t,{x.X,y.X,z.X,x.Y,y.Y,z.Y,x.Z,y.Z,z.Z})
  end
  CM.__index=function(a,k)
+  if k=="UpVector" then return V.new(a.R[2],a.R[5],a.R[8]) end
   if k=="LookVector" then return V.new(-a.R[3],-a.R[6],-a.R[9]) end
   return methods[k]
  end

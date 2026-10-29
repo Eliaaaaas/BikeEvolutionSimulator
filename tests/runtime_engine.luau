@@ -146,6 +146,8 @@ local function engine()
   return if e.NoGround or y==nil then nil else {Position=vector.new(origin.X,y,origin.Z),Normal=vector.new(0,1,0)} end
  e.Workspace.Blockcast=function() return if e.Collision then {} else nil end
  e.RaycastParams={new=function() return {} end}
+ e.OverlapParams={new=function() return {} end}
+ e.Workspace.GetPartBoundsInBox=function() return if e.Occupied then {e.Occupied} else {} end
  e.Move=vector.zero;e.Controls={GetMoveVector=function() return e.Move end,moveFunction=function() e.DefaultMoves=(e.DefaultMoves or 0)+1 end}
  e.PlayerModule={GetControls=function() return e.Controls end}
  e.Workspace.CurrentCamera={ViewportSize=vector.new(1000,700),CFrame=cf.new(0,20,30)}
@@ -164,7 +166,7 @@ local function engine()
  local services={MarketplaceService=market,Players=e.Players,ReplicatedStorage=e.Rep,RunService={PreSimulation=signal(),RenderStepped=render,BindToRenderStep=function(_,name,priority,cb) bindings[name]={Priority=priority,Callback=cb} end,UnbindFromRenderStep=function(_,name) bindings[name]=nil end,IsStudio=function() return e.Studio~=false end},
  HttpService={GenerateGUID=function() serial+=1;return "integration-"..serial end,JSONEncode=function() return "[]" end},
  DataStoreService={GetDataStore=function(_,name) e.StoreCalls+=1;e.StoreName=name;if e.FailStoreCreation then error("Publish place first") end;return store end},
- ContextActionService={BindActionAtPriority=function(_,name,callback) if name=="BikeBrake" then e.BrakeCallback=callback else e.JumpCallback=callback end end,SetTitle=function() end,SetPosition=function() end,UnbindAction=function() e.BrakeCallback=nil end},
+ ContextActionService={BindActionAtPriority=function(_,name,callback,touch,priority,...) e.ActionBindings=e.ActionBindings or {};e.ActionBindings[name]={Touch=touch,Priority=priority,Keys={...}}; if name=="BikeBrake" then e.BrakeCallback=callback else e.JumpCallback=callback end end,SetTitle=function() end,SetPosition=function(_,name,pos) e.ActionPositions=e.ActionPositions or {};e.ActionPositions[name]=pos end,UnbindAction=function() e.BrakeCallback=nil end},
  UserInputService={TouchEnabled=false,InputBegan=signal(),TouchTap=signal(),WindowFocused=signal(),WindowFocusReleased=signal(),GetFocusedTextBox=function() return nil end},TweenService={Create=function(_,target,_,props) local done=signal();return {Completed=done,Cancel=function() end,Play=function() for k,v in pairs(props) do target[k]=v end;done:Fire() end} end}}
  e.Players.GetPlayerByUserId=function(_,id) for _,player in ipairs(e.Players:GetPlayers()) do if player.UserId==id then return player end end;return nil end
  function game:GetService(name) return services[name] or self:FindFirstChild(name) end

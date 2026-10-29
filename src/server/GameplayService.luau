@@ -28,8 +28,10 @@ function Service.new(dataService: any): any
   return humanoid ~= nil and humanoid.Health > 0 and character ~= nil and character:IsDescendantOf(workspace)
  end
  local mounts:any=nil
+ local premium:any=nil
  local function near(player: Player, id: number): boolean
-  if not alive(player) or player:GetAttribute("Racing")==true then return false end
+  if not alive(player) or player:GetAttribute("Racing")==true or not zones[id] then return false end
+  if (zones[id]:GetAttribute("VIPOnly")==true or Catalog.Treadmills[id].VIPOnly==true) and (not premium or not premium.entitled(player,"VIP")) then return false end
   return mounts~=nil and mounts.onBelt(player,zones[id])
  end
  local sink: any=function() end
@@ -38,13 +40,14 @@ function Service.new(dataService: any): any
   sequence[player]=(sequence[player] or 0)+1;event.Id=sequence[player]
   local ok,err=pcall(sink,player,event);if not ok then warn("[Feedback]",player.UserId,tostring(err)) end
  end
- local premium=PremiumService.new(dataService)
+ premium=PremiumService.new(dataService)
  local controller = Controller.new(dataService, os.clock, near,emit)
  controller.Premium=premium.bonus
  mounts=MountedBikes.new(dataService)
+ mounts.setTrainingZones(zones,function(player:Player) return premium.entitled(player,"VIP") end)
  mounts.cashPass=function(player:Player) return premium.bonus(player,{Boosts={}},"Cash")>1 end
  local race=RaceService.new(dataService,function(player) controller:stop(player) end,emit,mounts)
- local automation=AutomationService.new(dataService,mounts,race,controller,zones,emit)
+ local automation=AutomationService.new(dataService,mounts,race,controller,zones,emit,function(player:Player) return premium.entitled(player,"VIP") end)
  local rng=Random.new()
  local economy=Economy.new(dataService,os.clock,function() return rng:NextInteger(1,10000) end,function() return Http:GenerateGUID(false) end,emit,function(player,event,reason) warn("[Economy]",event,player.UserId,reason) end)
  local limiter = Limiter.new(Config.Training.RemoteCapacity, Config.Training.RemoteRefillPerSecond, os.clock)

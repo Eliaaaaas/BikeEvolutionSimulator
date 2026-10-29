@@ -19,7 +19,7 @@ function Controller.select(self: any, player: any, id: number): (boolean, string
  local state, now = self:state(player), self.Clock()
  if now - state.LastSelect < Config.Training.SelectCooldown then return false, "Cooldown" end
  state.LastSelect = now
- if id % 1 ~= 0 or id < 1 or id > 5 or not self.Near(player, id) then return false, "TooFar" end
+ if id % 1 ~= 0 or id < 1 or id > Config.Rules.TreadmillCount or not self.Near(player, id) then return false, "TooFar" end
  local allowed = false
  local ok, reason = self.Data.change(player, function(data: any): boolean
   allowed = Rules.canUseTreadmill(id, data.Energy, data.Rebirths, data.OwnedWorlds)

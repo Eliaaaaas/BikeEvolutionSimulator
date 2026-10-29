@@ -7,7 +7,7 @@ function Camera.new(settings:any,ui:any)
  local player=Players.LocalPlayer
  local anchor=Instance.new("Part");anchor.Name="BikeCameraTarget";anchor.Size=Vector3.new(.1,.1,.1)
  anchor.Anchored=true;anchor.Transparency=1;anchor.CanCollide=false;anchor.CanQuery=false;anchor.CanTouch=false;anchor.Parent=workspace
- local active:Camera?=nil;local saved:any=nil;local target:Vector3?=nil;local wasRace=false
+ local active:Camera?=nil;local saved:any=nil;local target:Vector3?=nil;local wasRace=false;local teleportSerial=player:GetAttribute("BikeTeleportSerial") or 0
  local function restore()
   if active and saved then active.CameraType=saved.Type;active.CameraSubject=saved.Subject;active.FieldOfView=saved.Fov end
   active=nil;saved=nil;target=nil
@@ -25,9 +25,10 @@ function Camera.new(settings:any,ui:any)
   if not root or not root:IsA("BasePart") then return end
   local racing=player:GetAttribute("Racing")==true
   local desired=root.Position+Vector3.new(0,4,0)
-  if not target or (target-desired).Magnitude>20 or wasRace~=racing then target=desired
+  local serial=player:GetAttribute("BikeTeleportSerial") or 0
+  if not target or (target-desired).Magnitude>20 or wasRace~=racing or serial~=teleportSerial then target=desired
   else target=target:Lerp(desired,1-math.exp(-math.min(dt,.1)*35)) end
-  wasRace=racing
+  wasRace=racing;teleportSerial=serial
   anchor.CFrame=CFrame.new(target :: Vector3)
   if racing then
    camera.CameraType=Enum.CameraType.Scriptable

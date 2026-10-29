@@ -63,3 +63,11 @@ jobs:
           name: BikeEvolutionSimulator-V4.4
           path: build/v4.4/
           if-no-files-found: error
+      - name: Package V4.5 sign, treadmill, HUD and Auto Train overhaul
+        run: python3 tools/package_v4.py --version V4.5
+      - name: Upload V4.5 Studio build
+        uses: actions/upload-artifact@v4
+        with:
+          name: BikeEvolutionSimulator-V4.5
+          path: build/v4.5/
+          if-no-files-found: error

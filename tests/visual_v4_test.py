@@ -61,13 +61,13 @@ class VisualV4Tests(unittest.TestCase):
                 self.assertTrue(abs(wh[0]-lo[0])<1e-7 or abs(wl[0]-hi[0])<1e-7)
 
     def test_sculpted_signs_keep_caption_and_icons_separate(self):
-        signs = [i for i in items if name(i).startswith('V4Sign_')]
+        signs = [i for i in items if name(i).startswith('Sign_')]
         self.assertGreaterEqual(len(signs),20)
         for sign in signs:
             names = [name(i) for i in sign.findall('Item')]
-            for layer in ('SculptedBack','NeonContour','EnamelFace'):
+            for layer in ('MatteBack','MatteFaceRound','TextFace'):
                 self.assertIn(layer,names)
-            for carrier in [i for i in sign.findall('Item') if name(i)=='V4Caption']:
+            for carrier in [i for i in sign.findall('Item') if name(i)=='TextFace']:
                 label=carrier.find("Item/Item")
                 self.assertEqual(label.findtext("Properties/bool[@name='TextScaled']"),'true')
                 dims=label.find("Properties/UDim2[@name='Size']")
@@ -75,10 +75,13 @@ class VisualV4Tests(unittest.TestCase):
                 for axis in 'XY':
                     self.assertLessEqual(float(dims.findtext(axis+'S'))+float(pos.findtext(axis+'S')), .97)
                 self.assertEqual(label.findtext("Properties/bool[@name='TextWrapped']"),'false')
-                right=[row[0] for row in rotation(carrier)]
+                side=1 if carrier.findtext("Item/Properties/token[@name='Face']")=="2" else -1
+                right=[row[0]*side for row in rotation(carrier)]
                 left=-size(carrier)[0]/2+float(pos.findtext('XS'))*size(carrier)[0]
                 for icon in sign.findall('Item'):
                     if name(icon) in {'BikeWheel','BikeFrame','EggIcon','StarGem','FlagPole','CheckeredFlag','PortalIcon','CoinRim','CoinStamp','StarRay','EnergyBolt'}:
+                        outward=sum((xyz(icon)[a]-xyz(carrier)[a])*rotation(carrier)[a][2]*side for a in range(3))
+                        if outward<0:continue # The other face has its own mirrored icon layout.
                         center=sum((xyz(icon)[a]-xyz(carrier)[a])*right[a] for a in range(3))
                         r=rotation(icon)
                         half=sum(abs(sum(r[a][b]*right[a] for a in range(3)))*size(icon)[b]/2 for b in range(3))
@@ -86,11 +89,11 @@ class VisualV4Tests(unittest.TestCase):
 
     def test_showroom_label_frames_do_not_overlap(self):
         showroom=by_name['GarageShowroom']
-        signs=[i for i in showroom.findall('Item') if name(i).startswith('V4Sign_')]
+        signs=[i for i in showroom.findall('Item') if name(i).startswith('Sign_')]
         self.assertEqual(len(signs),10)
         ranges=[]
         for sign in signs:
-            layers=[p for p in sign.findall('Item') if name(p) in {'SculptedBack','SculptedBackCap'}]
+            layers=[p for p in sign.findall('Item') if name(p) in {'MatteBack','MatteBackCap'}]
             ranges.append(([min(bounds(p)[0][a] for p in layers) for a in range(3)], [max(bounds(p)[1][a] for p in layers) for a in range(3)]))
         for index,(lo,hi) in enumerate(ranges):
             for otherlo,otherhi in ranges[index+1:]:

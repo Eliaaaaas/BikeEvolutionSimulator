@@ -8,7 +8,7 @@ local Config = {
   RebirthBonus = 0.5, GoldenIngredients = 5, RainbowIngredients = 3 },
  Numbers = { MaxBalance = Numbers.Max, MaxRebirths = Numbers.MaxRebirths },
  Treadmills = { EnergyBase = 21, Difficulty = 4, RebirthBase = 1, RebirthFactor = 3 },
- Training = { AutoSeconds = 1, ClickCooldown = 0.2, SelectCooldown = 0.4, RebirthCooldown = 1,
+ Training = { AutoTeleportCooldown = .4, AutoSeconds = 1, ClickCooldown = 0.2, SelectCooldown = 0.4, RebirthCooldown = 1,
   RemoteCapacity = 12, RemoteRefillPerSecond = 8, MaxDistance = 10, MaxVerticalDistance = 6 },
  Bike = { Tick = 1/60, CommandSteps = 2, InputInterval = 1/30, InputTimeout = .45, BaseSpeed = 18, MaxSpeed = 46,
   Acceleration = 40, Braking = 90, Drag = 35, TurnRate = 2.8, StepHeight = 1.6,

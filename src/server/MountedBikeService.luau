@@ -11,6 +11,8 @@ local Rig=require(Shared:WaitForChild("BikeRig"))
 local Protocol=require(Shared:WaitForChild("Protocol"))
 local Limiter=require(Shared:WaitForChild("RateLimiter"))
 local Progression=require(Shared:WaitForChild("Progression"))
+local Access=require(Shared:WaitForChild("AutoTraining"))
+local Catalog=require(Shared:WaitForChild("Catalog"))
 local Service={}
 function Service.new(data:any):any
  local folder=Instance.new("Folder");folder.Name="PlayerBikes";folder.Parent=workspace
@@ -20,6 +22,9 @@ function Service.new(data:any):any
  local epoch:{[Player]:number}={}
  local stateSink:any=function() end
  local api:any={}
+ local trainingZones:{[number]:BasePart}={}
+ local hasVIP:(Player)->boolean=function() return false end
+ function api.setTrainingZones(zones:any,entitlement:(Player)->boolean) trainingZones=table.clone(zones);hasVIP=entitlement end
  local function poseNode(node:Instance)
   if node:IsA("BasePart") then node.CanCollide=false
   elseif node:IsA("LocalScript") and node.Name=="Animate" then node.Disabled=true
@@ -124,7 +129,7 @@ function Service.new(data:any):any
  local function sendState(player:Player,r:any)
   if not r.State then return end
   r.Ack=(r.Ack or 0)+1
-  stateSink(player,{Ack=r.Ack,Epoch=r.Epoch,Sequence=r.Processed,State=table.clone(r.State),Mode=r.Mode,VehicleId=r.VehicleId,MaxSpeed=maxSpeed(player,r)})
+  stateSink(player,{Ack=r.Ack,Epoch=r.Epoch,Sequence=r.Processed,State=table.clone(r.State),Mode=r.Mode,Auto=r.Auto~=nil,VehicleId=r.VehicleId,MaxSpeed=maxSpeed(player,r)})
  end
  function api.input(player:Player,payload:any):boolean
   if player.Parent~=Players or not gate:allow(player) or not Protocol.validDrive(payload) then return false end
@@ -138,7 +143,11 @@ function Service.new(data:any):any
  end
  function api.onBelt(player:Player,zone:BasePart):boolean
   local r=records[player]
-  return r~=nil and r.Mode=="Manual" and Sim.onBelt(r.State,zone.Position.X,zone.Position.Y,zone.Position.Z,zone.Size.X,zone.Size.Z)
+  if not r or r.Mode~="Manual" then return false end
+  local relative=zone.CFrame:ToObjectSpace(CFrame.new(r.State.X,r.State.Y,r.State.Z)*CFrame.Angles(0,r.State.Yaw,0))
+  local _,yaw=relative:ToEulerAnglesYXZ()
+  local state=table.clone(r.State);state.X=relative.Position.X;state.Y=relative.Position.Y;state.Z=relative.Position.Z;state.Yaw=yaw
+  return Sim.onBelt(state,0,0,0,zone.Size.X,zone.Size.Z)
  end
  function api.race(player:Player):any
   local record=api.ensure(player);assert(record,"Mounted rider unavailable")
@@ -153,15 +162,41 @@ function Service.new(data:any):any
   record.Distance=distance
   record.Bike:SetAttribute("RaceSpeed",speed);record.Bike:SetAttribute("Distance",distance)
  end
- function api.teleport(player:Player,cf:CFrame)
-  local record=api.ensure(player);if not record then return end
+ function api.teleport(player:Player,cf:CFrame):boolean
+  local record=api.ensure(player);if not record or record.Mode~="Manual" or player:GetAttribute("Racing")==true or not data.snapshot(player) then return false end
   record.Speed=0;local _,yaw=cf:ToEulerAnglesYXZ();record.Yaw=yaw
   local scene=Surface.new(workspace,{record.Character,folder},6)
   local floor=scene.floor(cf.Position.X,cf.Position.Y,cf.Position.Z)
   if floor and math.abs(cf.Position.Y-floor-.05)<=Config.Bike.StepHeight then cf=CFrame.new(cf.Position.X,floor+.05,cf.Position.Z)*CFrame.Angles(0,yaw,0) end
   record.State=Sim.new(cf.Position.X,cf.Position.Y,cf.Position.Z,yaw)
   record.State.Distance=record.Distance;record.State.JumpId=player:GetAttribute("DriveJumpId") or 0;record.Queue={};record.LastCommand=nil
+  record.Input={Throttle=0,Steer=0,Brake=true,At=0};record.CommandPhase=0
+  epoch[player]=(epoch[player] or 0)+1;record.Epoch=epoch[player];record.Processed=sequence[player] or 0
+  player:SetAttribute("DriveEpoch",record.Epoch)
   api.move(record,cf,0,record.Distance)
+  local serial=player:GetAttribute("BikeTeleportSerial")
+  player:SetAttribute("BikeTeleportSerial",if type(serial)=="number" then serial+1 else 1)
+  sendState(player,record)
+  return true
+ end
+ -- Takes only a stable catalogue ID. Positions come exclusively from registered server world objects.
+ function api.trainTeleport(player:Player,id:number):(boolean,string?)
+  if type(id)~="number" or id%1~=0 or id<1 or id>Config.Rules.TreadmillCount then return false,"BadRequest" end
+  local zone=trainingZones[id]
+  if not zone or not zone:IsDescendantOf(workspace) or not Catalog.Treadmills[id] then return false,"TreadmillUnavailable" end
+  if zone.Size.X<4.8 or zone.Size.Z<8 or zone.CFrame.UpVector.Y<.9999 then return false,"TrainingPositionBlocked" end
+  local profile=data.context(player)
+  if not Access.allowed(profile,id,zone:GetAttribute("VIPOnly")==true or Catalog.Treadmills[id].VIPOnly==true,hasVIP(player)) then return false,"Locked" end
+  local record=api.ensure(player)
+  if not record or record.Mode~="Manual" or player:GetAttribute("Racing")==true then return false,"AlreadyRacing" end
+  local target=zone.CFrame*CFrame.new(0,.05,0)
+  local scene=Surface.new(workspace,{record.Character,folder},math.max(5.8,record.Offset.Position.Y+record.Root.Size.Y+1))
+  local p=target.Position;local _,yaw=target:ToEulerAnglesYXZ()
+  for _,value in ipairs({p.X,p.Y,p.Z,yaw}) do if value~=value or math.abs(value)>1e6 then return false,"TrainingPositionBlocked" end end
+  local floor,normal=scene.floor(p.X,p.Y,p.Z)
+  if not floor or not normal or normal<Config.Bike.MinGroundNormal or math.abs(p.Y-floor-.05)>.25 or not scene.clear(p.X,p.Y,p.Z,yaw) then return false,"TrainingPositionBlocked" end
+  if not api.teleport(player,target) or not api.onBelt(player,zone) then return false,"TrainingPositionBlocked" end
+  return true,nil
  end
  function api.finish(player:Player,record:any,reason:string)
   if records[player]~=record then return end

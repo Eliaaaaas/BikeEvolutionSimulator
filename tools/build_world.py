@@ -58,57 +58,11 @@ def ring(parent,name,center,radius,color,segments=10):
         a=j*math.tau/segments;b=(j+1)*math.tau/segments
         beam(parent,name,(center[0]+math.sin(a)*radius,center[1]+math.cos(a)*radius,center[2]),(center[0]+math.sin(b)*radius,center[1]+math.cos(b)*radius,center[2]),.15,color,288)
 
+# One reusable serializer for every island/course/showroom sign.
+from sign_builder import SignBuilder
+sign_builder = SignBuilder(item, part, prop, capsule, beam)
 def marquee(parent,title,pos,width,color,height=4,kind=None):
-    kind=kind or ('Garage' if 'GARAGE' in title else 'Eggs' if 'EGG' in title or 'PET' in title else 'Race' if 'RACE' in title or 'START' in title or 'ZIEL' in title else 'Worlds' if 'WORLD' in title or 'PORTAL' in title else 'Shop' if 'SHOP' in title else 'Training' if 'TRAIN' in title else 'VIP' if 'VIP' in title else 'Island')
-    colors={'Garage':((60,162,244),(255,218,83)),'Eggs':((183,76,186),(173,123,246)),'Race':((240,87,65),(255,201,64)),'Worlds':((65,118,210),(169,127,249)),'Shop':((56,184,118),(255,221,102)),'Training':((29,161,177),(255,166,68)),'VIP':((237,189,61),(129,225,245)),'Island':((43,161,162),(255,222,132))}
-    primary,accent=colors[kind]
-    model,_=item(parent,'Model','V4Sign_'+kind)
-    dark=tuple(int(v*.48) for v in primary)
-    trim=min(1,height/3) # Small showroom labels must fit between neighboring plinths.
-    capsule(model,'SculptedBack',width+1.6*trim,height+1.4*trim,.65,(pos[0],pos[1],pos[2]-.1),dark)
-    capsule(model,'NeonContour',width+.7*trim,height+.7*trim,.15,(pos[0],pos[1],pos[2]+.32),accent,256)
-    capsule(model,'EnamelFace',width,height,.28,(pos[0],pos[1],pos[2]+.49),primary)
-    # Invisible carriers keep the words inside rounded geometry with explicit margins.
-    for face,dz in [(2,.66),(5,-.47)]:
-        carrier,props=part(model,'V4Caption',(width-.6,height-.3,.03),(pos[0],pos[1],pos[2]+dz),primary,collide=False,transparency=1)
-        gui,gp=item(carrier,'SurfaceGui','CaptionSurface');prop(gp,'token','Face',face);prop(gp,'float','PixelsPerStud',64);prop(gp,'float','LightInfluence',0);prop(gp,'float','Brightness',1)
-        label,lp=item(gui,'TextLabel','Caption');prop(lp,'string','Text',title);prop(lp,'bool','TextScaled',True);prop(lp,'bool','TextWrapped',False);prop(lp,'float','BackgroundTransparency',1);prop(lp,'token','Font',20)
-        c=E.SubElement(lp,'Color3',name='TextColor3')
-        ink=(.07,.20,.28) if kind=='VIP' else (1,1,1)
-        for k,v in zip('RGB',ink):E.SubElement(c,k).text=str(v)
-        u=E.SubElement(lp,'UDim2',name='Size')
-        for k,v in [('XS',.78 if width>=16 else .92),('XO',0),('YS',.8),('YO',0)]:E.SubElement(u,k).text=str(v)
-        u=E.SubElement(lp,'UDim2',name='Position')
-        for k,v in [('XS',.18 if width>=16 else .04),('XO',0),('YS',.1),('YO',0)]:E.SubElement(u,k).text=str(v)
-    if width>=16:
-        x,y,z=pos[0]-width*.38,pos[1],pos[2]+.9;r=min(1.1,height*.23)
-        if kind=='Garage':
-            for side in [-1,1]:ring(model,'BikeWheel',(x+side*r*.7,y-r*.3,z),r*.55,accent,6)
-            for a,b in [((x-r*.7,y-r*.3,z),(x,y+r*.6,z)),((x,y+r*.6,z),(x+r*.7,y-r*.3,z)),((x-r*.7,y-r*.3,z),(x+r*.7,y-r*.3,z))]:beam(model,'BikeFrame',a,b,.13,(137,251,240),288)
-        elif kind=='Eggs':
-            part(model,'EggIcon',(r*1.3,r*1.8,r*.6),(x,y,z),accent,288,False,shape=0)
-            for k in [-1,1]:part(model,'StarGem',(.3,.3,.2),(x+k*r,y+k*r*.5,z),(255,244,168),288,False,shape=0)
-        elif kind=='Race':
-            beam(model,'FlagPole',(x-r*.7,y-r,z),(x-r*.7,y+r,z),.14,accent,288)
-            for i in range(3):
-                for j in range(2):part(model,'CheckeredFlag',(.5,.5,.12),(x-r*.4+i*.5,y+r*.3+j*.5,z),(255,249,212) if (i+j)%2==0 else (53,76,107),collide=False)
-        elif kind=='Worlds':ring(model,'PortalIcon',(x,y,z),r,accent,12)
-        elif kind=='Shop':
-            ring(model,'CoinRim',(x,y,z),r,accent,10)
-            beam(model,'CoinStamp',(x,y-r*.5,z),(x,y+r*.5,z),.35,accent,288)
-        elif kind=='VIP':
-            for i in range(5):
-                a=i*math.tau/5;beam(model,'StarRay',(x,y,z),(x+math.sin(a)*r,y+math.cos(a)*r,z),.25,accent,288)
-        else:
-            for a,b in [((x+.3,y+r,z),(x-.4,y,z)),((x-.4,y,z),(x+.4,y,z)),((x+.4,y,z),(x-.3,y-r,z))]:beam(model,'EnergyBolt',a,b,.22,accent,288)
-    # Icons are authored on both faces, so signs read correctly from either approach.
-    import copy
-    icon_names={'BikeWheel','BikeFrame','EggIcon','StarGem','FlagPole','CheckeredFlag','PortalIcon','CoinRim','CoinStamp','StarRay','EnergyBolt'}
-    for node in list(model.findall('Item')):
-        if node.findtext("Properties/string[@name='Name']") not in icon_names:continue
-        back=copy.deepcopy(node);cf=back.find("Properties/CoordinateFrame[@name='CFrame']")
-        cf.find('Z').text=str(2*pos[2]-float(cf.find('Z').text));model.append(back)
-    return model
+    return sign_builder.build(parent,title,pos,width,height,kind)
 
 def plaque(parent,title,pos,width,color=(27,126,119),height=4):
     return marquee(parent,title,pos,width,color,height)
@@ -180,37 +134,23 @@ for x in [-57,57]:
     for j in [-1,1]:part(model,'PoolRock',(5,3,6),(x+j*9,8,-65),(138,157,143),896,shape=0)
 training,_=item(model,'Folder','Training')
 xs=[-54,-36,-18,24,42]
-colors=[(43,225,166),(52,185,255),(255,205,65),(255,126,65),(159,121,255)]
-def oval(parent,name,width,depth,thickness,pos,color,material):
-    node,props=part(parent,name,(thickness,width,depth),pos,color,material,False,shape=2)
-    cf=props.find("CoordinateFrame[@name='CFrame']")
-    for row in range(3):
-        for col in range(3):cf.find(f'R{row}{col}').text=str([[0,-1,0],[1,0,0],[0,0,1]][row][col])
-    return node
+colors=[(47,214,196),(65,151,239),(90,209,121),(248,151,65),(163,115,237)]
 for i,(x,color) in enumerate(zip(xs,colors),1):
     treadmill,_=item(training,'Model',f'Treadmill_{i}')
-    accent=colors[i%len(colors)]
-    # V4.4: flush inset running surface. No access ramp or replacement neon approach plate.
-    oval(treadmill,'RoundedBase',14,18,.5,(x,7.05,-51),(31,53,78),1088)
-    oval(treadmill,'NeonRim',14.3,18.3,.14,(x,8.035,-51),color,288)
-    oval(treadmill,'RoundedLayer',12.5,16.5,.4,(x,7.55,-51),accent,256)
-    part(treadmill,'Deck',(10.5,.5,14),(x,7.6,-51),(26,43,64))
-    part(treadmill,'Belt',(8,.2,12),(x,7.95,-51),(19,33,53))
+    # Real rectangular inset assembly. Only the thin side inlays use Neon.
+    part(treadmill,'Deck',(10,.32,14.4),(x,7.84,-51),(31,41,52),1088)
+    part(treadmill,'Belt',(8,.2,12),(x,7.95,-51),(24,29,36),1312)
     part(treadmill,'Zone',(8,.1,12),(x,8.05,-51),color,collide=False,transparency=1)
     for side in [-1,1]:
-        part(treadmill,'NeonEdge',(.22,.25,14.4),(x+side*5.4,8.09,-51),color,288,False)
-        beam(treadmill,'PowerArm',(x+side*5.5,8,-55),(x+side*3.5,10.6,-57),.4,(123,154,180),1088)
-        part(treadmill,'JointGlow',(.8,.8,.8),(x+side*3.5,10.6,-57),accent,288,False,shape=0)
-    for j in range(8):part(treadmill,f'BeltStripe_{j}',(7.7,.025,.15),(x,8.065,-56+j*1.4),color if j%2 else accent,288,False)
-    for j in range(3):
-        for side in [-1,1]:part(treadmill,f'DirectionChevron_{j}_{side}',(.13,.03,1.2),(x+side*.35,8.08,-54+j*3),(232,255,245),288,False,yaw=side*35)
-    part(treadmill,'PowerCore',(1.5+i*.12,1.5+i*.12,1.5+i*.12),(x,10.1,-57.2),accent,288,False,shape=0)
-    for j in range(6+i):
-        angle=j*math.tau/(6+i)
-        part(treadmill,f'OrbitLight_{j}',(.3,.7,.3),(x+math.sin(angle)*2.1,10.1,-57.2+math.cos(angle)*2.1),color,288,False,yaw=j*40)
-    for j in range(2+i):
-        side=-1 if j%2 else 1
-        part(treadmill,'EnergyFin',(.3,1+j*.15,1.4),(x+side*5.7,8.5,-54+(j//2)*2),accent,288,False,cls='WedgePart',yaw=side*90)
+        part(treadmill,'SideFrame',(.64,.38,14.2),(x+side*4.45,8.03,-51),(54,67,81),1088,False)
+        part(treadmill,'NeonEdge',(.09,.04,13.4),(x+side*4.45,8.23,-51),color,288,False)
+        for end in [-1,1]:
+            part(treadmill,'RollerHousing',(.7,.32,.7),(x+side*4.35,7.94,-51+end*6.1),(73,88,102),1088,False)
+            part(treadmill,'FrameBolt',(.18,.04,.18),(x+side*4.45,8.24,-51+end*6.45),(163,180,191),1088,False,shape=2)
+    for end in [-1,1]:
+        part(treadmill,'FrontRoller' if end==-1 else 'RearRoller',(7.9,.7,.7),(x,7.94,-51+end*6.1),(121,137,151),1088,False,shape=2)
+        part(treadmill,'EndCrossMember',(9.6,.28,.26),(x,7.9,-51+end*7),(52,65,80),1088,False)
+    for j in range(8):part(treadmill,f'BeltStripe_{j}',(7.8,.012,.055),(x,8.058,-56.25+j*1.5),(44,53,62),256,False)
 part(training,'PremiumReserved',(20,.12,17),(3,8.08,-51),(240,208,120),collide=False)
 # Authored curved paths use small oval pavers with shared tangents, not long rectangular roads.
 path_points=[]

@@ -84,7 +84,7 @@ function Prediction.new(ui:any,stateRemote:RemoteEvent):any
   -- Ignore stale epochs before changing the currently visible assembly.
   if type(message.Epoch)~="number" or message.Epoch<math.max(reconciler.Epoch,player:GetAttribute("DriveEpoch") or 0) then return end
   if message.Epoch==reconciler.Epoch and (message.Ack<=reconciler.Ack or message.Sequence<reconciler.Sequence) then return end
-  if message.Mode~="Manual" or player:GetAttribute("Racing")==true or player:GetAttribute("AutoDriving")==true then reset();return end
+  if message.Mode~="Manual" or message.Auto==true or player:GetAttribute("Racing")==true or player:GetAttribute("AutoDriving")==true then reset();return end
   local changed=not api.Active or vehicle~=message.VehicleId or message.Epoch~=reconciler.Epoch
   if changed and not build(message.VehicleId,message.State) then return end
   if Replay.accept(reconciler,message,scene) then

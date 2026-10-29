@@ -8,7 +8,7 @@ local function integration(preview,remove,live,predict)
  modules.RaceService=modules.makeRaceService(e.Game,e.Workspace,e.Task,e.OS,e.Warn,e.Instance,e.CFrame,e.Vector3,e.Enum)
  modules.PlayerDataService=modules.makeService(e.Game,e.Task,e.OS,e.Warn)
  modules.RiderMount=modules.make_RiderMount(e.CFrame)
- modules.BikeSurface=modules.make_BikeSurface(e.CFrame,e.Vector3,e.RaycastParams,e.Enum)
+ modules.BikeSurface=modules.make_BikeSurface(e.CFrame,e.Vector3,e.RaycastParams,e.Enum,e.OverlapParams)
  local mountedModule=modules.make_MountedBikeService(e.Game,e.Workspace,e.Task,e.OS,e.Warn,e.Instance,e.CFrame,e.Vector3,e.Enum,e.RaycastParams)
  modules.MountedBikeService={new=function(data) e.Mounts=mountedModule.new(data);return e.Mounts end}
  function e.teleport(x,y,z)
@@ -16,7 +16,7 @@ local function integration(preview,remove,live,predict)
   e.Mounts.teleport(e.Player,e.CFrame.new(x,y,z)*record.Offset:Inverse())
  end
  modules.PremiumService=modules.make_PremiumService(e.Game,e.Workspace,e.Task,e.OS,e.Warn,e.Enum)
- modules.AutomationService=modules.make_AutomationService(e.Game,e.OS)
+ modules.AutomationService=modules.make_AutomationService(e.Game,e.OS,e.Workspace)
  modules.GameplayService=modules.make_GameplayService(e.Game,e.Workspace,e.Task,e.OS,e.Warn,e.Instance,e.Random)
  modules.RemoteService=modules.make_RemoteService(e.Game,e.Task,e.OS,e.Instance)
  local booted,bootError=pcall(modules.make_init_server,e.Game,e.Workspace,e.Instance,serverScript,e.Warn)
@@ -30,7 +30,7 @@ local function integration(preview,remove,live,predict)
  local noop=function() end
  modules.Audio={new=function() return {refresh=noop,play=noop} end}
  modules.Effects={new=function(gui) assert(gui and gui:IsA("ScreenGui"),"Actual UI did not export Gui");return {refresh=noop,training=function(amount) table.insert(e.TrainingPopups,amount) end,rebirth=noop} end}
- for _,name in ipairs({"Visuals","PetFollowers","IslandEffects","StationEffects","RaceCamera"}) do modules[name]={new=function() return {refresh=noop} end} end
+ for _,name in ipairs({"Visuals","PetFollowers","IslandEffects","StationEffects","RaceCamera","SignReadability"}) do modules[name]={new=function() return {refresh=noop} end} end
  modules.PlayerModule=e.PlayerModule
  modules.RidePrediction=if predict then modules.make_RidePrediction(e.Game,e.Workspace,e.Instance,e.CFrame,e.OS,e.Enum) else {new=function() return {intent=function() end,command=function() end} end}
  modules.BikeInput=modules.make_BikeInput(e.Game,e.Task,e.UDim2,e.Enum,e.Vector3)
@@ -176,11 +176,11 @@ test("V2 compact HUD uses safe insets and reserves touch jump space in both orie
  assert(e.UI.Gui.ScreenInsets==e.Enum.ScreenInsets.CoreUISafeInsets)
  e.Game:GetService("UserInputService").TouchEnabled=true
  root.AbsoluteSize=e.Vector2.new(375,680);root:GetPropertyChangedSignal("AbsoluteSize"):Fire()
- assert(e.UI.ResourceHUD.Size[1]==154 and e.UI.ResourceHUD.Size[2]==90)
- assert(e.UI.ResourceHUD.Position[2]==-8 and e.UI.ResourceHUD.Position[4]==-130)
+ assert(e.UI.ResourceHUD.Size[1]==136 and e.UI.ResourceHUD.Size[2]==90)
+ assert(e.UI.ResourceHUD.Position[2]==-10 and e.UI.ResourceHUD.Position[4]==-10)
  assert(e.UI.ResourceValues.Energy.TextSize==22)
  root.AbsoluteSize=e.Vector2.new(820,330);root:GetPropertyChangedSignal("AbsoluteSize"):Fire()
- assert(e.UI.ResourceHUD.Position[2]==-138 and e.UI.ResourceHUD.Position[4]==-8)
+ assert(e.UI.ResourceHUD.Position[2]==-10 and e.UI.ResourceHUD.Position[4]==-10)
  local copies=0;for _,node in ipairs(e.UI.Gui:GetDescendants()) do if node.Name=="ResourceHUD" then copies+=1 end end;assert(copies==1)
 end)
 test("V2 sidebar keeps full Rebirth preview, cancel and authoritative confirmation without a stand",function()
@@ -658,7 +658,8 @@ test("V4.4 Auto Race drives to start uses real bots and stops further starts whe
  local e=integration(true)
  e.UI.OnAction("Automation",{Setting="AutoTrain",Enabled=true})
  e.UI.OnAction("Automation",{Setting="AutoRace",Enabled=true,Difficulty="Easy"})
- e.advance(18);assert(e.Player:GetAttribute("Racing"),"AutoRace phase="..e.UI.Snapshot.Automation.Phase)
+ local deadline=e.Now+45;repeat e.advance(.2) until e.Player:GetAttribute("Racing") or e.Now>deadline
+ assert(e.Player:GetAttribute("Racing"),"AutoRace phase="..e.UI.Snapshot.Automation.Phase)
  assert(#e.Workspace.ActiveRaceBikes:GetChildren()==5 and e.UI.Snapshot.SelectedTreadmill==0)
  local energy=e.Data.snapshot(e.Player).Energy
  e.UI.OnAction("Automation",{Setting="AutoRace",Enabled=false})
@@ -669,7 +670,8 @@ test("V4.4 Auto Race drives to start uses real bots and stops further starts whe
 end)
 test("V4.4 blocked automatic navigation stops safely without teleport or free training",function()
  local e=integration(true);local start=e.Mounts.ensure(e.Player).State
- e.Collision=true;e.UI.OnAction("Automation",{Setting="AutoTrain",Enabled=true});e.advance(15)
+ e.Occupied=e.add(e.Workspace,"Part","BlockingWall");e.Occupied.CanCollide=true
+ e.UI.OnAction("Automation",{Setting="AutoTrain",Enabled=true});e.advance(1)
  local s=e.Mounts.ensure(e.Player).State
  assert(math.abs(s.X-start.X)<1e-7 and math.abs(s.Z-start.Z)<1e-7 and not e.UI.Snapshot.Automation.AutoTrain and e.Data.snapshot(e.Player).Energy==0)
 end)
@@ -766,5 +768,169 @@ test("V4.4 pass bonuses require Marketplace ownership rather than purchase-finis
  assert(checks>0 and service.bonus(e.Player,e.Data.read(e.Player),"Energy")==2)
  owns=false;marketplace.PromptGamePassPurchaseFinished:Fire(e.Player,501,true);e.advance(.1)
  assert(service.bonus(e.Player,e.Data.read(e.Player),"Energy")==1)
+end)
+test("V4.5 Auto Train activation immediately teleports the one mounted unit and resets motion",function()
+ local e=integration(true);local r=e.Mounts.ensure(e.Player);local bike=r.Bike;local root=r.Root
+ r.Rig.Root.PivotOffset=e.CFrame.new(2,1,-7)*e.CFrame.Angles(.2,.8,.1)
+ r.State.Speed=16;r.Speed=16;r.State.VY=12;r.State.Grounded=false
+ local before=e.Player:GetAttribute("BikeTeleportSerial") or 0
+ e.UI.OnAction("Automation",{Setting="AutoTrain",Enabled=true})
+ local zone=e.Workspace.World1.Training.Treadmill_1.Zone
+ assert((e.Player:GetAttribute("BikeTeleportSerial") or 0)==before+1)
+ assert(r.Bike==bike and r.Root==root and #e.Workspace.PlayerBikes:GetChildren()==1)
+ closeFrame(r.Rig.Root.CFrame,zone.CFrame*e.CFrame.new(0,.05,0))
+ closeFrame(root.CFrame,r.Rig.Frame.CFrame*r.Weld.C0)
+ assert(r.State.Speed==0 and r.State.VY==0 and r.State.Grounded and e.Mounts.onBelt(e.Player,zone))
+ e.advance(.9);assert(e.Data.snapshot(e.Player).Energy==0,"Teleport must not grant an artificial pulse")
+ e.advance(.3);assert(e.Data.snapshot(e.Player).Energy==1 and e.UI.Snapshot.SelectedTreadmill==1)
+end)
+test("V4.5 unlock and energy reset each select and teleport once within a server check",function()
+ local e=integration(true);e.UI.OnAction("Automation",{Setting="AutoTrain",Enabled=true});e.advance(.6)
+ local first=e.Player:GetAttribute("BikeTeleportSerial")
+ assert(e.Data.change(e.Player,function(p) p.Energy=modules.Catalog.Treadmills[4].EnergyRequirement;return true end))
+ e.advance(.25);assert(e.Mounts.onBelt(e.Player,e.Workspace.World1.Training.Treadmill_4.Zone))
+ assert(e.Player:GetAttribute("BikeTeleportSerial")==first+1)
+ e.advance(.6)
+ assert(e.Data.change(e.Player,function(p) p.Energy=0;p.Rebirths=0;return true end));e.advance(.25)
+ assert(e.Mounts.onBelt(e.Player,e.Workspace.World1.Training.Treadmill_1.Zone) and e.Player:GetAttribute("BikeTeleportSerial")==first+2)
+end)
+test("V4.5 rebirth teleports to the remaining OR-authorized belt and preserves all other progress",function()
+ local e=integration(true);assert(e.Data.change(e.Player,function(p) p.Energy=3000;p.Cash=99;return true end));e.advance(.3)
+ e.UI.OnAction("Automation",{Setting="AutoTrain",Enabled=true});e.advance(.6)
+ assert(e.Mounts.onBelt(e.Player,e.Workspace.World1.Training.Treadmill_5.Zone))
+ e.UI.OnAction("Rebirth");e.advance(.25)
+ local p=e.Data.read(e.Player)
+ assert(p.Rebirths==1 and p.Energy==0 and p.Cash==99)
+ assert(e.Mounts.onBelt(e.Player,e.Workspace.World1.Training.Treadmill_2.Zone))
+end)
+test("V4.5 duplicate Auto Train intents and profile updates do not spam teleports or tap rewards",function()
+ local e=integration(true);e.UI.OnAction("Automation",{Setting="AutoTrain",Enabled=true})
+ local serial=e.Player:GetAttribute("BikeTeleportSerial")
+ for _=1,100 do e.Rep.BikeRemotes.Action:FireServer({Version=1,Action="Automation",Setting="AutoTrain",Enabled=true}) end
+ assert(e.Player:GetAttribute("BikeTeleportSerial")==serial and e.Data.snapshot(e.Player).Energy==0)
+ e.advance(1.3);assert(e.Data.snapshot(e.Player).Energy==1,"Exactly one normal auto impulse after the selection interval")
+ local energy=e.Data.snapshot(e.Player).Energy;e.action("Training");assert(e.Data.snapshot(e.Player).Energy-energy==1)
+ e.advance(1.1);assert(e.Player:GetAttribute("BikeTeleportSerial")==serial)
+end)
+test("V4.5 disabling Auto Train restores manual riding and no later unlock causes a teleport",function()
+ local e=integration(true);e.UI.OnAction("Automation",{Setting="AutoTrain",Enabled=true});e.advance(.6)
+ e.UI.OnAction("Automation",{Setting="AutoTrain",Enabled=false})
+ local serial=e.Player:GetAttribute("BikeTeleportSerial")
+ assert(e.Data.change(e.Player,function(p) p.Energy=1e6;return true end));e.advance(.5)
+ assert(e.Player:GetAttribute("BikeTeleportSerial")==serial and not e.Player:GetAttribute("AutoDriving"))
+ e.Move=e.Vector3.new(0,0,1);e.advance(1.5)
+ assert(e.Player:GetAttribute("Mounted") and e.UI.Snapshot.SelectedTreadmill==0)
+end)
+test("V4.5 authoritative training teleport rejects walls, bad support and invalid IDs",function()
+ local e=integration(true);local r=e.Mounts.ensure(e.Player);local start=r.Rig.Root.CFrame
+ assert(not e.Mounts.trainTeleport(e.Player,5));assert(not e.Mounts.trainTeleport(e.Player,0/0));assert(not e.Mounts.trainTeleport(e.Player,99))
+ e.Occupied=e.add(e.Workspace,"Part","BlockedTrainingPosition");e.Occupied.CanCollide=true
+ assert(not e.Mounts.trainTeleport(e.Player,1));closeFrame(r.Rig.Root.CFrame,start)
+ e.Occupied=nil;e.NoGround=true;assert(not e.Mounts.trainTeleport(e.Player,1));closeFrame(r.Rig.Root.CFrame,start)
+ e.NoGround=false;assert(e.Mounts.trainTeleport(e.Player,1))
+end)
+test("V4.5 VIP zone restriction is enforced for auto teleport and manual training",function()
+ local e=integration(true);assert(e.Data.change(e.Player,function(p) p.Energy=1e6;return true end))
+ e.Workspace.World1.Training.Treadmill_5.Zone:SetAttribute("VIPOnly",true)
+ e.Player:SetAttribute("VIP",true) -- A player attribute is not Marketplace ownership.
+ assert(not e.Mounts.trainTeleport(e.Player,5))
+ e.UI.OnAction("Automation",{Setting="AutoTrain",Enabled=true});assert(e.Mounts.onBelt(e.Player,e.Workspace.World1.Training.Treadmill_4.Zone))
+ local r=e.Mounts.ensure(e.Player);e.Mounts.teleport(e.Player,e.Workspace.World1.Training.Treadmill_5.Zone.CFrame*e.CFrame.new(0,.05,0))
+ e.UI.OnAction("Automation",{Setting="AutoTrain",Enabled=false});e.advance(1.2)
+ assert(e.UI.Snapshot.SelectedTreadmill~=5)
+ e.Workspace.World1.Training.Treadmill_5.Zone:SetAttribute("VIPOnly",false)
+ e.UI.OnAction("Automation",{Setting="AutoTrain",Enabled=true});assert(e.Mounts.onBelt(e.Player,e.Workspace.World1.Training.Treadmill_5.Zone))
+end)
+test("V4.5 Auto Train never teleports an active race and resumes immediately after finish",function()
+ local e=integration(true);local r=e.Mounts.ensure(e.Player)
+ e.teleport(0,8.05+r.Offset.Position.Y,63);e.action("StartRace",{Difficulty="Easy"});assert(e.Player:GetAttribute("Racing"))
+ local serial=e.Player:GetAttribute("BikeTeleportSerial")
+ assert(e.Data.change(e.Player,function(p) p.Energy=1e6;return true end))
+ e.UI.OnAction("Automation",{Setting="AutoTrain",Enabled=true})
+ assert(not e.Mounts.trainTeleport(e.Player,1))
+ e.advance(5);assert(e.Player:GetAttribute("Racing") and e.Player:GetAttribute("BikeTeleportSerial")==serial)
+ repeat e.advance(.1) until not e.Player:GetAttribute("Racing")
+ e.advance(.25)
+ assert(e.Player:GetAttribute("BikeTeleportSerial")==serial+1 and e.Mounts.onBelt(e.Player,e.Workspace.World1.Training.Treadmill_5.Zone))
+ assert(e.Data.snapshot(e.Player).Cash>0)
+end)
+test("V4.5 Auto Race repeats with one training resume teleport per finished race",function()
+ local e=integration(true);e.UI.OnAction("Automation",{Setting="AutoRace",Enabled=true})
+ local deadline=e.Now+45;repeat e.advance(.2) until e.Player:GetAttribute("Racing") or e.Now>deadline
+ assert(e.Player:GetAttribute("Racing"));e.UI.OnAction("Automation",{Setting="AutoTrain",Enabled=true})
+ local serial=e.Player:GetAttribute("BikeTeleportSerial") or 0
+ repeat e.advance(.1) until not e.Player:GetAttribute("Racing")
+ e.advance(.25);assert((e.Player:GetAttribute("BikeTeleportSerial") or 0)==serial+1)
+ e.advance(1);assert((e.Player:GetAttribute("BikeTeleportSerial") or 0)==serial+1)
+ deadline=e.Now+45;repeat e.advance(.2) until e.Player:GetAttribute("Racing") or e.Now>deadline
+ assert(e.Player:GetAttribute("Racing") and (e.Player:GetAttribute("BikeTeleportSerial") or 0)==serial+1)
+ e.UI.OnAction("Automation",{Setting="AutoRace",Enabled=false})
+end)
+test("V4.5 respawn remounts and auto teleports once; bike change preserves the valid training position",function()
+ local e=integration(true);assert(e.Data.change(e.Player,function(p) p.Energy=1e6;p.OwnedVehicles={1,7};return true end,true))
+ e.UI.OnAction("Automation",{Setting="AutoTrain",Enabled=true});e.advance(.6)
+ local serial=e.Player:GetAttribute("BikeTeleportSerial")
+ assert(e.Data.change(e.Player,function(p) p.ActiveVehicle=7;return true end,true));e.advance(.4)
+ assert(e.Mounts.ensure(e.Player).VehicleId==7 and e.Player:GetAttribute("BikeTeleportSerial")==serial)
+ e.Player.CharacterRemoving:Fire();e.Player.Character:Destroy()
+ local char=e.add(e.Workspace,"Model","Respawn");e.Root=e.add(char,"Part","HumanoidRootPart",0,11,0);local hum=e.add(char,"Humanoid","Humanoid");hum.Health=100
+ e.Player.Character=char;e.Player.CharacterAdded:Fire(char);e.advance(.6)
+ assert(e.Mounts.ensure(e.Player).VehicleId==7 and #e.Workspace.PlayerBikes:GetChildren()==1 and hum.Sit)
+ assert(e.Player:GetAttribute("BikeTeleportSerial")==serial+1 and e.Mounts.onBelt(e.Player,e.Workspace.World1.Training.Treadmill_5.Zone))
+ e.advance(1);assert(e.Player:GetAttribute("BikeTeleportSerial")==serial+1)
+end)
+test("V4.5 teleport invalidates stale drive epochs and resets the root-based camera even for an 18-stud switch",function()
+ local e=integration(true,nil,nil,true);local camera=modules.make_RaceCamera(e.Game,e.Workspace,e.CFrame,e.Vector3,e.Enum,e.Instance)
+ camera.new(e.UI.Settings,e.UI);e.UI.OnAction("Automation",{Setting="AutoTrain",Enabled=true});e.advance(.6)
+ local render=e.Game:GetService("RunService").RenderStepped;render:Fire(.016)
+ local epoch=e.Player:GetAttribute("DriveEpoch")
+ assert(e.Data.change(e.Player,function(p) p.Energy=84;return true end));e.advance(.25);render:Fire(.016)
+ local r=e.Mounts.ensure(e.Player);local target=e.Workspace.CurrentCamera.CameraSubject
+ assert((target.Position-(r.Rig.Root.Position+e.Vector3.new(0,4,0))).Magnitude<1e-6)
+ assert(not e.Mounts.input(e.Player,{Version=1,Epoch=epoch,Sequence=10000,Throttle=1,Steer=1,Brake=false,JumpId=100}))
+ assert(r.State.Speed==0 and r.State.VY==0)
+end)
+test("V4.5 free HUD is exactly at the safe-area corner and touch jump is placed above it",function()
+ local e=integration(true);local hud=e.UI.ResourceHUD;local canvas=hud.Parent
+ assert(canvas.Parent==e.UI.Gui and canvas.BackgroundTransparency==1 and canvas.Position[1]==0 and canvas.Position[2]==0)
+ for _,touch in ipairs({false,true}) do
+  e.Game:GetService("UserInputService").TouchEnabled=touch
+  for _,size in ipairs({{375,680},{820,330},{1024,700}}) do
+   canvas.AbsoluteSize=e.Vector2.new(size[1],size[2]);canvas:GetPropertyChangedSignal("AbsoluteSize"):Fire()
+   assert(hud.AnchorPoint.X==1 and hud.AnchorPoint.Y==1 and hud.Position[2]==-10 and hud.Position[4]==-10)
+   for i,name in ipairs({"Energy","Cash","Rebirths"}) do
+    local row=hud:FindFirstChild(name.."Status");assert(row.Position[2]==(i-1)*(if touch then 30 else 36))
+    assert(e.UI.ResourceValues[name].TextXAlignment==e.Enum.TextXAlignment.Right and e.UI.ResourceValues[name].TextScaled)
+   end
+  end
+ end
+ assert(e.ActionPositions.BikeJump[4]==-220 and e.ActionBindings.BikeJump.Touch and e.ActionBindings.BikeJump.Keys[1]==e.Enum.KeyCode.Space)
+ assert(220-70>10+hud.Size[2],"Touch jump button must leave vertical clearance above the HUD")
+end)
+test("V4.5 teleport action cannot accept positions, targets, amounts or VIP claims from the client",function()
+ local e=integration(true);local before=e.Player:GetAttribute("BikeTeleportSerial") or 0
+ for _,field in ipairs({"Position","CFrame","TreadmillId","Energy","VIP"}) do
+  local payload={Version=1,Action="Automation",Setting="AutoTrain",Enabled=true};payload[field]=5
+  assert(not modules.Protocol.validAction(payload));e.Rep.BikeRemotes.Action:FireServer(payload)
+ end
+ assert((e.Player:GetAttribute("BikeTeleportSerial") or 0)==before and e.UI.Snapshot.Energy==0)
+end)
+test("V4.5 sign diagnostics read actual bounds/fits rather than asserting renderer success",function()
+ local e=integration(true);local module=modules.make_SignReadability(e.Game,e.Workspace,e.Task,e.Warn,e.Enum)
+ local part=e.add(e.Workspace,"Part","TextFace");local gui=e.add(part,"SurfaceGui","SignCaption")
+ gui.Adornee=part;gui.Face=e.Enum.NormalId.Back;gui.SizingMode=e.Enum.SurfaceGuiSizingMode.PixelsPerStud;gui.PixelsPerStud=96
+ local label=e.add(gui,"TextLabel","Caption");label.Text="BIKE SHOP";label.TextScaled=true;label.ClipsDescendants=false;label.TextStrokeTransparency=.45;label.ZIndex=2;label.TextBounds=e.Vector2.new(300,60);label.AbsoluteSize=e.Vector2.new(1000,200);label.TextFits=true
+ assert(#module.inspect(gui)==0)
+ label.TextFits=false;assert(table.find(module.inspect(gui),"Caption does not fit"))
+ label.TextFits=true;gui.Adornee=nil;assert(table.find(module.inspect(gui),"Adornee mismatch"))
+end)
+test("V4.5 teleport respects rotated zone axes and refuses tilted training targets before movement",function()
+ local e=integration(true);local zone=e.Workspace.World1.Training.Treadmill_1.Zone
+ local r=e.Mounts.ensure(e.Player);local initial=r.Rig.Root.CFrame
+ zone.CFrame=e.CFrame.new(zone.Position)*e.CFrame.Angles(.2,0,0)
+ assert(not e.Mounts.trainTeleport(e.Player,1));closeFrame(r.Rig.Root.CFrame,initial)
+ zone.CFrame=e.CFrame.new(zone.Position)*e.CFrame.Angles(0,math.pi/2,0)
+ assert(e.Mounts.trainTeleport(e.Player,1));closeFrame(r.Rig.Root.CFrame,zone.CFrame*e.CFrame.new(0,.05,0))
+ assert(e.Mounts.onBelt(e.Player,zone));closeFrame(e.Root.CFrame,r.Rig.Frame.CFrame*r.Weld.C0)
 end)
 print(string.format("%d actual runtime wiring tests passed (engine doubles; NOT Roblox Studio)",count))

@@ -41,7 +41,7 @@ function Driver.new(ui:any,remote:RemoteEvent,stateRemote:RemoteEvent)
   if state==Enum.UserInputState.Begin and focused and not ui.isMenuOpen() and player:GetAttribute("Racing")~=true and player:GetAttribute("AutoDriving")~=true and ui.Snapshot then jumpId+=1 end
   return Enum.ContextActionResult.Sink
  end,true,3001,Enum.KeyCode.Space)
- Actions:SetTitle("BikeJump","SPRUNG");Actions:SetPosition("BikeJump",UDim2.new(1,-90,1,-90))
+ Actions:SetTitle("BikeJump","SPRUNG");Actions:SetPosition("BikeJump",UDim2.new(1,-90,1,-220))
  local lost=Input.WindowFocusReleased:Connect(function() focused=false;brake=true end)
  local gained=Input.WindowFocused:Connect(function() focused=true;brake=false end)
  task.spawn(function()

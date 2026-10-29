@@ -42,12 +42,14 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
  local generation=0
  local api:any={Gui=gui,Settings=settings,Buttons=buttons,Snapshot=nil,Viewport=nil,OnAction=function() end,OnSetting=function() end,OnMenu=function() end,Difficulty="Easy"}
  -- V2 contract: this transparent container lays out free-standing icons and values only.
- local resourceHUD=make("Frame",root,{Name="ResourceHUD",AnchorPoint=Vector2.new(1,1),Position=UDim2.new(1,-8,1,-8),Size=UDim2.fromOffset(190,108),BackgroundTransparency=1,BorderSizePixel=0})
+ local resourceCanvas=make("Frame",gui,{Name="SafeResourceCanvas",Position=UDim2.fromOffset(0,0),ZIndex=0,Size=UDim2.fromScale(1,1),BackgroundTransparency=1,BorderSizePixel=0})
+ local resourceHUD=make("Frame",resourceCanvas,{Name="ResourceHUD",AnchorPoint=Vector2.new(1,1),Position=UDim2.new(1,-10,1,-10),Size=UDim2.fromOffset(190,108),BackgroundTransparency=1,BorderSizePixel=0})
  local resourceValues:any={};local resourceRows:any={};local resourceIcons:any={}
  for i,name in ipairs({"Energy","Cash","Rebirths"}) do
   local holder=make("Frame",resourceHUD,{Name=name.."Status",Size=UDim2.new(1,0,0,36),Position=UDim2.fromOffset(0,(i-1)*36),BackgroundTransparency=1,BorderSizePixel=0})
   local icon=Icons.resource(holder,name);make("UIScale",icon,{Scale=1});resourceIcons[name]=icon;resourceRows[name]=holder
-  resourceValues[name]=make("TextLabel",holder,{Name="Value",Position=UDim2.fromOffset(40,0),Size=UDim2.new(1,-40,1,0),BackgroundTransparency=1,BorderSizePixel=0,Text="—",TextColor3=white,TextSize=27,Font=Enum.Font.GothamBold,TextXAlignment=Enum.TextXAlignment.Left,TextStrokeColor3=Color3.fromRGB(14,45,61),TextStrokeTransparency=0.25,TextWrapped=false})
+  resourceValues[name]=make("TextLabel",holder,{Name="Value",Position=UDim2.fromOffset(40,0),Size=UDim2.new(1,-40,1,0),BackgroundTransparency=1,BorderSizePixel=0,Text="—",TextColor3=white,TextSize=27,Font=Enum.Font.GothamBold,TextXAlignment=Enum.TextXAlignment.Right,TextStrokeColor3=Color3.fromRGB(14,45,61),TextStrokeTransparency=0.25,TextWrapped=false,TextScaled=true})
+  make("UITextSizeConstraint",resourceValues[name],{MinTextSize=12,MaxTextSize=27})
  end
  api.ResourceHUD=resourceHUD;api.ResourceValues=resourceValues
  for i,name in ipairs({"Garage","Pets","Race","Worlds","Rebirths","Shop","Settings"}) do
@@ -334,18 +336,17 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
   local touch=UserInputService.TouchEnabled
   local compact=touch or size.X<600
   local rowHeight=if compact then 30 else 36
-  local hudWidth=if compact then 154 else 190
-  -- CoreUISafeInsets handles cutouts/topbar. Touch controls additionally need clearance.
-  local shortTouch=touch and size.Y<420
-  local right=if shortTouch then 138 else 8
-  local bottom=if touch and not shortTouch then 130 else 8
-  resourceHUD.Position=UDim2.new(1,-right,1,-bottom)
+  local hudWidth=if compact then 136 else 160
+  -- Exact 10px inset from the unpadded CoreUISafeInsets canvas, on every device.
+  -- The owned touch jump button moves above this HUD instead of pushing resources inward.
+  resourceHUD.Position=UDim2.new(1,-10,1,-10)
   resourceHUD.Size=UDim2.fromOffset(hudWidth,rowHeight*3)
   for i,name in ipairs({"Energy","Cash","Rebirths"}) do
    resourceRows[name].Position=UDim2.fromOffset(0,(i-1)*rowHeight)
    resourceRows[name].Size=UDim2.new(1,0,0,rowHeight)
    resourceIcons[name].Size=UDim2.fromOffset(rowHeight,rowHeight)
    resourceValues[name].TextSize=if compact then 22 else 27
+   resourceValues[name]:FindFirstChildOfClass("UITextSizeConstraint").MaxTextSize=if compact then 22 else 27
    resourceValues[name].Position=UDim2.fromOffset(rowHeight+6,0)
    resourceValues[name].Size=UDim2.new(1,-rowHeight-6,1,0)
   end
@@ -368,6 +369,7 @@ function UI.new(playerGui:Instance,settings:any,audio:any):any
    labels[name].Visible=not compact
   end
  end
+ resourceCanvas:GetPropertyChangedSignal("AbsoluteSize"):Connect(layout)
  root:GetPropertyChangedSignal("AbsoluteSize"):Connect(layout);layout();api.collapse(settings.Collapsed)
  return api
 end

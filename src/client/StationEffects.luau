@@ -11,7 +11,7 @@ function Stations.new(settings:any,ui:any)
   local model=training:WaitForChild("Treadmill_"..id)
   local parts={}
   for _,part in ipairs(model:GetChildren()) do
-   if part:IsA("BasePart") and (string.find(part.Name,"^BeltStripe_") or string.find(part.Name,"^DirectionChevron_") or string.find(part.Name,"^OrbitLight_") or part.Name=="NeonEdge" or part.Name=="PowerCore") then
+   if part:IsA("BasePart") and (string.find(part.Name,"^BeltStripe_") or part.Name=="NeonEdge") then
     table.insert(parts,{Part=part,Base=part.CFrame,Color=part.Color,Transparency=part.Transparency})
    end
   end
@@ -34,14 +34,11 @@ function Stations.new(settings:any,ui:any)
     for _,record in ipairs(entry.Parts) do
      local part=record.Part
      part.Color=if allowed then record.Color else Color3.fromRGB(77,83,104)
-     if animate and (string.find(part.Name,"^BeltStripe_") or string.find(part.Name,"^DirectionChevron_")) then
+     if animate and string.find(part.Name,"^BeltStripe_") then
       local offset=(record.Base.Position.Z-entry.Zone.Position.Z+now*4+6)%12-6
       part.CFrame=record.Base+Vector3.new(0,0,entry.Zone.Position.Z+offset-record.Base.Position.Z)
-     elseif animate and string.find(part.Name,"^OrbitLight_") then
-      local base=record.Base.Position-entry.Zone.Position;local angle=now*1.5
-      part.CFrame=CFrame.new(entry.Zone.Position+Vector3.new(base.X*math.cos(angle)-(base.Z+6.2)*math.sin(angle),base.Y,(base.Z+6.2)*math.cos(angle)+base.X*math.sin(angle)-6.2))
      else part.CFrame=record.Base end
-     part.Transparency=if animate and part.Name=="PowerCore" then .12+math.sin(now*3)*.1 else record.Transparency
+     part.Transparency=record.Transparency
     end
     for j,spark in ipairs(entry.Sparks) do
      spark.Transparency=if animate then .2 else 1

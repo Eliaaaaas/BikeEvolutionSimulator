@@ -11,6 +11,7 @@ function Service.new(data:any):any
  local owned:{[Player]:{[string]:boolean}}={}
  local checked:{[Player]:number}={}
  local api:any={}
+ function api.entitled(player:Player,kind:string):boolean return owned[player]~=nil and owned[player][kind]==true end
  function api.bonus(player:Player,profile:any,kind:string):number
   return Rules.bonus(profile,kind,owned[player] and owned[player][kind])
  end

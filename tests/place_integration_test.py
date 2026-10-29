@@ -40,7 +40,7 @@ for id in range(1,11):
  for n in visible:assert n.findtext("Properties/bool[@name='Anchored']")=='true'
 for id in range(1,6):
  belt=path('Workspace','World1','Training',f'Treadmill_{id}')
- for component in ['Zone','Belt','NeonEdge','PowerCore','RoundedBase','BeltStripe_0']:assert child(belt,component) is not None
+ for component in ['Zone','Belt','NeonEdge','Deck','FrontRoller','RearRoller','SideFrame','BeltStripe_0']:assert child(belt,component) is not None
 training=path('Workspace','World1','Training')
 for node in training.iter('Item'):
  assert node.attrib['class'] not in ['SurfaceGui','BillboardGui','TextLabel','ProximityPrompt'], 'No training signs/prompts'

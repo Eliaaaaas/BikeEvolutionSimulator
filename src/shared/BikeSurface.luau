@@ -10,6 +10,13 @@ function Surface.new(world:Workspace,excluded:{Instance},height:number):any
   if not hit then return nil,nil end
   return hit.Position.Y,if hit.Normal then hit.Normal.Y else 1
  end
+ function api.clear(x:number,y:number,z:number,yaw:number):boolean
+  local overlap=OverlapParams.new();overlap.FilterType=Enum.RaycastFilterType.Exclude
+  overlap.FilterDescendantsInstances=excluded;overlap.RespectCanCollide=true
+  local hits=world:GetPartBoundsInBox(CFrame.new(x,y+height/2+.2,z)*CFrame.Angles(0,yaw,0),Vector3.new(2.8,height,6.4),overlap)
+  for _,part in ipairs(hits) do if part.CanCollide then return false end end
+  return true
+ end
  function api.block(x:number,y:number,z:number,yaw:number,dx:number,dy:number,dz:number,ground:number?,grounded:boolean?):boolean
   local delta=Vector3.new(dx,dy,dz)
   if delta.Magnitude<1e-5 then return false end

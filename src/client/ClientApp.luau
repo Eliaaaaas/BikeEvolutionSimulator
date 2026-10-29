@@ -59,7 +59,7 @@ local function render(data:any):boolean
 end
 local snapshotEvent=remotes:WaitForChild("SnapshotChanged") :: RemoteEvent
 snapshotEvent.OnClientEvent:Connect(render)
-local errors={ProductUnavailable="Dieses Robux-Angebot ist noch nicht konfiguriert.",NavigationBlocked="Automatik angehalten: Weg blockiert. Bitte manuell freifahren.",TooFar="Stelle dich auf dein Laufband.",Locked="Energy- oder Rebirth-Anforderung fehlt.",NotReady="Daten noch nicht bereit.",Saving="Speichern läuft – kurz warten.",NoTreadmill="Bitte zuerst ein Laufband auswählen.",NotEnoughEnergy="Nicht genug Energy.",NotAlive="Aktion nur mit lebendem Charakter.",AlreadyRacing="Während des Rennens nicht verfügbar.",RaceUnavailable="Gehe zur Race-Zone vorne auf der Insel.",NotEnoughCash="Nicht genug Cash.",AlreadyOwned="Dieses Fahrzeug gehört dir bereits.",InventoryFull="Pet-Inventar voll.",EquipLimit="Maximal drei Pets ausrüstbar.",DuplicateRequest="Diese Anfrage wurde bereits verarbeitet.",PetUnavailable="Dieses Pet ist nicht verfügbar oder noch gesperrt.",ServiceUnavailable="Aktion vorübergehend nicht verfügbar. Bitte erneut versuchen."}
+local errors={TrainingPositionBlocked="Trainingsposition blockiert. Auto Train wurde angehalten.",TreadmillUnavailable="Dieses Laufband ist hier nicht verfügbar.",NoAvailableTreadmill="Kein nutzbares Laufband in einer verfügbaren Welt.",ProductUnavailable="Dieses Robux-Angebot ist noch nicht konfiguriert.",NavigationBlocked="Automatik angehalten: Weg blockiert. Bitte manuell freifahren.",TooFar="Stelle dich auf dein Laufband.",Locked="Energy- oder Rebirth-Anforderung fehlt.",NotReady="Daten noch nicht bereit.",Saving="Speichern läuft – kurz warten.",NoTreadmill="Bitte zuerst ein Laufband auswählen.",NotEnoughEnergy="Nicht genug Energy.",NotAlive="Aktion nur mit lebendem Charakter.",AlreadyRacing="Während des Rennens nicht verfügbar.",RaceUnavailable="Gehe zur Race-Zone vorne auf der Insel.",NotEnoughCash="Nicht genug Cash.",AlreadyOwned="Dieses Fahrzeug gehört dir bereits.",InventoryFull="Pet-Inventar voll.",EquipLimit="Maximal drei Pets ausrüstbar.",DuplicateRequest="Diese Anfrage wurde bereits verarbeitet.",PetUnavailable="Dieses Pet ist nicht verfügbar oder noch gesperrt.",ServiceUnavailable="Aktion vorübergehend nicht verfügbar. Bitte erneut versuchen."}
 local resultEvent=remotes:WaitForChild("ActionResult") :: RemoteEvent
 resultEvent.OnClientEvent:Connect(function(result)
  if type(result)=="table" and result.Error=="Cooldown" and (result.Action=="StartRace" or result.Action=="Hatch") then ui.message("Bitte kurz warten und dann erneut versuchen.") end
@@ -102,6 +102,7 @@ task.defer(function()
  optional("Vehicles",function() visuals=require(script.Parent.Visuals).new(settings,ui) end)
  optional("Pets",function() require(script.Parent.PetFollowers).new(settings,ui.Gui) end)
  optional("Island",function() require(script.Parent.IslandEffects).new(settings,ui.Gui) end)
+ optional("Signs",function() require(script.Parent.SignReadability).new(settings,ui) end)
  optional("Stations",function() require(script.Parent.StationEffects).new(settings,ui) end)
 end)
 require(script.Parent.BikeInput).new(ui,remotes:WaitForChild("Drive") :: RemoteEvent,remotes:WaitForChild("DriveState") :: RemoteEvent)
