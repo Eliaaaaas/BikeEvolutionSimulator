@@ -1,13 +1,13 @@
-# Bike Evolution Simulator — Palm Bay V4.4
+# Bike Evolution Simulator — Palm Bay V4.5
 
 Jeder Spieler bleibt auf seinem ausgerüsteten Fahrrad/Moped. Native Tastatur-/Touch-Steuerung bewegt das Bike auf der Insel; Rennen übernehmen automatisch. Palm Bay verbindet Training, Rebirths, zehn kauf-/ausrüstbare Fahrzeuge, automatische Rennen gegen fünf Bots, Cash-Belohnungen, drei Eier und zwölf sammelbare Pets. Der bestehende Draft [PR #2](https://github.com/Eliaaaaas/BikeEvolutionSimulator/pull/2) liegt auf `feat/phase-2-training-world`; Basis bleibt der ungemergte Phase-1-Branch. Der vorherige Build wurde vom Spieler **nicht abgenommen**. Dieser Rebuild repariert belegte Integrationsfehler und ist erneut manuell zu prüfen. **Keine Studio-Abnahme durchgeführt.** Ursachen, sichere Testmodi und vollständige Checkliste: [Emergency-Rebuild-Bericht](docs/EMERGENCY_REBUILD.md).
 
-Aktueller Umfang, Ursachen, Grenzen und manuelle Checkliste: [V4.4-Übergabe](docs/OVERHAUL_V44.md). Neu: direkte IK-Kontakte/Pole, ein Kamerabesitzer, bodenbündige Belts ohne Großrampen, neu modellierte Progression, mittige Sidebar/grafische Ressourcenicons, Premium-Backend, Auto Train/Auto Race/Slow Mode und nahtverbundene Asphaltgeometrie. **Robux-Angebote sind ohne echte Produkt-IDs deaktiviert; VIP und weitere Welten bleiben Zukunft.**
+Aktueller Umfang, Ursachen, Grenzen und manuelle Checkliste: [V4.5-Übergabe](docs/VISUAL_AUTO_TRAIN_V45.md). Neu: gemeinsamer SignBuilder mit maßstäblicher Textfläche, rechteckige dunkle Trainingsgeräte, Ressourcen direkt am Safe-Area-Eck und serverseitiger Auto-Train-Teleport statt Navigation. Alle bisherigen World-1-Systeme bleiben erhalten. **Robux-Angebote sind ohne echte Produkt-IDs deaktiviert; VIP und weitere Welten bleiben Zukunft.**
 
 ## Studio-Build öffnen
 
 1. Unter [Actions → Validate Luau foundation](https://github.com/Eliaaaaas/BikeEvolutionSimulator/actions/workflows/validate.yml) den neuesten erfolgreichen Lauf von `feat/phase-2-training-world` auswählen.
-2. **Artifacts → BikeEvolutionSimulator-V4.4** herunterladen (enthält Place, `BUILD_INFO.json` mit Commit und SHA-256 sowie `SHA256SUMS.txt`). Alternativ bleibt **BikeEvolutionSimulator-Studio** verfügbar. ZIP entpacken und `BikeEvolutionSimulator.rbxlx` über **File → Open from File…** öffnen. Eine GitHub-Anmeldung ist für den Download nötig; lokale CLI-Tools sind dafür nicht erforderlich.
+2. **Artifacts → BikeEvolutionSimulator-V4.5** herunterladen (enthält Place, `BUILD_INFO.json` mit Commit und SHA-256 sowie `SHA256SUMS.txt`). Alternativ bleibt **BikeEvolutionSimulator-Studio** verfügbar. ZIP entpacken und `BikeEvolutionSimulator.rbxlx` über **File → Open from File…** öffnen. Eine GitHub-Anmeldung ist für den Download nötig; lokale CLI-Tools sind dafür nicht erforderlich.
 3. Zunächst direkt **Play** starten: `Workspace.StudioPreviewData=true` aktiviert ausschließlich in Studio den deutlich markierten **nicht dauerhaften Vorschau-Store**. Kein Veröffentlichen oder DataStore-Zugriff erforderlich. Alle normalen Validierungen und Session-Locks bleiben aktiv. Stop/Play verwirft ausdrücklich diese Vorschau-Daten.
 4. Für dauerhafte Speicherprüfungen in einer **separaten Test-Experience** veröffentlichen, `Workspace.StudioPreviewData=false` setzen und **Enable Studio Access to API Services** dort aktivieren. Studio verwendet dann ausschließlich **BikeEvolution_StudioTest_v2**. Normale veröffentlichte Spielserver ignorieren das Preview-Attribut und behalten den bisherigen Store. Es gibt keinen automatischen In-Memory-Fallback nach einem Live-Speicherfehler.
 
@@ -83,14 +83,14 @@ Bootstrap pinnt Luau 0.744, Rojo 7.4.4 und luau-lsp 1.70.1 mit Roblox-Typdefinit
 | `src/models/*.rbxmx` | Zehn strukturell unterschiedliche Fahrzeuge und zwölf unterscheidbare Pet-Arten |
 | `tools/build_world.py`, `build_race_assets.py`, `build_vehicle_fleet.py`, `build_pet_assets.py` | Deterministische, editierbare Primitive-Assets; `--check` erkennt veraltete Dateien |
 | `src/shared/RuntimeContract.luau`, `src/server/StudioStore.luau` | Frühe Dependency-Prüfung, ausdrücklich isolierte Studio-Vorschau |
-| `src/client/StationEffects.luau`, `RaceCamera.luau` | Lokale Belt-Anzeigen/Animationen und wiederhergestellte Rennkamera |
+| `src/client/StationEffects.luau`, `RaceCamera.luau` | Lokale Gurt-/Neon-/Sparkanimationen und gemeinsame Kamera |
 | `tests/` | Bestehende Suiten und World-1-Ökonomie-/Migrations-/Bot-/Assetprüfungen |
 
 Nach Änderungen an Generatoren diese ausführen und die erzeugten Assets mitcommitten. Keine kostenpflichtigen Modelle, Meshes oder erfundenen Asset-IDs. Audio referenziert ausschließlich nachgewiesene Roblox-Paketdateien (`volume_slider.ogg`, `action_jump.mp3`, `action_jump_land.mp3`, `action_get_up.mp3`), siehe [Client-Manifest a020070](https://github.com/MaximumADHD/Roblox-Client-Tracker/blob/a020070e2758a71b5d61cf692eee3704a5793011/rbxManifest.txt). Tatsächliche Wiedergabe auf iOS/PC bleibt zu prüfen.
 
 ## Prüfstand und Grenzen
 
-**210 Luau-Tests bestanden**, davon 59 mit tatsächlicher Runtime-Verdrahtung gegen Engine-Doubles und 13 neue reine V4.4-Regressionsfälle. Alle bisherigen Suiten bleiben erhalten; Erwartungen wurden bei geänderten V4.4-Schwellen, Schema 3, HUD-Icons und bodenbündigen Laufbändern angepasst. Dazu zwölf Python-Geometrie-/Source-Prüfungen, bestehende Struktur-/Generatorprüfungen, vollständige Produktions-Luau-Kompilierung, Strict-/Roblox-API-Typprüfung und Rojo-Build. Einzelheiten und ausdrücklich offene Studio-Prüfungen: [V4.4-Übergabe](docs/OVERHAUL_V44.md).
+**229 Luau-Tests bestanden**, davon 74 mit tatsächlicher Runtime-Verdrahtung gegen Engine-Doubles einschließlich vier neuer reiner V4.5-Zugangstests und 15 zusätzlicher V4.5-Runtime-Fälle. Alle bisherigen Suiten bleiben erhalten; Erwartungen wurden bei den ausdrücklich geänderten Modellnamen, HUD-Abständen und Auto-Train-Teleports angepasst. Dazu 19 Python-Geometrie-/Source-Prüfungen, bestehende Struktur-/Generatorprüfungen, vollständige Produktions-Luau-Kompilierung, Strict-/Roblox-API-Typprüfung und Rojo-Build. Einzelheiten und ausdrücklich offene Studio-Prüfungen: [V4.5-Übergabe](docs/VISUAL_AUTO_TRAIN_V45.md).
 
 
 Die Adaptertests führen echten Code mit Engine-Doubles aus, keine Roblox-Physik oder GUI. **Nicht ausführbar hier:** Studio/Device-Emulator, Audio/IK/Kamera/Streaming, echte DataStore- und Lasttests. Kein Studio-Test wird als bestanden ausgegeben. Einfache R6-Posen haben keine separaten Knie/Ellenbogen; R15-IK kann für ungewöhnliche Körpermaße Tuning brauchen. Fahrer-/Fahrzeugbewegung ist servergesteuerte Kinematik, keine physikalische Bikesimulation.
@@ -135,7 +135,7 @@ Formel, Verfügbarkeitsregeln, vorbereitete Fusion-Slotpflege, Sicherheits- und 
 
 ## Frühere Umbauten — historische Berichte
 
-Die folgenden Versionsnotizen dokumentieren frühere Änderungen. Bei Abweichungen gilt ausschließlich [V4.4](docs/OVERHAUL_V44.md), insbesondere keine Großrampen, keine separate Trainingsfahrräder/Billboards und nur ein Kamerabesitzer.
+Die folgenden Versionsnotizen dokumentieren frühere Änderungen. Bei Abweichungen gilt ausschließlich [V4.5](docs/VISUAL_AUTO_TRAIN_V45.md), insbesondere keine Großrampen, keine separate Trainingsfahrräder/Billboards und nur ein Kamerabesitzer.
 
 ### UI & Training Overhaul V3
 
@@ -180,8 +180,17 @@ Fünf flache Auffahrrampen verbinden Insel und Laufbänder. Vollständiger Fahrz
 Download: **BikeEvolutionSimulator-V4.3**. Lokal `python3 tools/package_v4.py --version V4.3` → `build/BikeEvolutionSimulator-V4.3.zip`. Vorherige Artifacts bleiben verfügbar. Keine Änderungen an produktiven Profilen oder Schema.
 
 
-## Aktuell: V4.4
+## Historisch: V4.4
 
 Vollständigen Build lokal mit `python3 tools/test.py` und `python3 tools/package_v4.py --version V4.4` erstellen: `build/BikeEvolutionSimulator-V4.4.zip`. GitHub Actions erzeugt denselben Place samt Commit-/SHA-256-Metadaten im Artifact **BikeEvolutionSimulator-V4.4**. XML und ZIP-Integrität werden geprüft; eine tatsächliche Studio-Öffnung wurde nicht durchgeführt.
 
 [Alle zehn Bereiche, 210 Luau-Tests, Grenzen und Studio-Checkliste](docs/OVERHAUL_V44.md) · [40 Laufbänder mit Modellzeiten](docs/PROGRESSION_V44.md) · [Schema-3-Migration](docs/V44_DATA_MIGRATION.md).
+
+
+## Aktuell: V4.5
+
+[Gemeinsamer Umbau und konkrete Studio-Checkliste](docs/VISUAL_AUTO_TRAIN_V45.md): neue matte 3D-Schilder mit korrekt skalierten SurfaceGuis, rechteckige Fahrrad-Trainingsgeräte, freies Ressourcen-HUD exakt 10px vom unteren rechten Safe-Area-Rand und Auto Train mit serverbestimmtem Teleport zum stärksten aktuell erlaubten verfügbaren Laufband. Kein Fahren zwischen Trainingsgeräten mehr; Auto Race behält seine Navigation und Wiederholung. Kein Trainings-Teleport während eines laufenden Rennens.
+
+Auto Train einschalten → gemeinsamer Bike-/Fahrer-Teleport und normales Training. Freischaltung/Rebirth/Respawn → neues erlaubtes Ziel; keine doppelten Teleports oder künstlichen Taps. Ausschalten → manuelle Fahrt wiederhergestellt. Der Touch-Sprungbutton liegt jetzt über dem HUD. Schema 3, Balancing, Bestand und Speicherarchitektur bleiben unverändert.
+
+Lokal `python3 tools/test.py` und `python3 tools/package_v4.py --version V4.5` → `build/BikeEvolutionSimulator-V4.5.zip`. **229 Luau-Tests, 19 Python-Geometrie-/Source-Tests, Strict-/Roblox-API-Prüfung und Rojo erfolgreich. Roblox Studio NICHT AUSGEFÜHRT**; Lesbarkeit, Geräteoptik, Fahr-/Kameraverhalten und echte Touch-Safe-Areas müssen manuell abgenommen werden.

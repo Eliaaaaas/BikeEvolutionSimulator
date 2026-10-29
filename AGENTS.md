@@ -44,3 +44,10 @@ Nur RaceCamera besitzt CameraSubject/CameraType; Vorhersage bei Camera−2, Kame
 Sidebar bleibt vertikal mittig mit sieben Buttons; Ressourcen ausschließlich rechts unten ohne Boxen, grafische UI-Geometrie statt Unicode.
 Schema 3 vor Änderungen in docs/V44_DATA_MIGRATION.md dokumentieren; alte Werte nie zurücksetzen. Premium-IDs 0 bleiben deaktiviert; keine echten Produkte erstellen.
 Auto-Navigation bleibt servergeführt, nutzt Kollisionen und erzeugt keine Teleports oder Tap-Impulse. Neue Ausgabe BikeEvolutionSimulator-V4.4.
+
+V4.5 hat Vorrang: [docs/VISUAL_AUTO_TRAIN_V45.md](docs/VISUAL_AUTO_TRAIN_V45.md).
+Schilder ausschließlich über tools/sign_builder.py erzeugen: matte Flächen, explizite Adornee/Face und PixelsPerStud-SizingMode; TextBounds/TextFits nicht als gemessenen Erfolg erfinden.
+Keine alten Neon-Ovale/PowerArms/PowerCores/Rampen wieder einführen; fünf rechteckige eingelassene Fahrrad-Laufbänder.
+Ressourcen exakt 10px von der unteren rechten CoreUISafeInsets-Ecke im ungepaddeten transparenten Canvas; eigene Touch-Sprungtaste darüber statt HUD-Einrücken.
+Auto Train verwendet servervalidierte ID-basierte Teleports des bestehenden Mounts, keine Navigation und keine frei wählbaren Ziele. Epoch/Velocity/Queues und Kamera-Serial aktualisieren, keine Wiederholungen auf gültigem Ziel.
+Während aktiver Rennen keinerlei Trainings-Teleports; danach Training wiederaufnehmen und bestehende Auto-Race-Wiederholung erhalten. Neue Ausgabe BikeEvolutionSimulator-V4.5. Keine Schema-/Produkt-/Datenänderungen.
