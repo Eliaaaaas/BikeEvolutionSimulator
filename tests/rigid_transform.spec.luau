@@ -1,0 +1,31 @@
+local V,C=modules.rigidMath()
+local count=0
+local function test(name,cb) local ok,err=pcall(cb);assert(ok,name..": "..tostring(err));count+=1;print("PASS "..name) end
+local function close(a,b) assert((a-b).Magnitude<1e-8) end
+test("rigid math rotates translations rather than treating rotations as identity",function()
+ local cf=C.new(10,20,30)*C.Angles(0,math.pi/2,0)
+ close(cf*V.new(0,0,2),V.new(12,20,30))
+ close(cf*V.new(2,0,0),V.new(10,20,28))
+end)
+test("rigid inverse round trips pitch, yaw, roll and local rider offsets",function()
+ for _,angle in ipairs({0,.3,math.pi/2,math.pi,4.7}) do
+  local cf=C.new(61,8,-30)*C.Angles(.15,angle,-.2)
+  local p=V.new(2,4.575,1)
+  close(cf:Inverse()*(cf*p),p)
+  close((cf:Inverse()*cf).Position,V.zero)
+ end
+end)
+test("lookAt and root-to-pivot correction preserve the requested root frame",function()
+ local cf=C.lookAt(V.new(10,8,5),V.new(11,8,5))
+ close(cf.LookVector,V.new(1,0,0))
+ local pivot=C.new(13,2,-7)*C.Angles(.3,.5,.2)
+ close((cf*pivot*pivot:Inverse()).Position,cf.Position)
+ close((cf*pivot*pivot:Inverse()).LookVector,cf.LookVector)
+end)
+test("fixed world rider offsets expose the old orbit error at quarter turns",function()
+ local offset=C.new(0,4.575,1)
+ local cf=C.new(30,8,50)*C.Angles(0,math.pi/2,0)
+ close((cf*offset).Position,V.new(31,12.575,50))
+ assert(((C.new(cf.Position+offset.Position)).Position-(cf*offset).Position).Magnitude>1)
+end)
+print(string.format("%d rigid transform tests passed",count))

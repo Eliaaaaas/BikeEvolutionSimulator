@@ -11,7 +11,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install pinned tools
         run: python3 tools/bootstrap.py
-      - name: Compile, type-check pure modules and run tests
+      - name: Compile, check Roblox types and run tests
         run: python3 tools/test.py
       - name: Build Rojo place
         run: |
@@ -22,4 +22,52 @@ jobs:
         with:
           name: BikeEvolutionSimulator-Studio
           path: build/BikeEvolutionSimulator.rbxlx
+          if-no-files-found: error
+      - name: Package V4 Studio build with provenance
+        run: python3 tools/package_v4.py
+      - name: Upload V4 Studio build
+        uses: actions/upload-artifact@v4
+        with:
+          name: BikeEvolutionSimulator-V4
+          path: build/v4/
+          if-no-files-found: error
+      - name: Package V4.1 permanent-bike Studio build
+        run: python3 tools/package_v4.py --version V4.1
+      - name: Upload V4.1 Studio build
+        uses: actions/upload-artifact@v4
+        with:
+          name: BikeEvolutionSimulator-V4.1
+          path: build/v4.1/
+          if-no-files-found: error
+      - name: Package V4.2 rider transform fix
+        run: python3 tools/package_v4.py --version V4.2
+      - name: Upload V4.2 Studio build
+        uses: actions/upload-artifact@v4
+        with:
+          name: BikeEvolutionSimulator-V4.2
+          path: build/v4.2/
+          if-no-files-found: error
+      - name: Package V4.3 movement and training fix
+        run: python3 tools/package_v4.py --version V4.3
+      - name: Upload V4.3 Studio build
+        uses: actions/upload-artifact@v4
+        with:
+          name: BikeEvolutionSimulator-V4.3
+          path: build/v4.3/
+          if-no-files-found: error
+      - name: Package V4.4 complete overhaul
+        run: python3 tools/package_v4.py --version V4.4
+      - name: Upload V4.4 Studio build
+        uses: actions/upload-artifact@v4
+        with:
+          name: BikeEvolutionSimulator-V4.4
+          path: build/v4.4/
+          if-no-files-found: error
+      - name: Package V4.5 sign, treadmill, HUD and Auto Train overhaul
+        run: python3 tools/package_v4.py --version V4.5
+      - name: Upload V4.5 Studio build
+        uses: actions/upload-artifact@v4
+        with:
+          name: BikeEvolutionSimulator-V4.5
+          path: build/v4.5/
           if-no-files-found: error

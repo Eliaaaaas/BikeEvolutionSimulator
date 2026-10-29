@@ -73,20 +73,20 @@ test("profile defaults, finite balances and schema rejection", function()
  for _, bad in ipairs({-1, math.huge, 0/0}) do
   data.Energy = bad; assert(not Profile.validate(data))
  end
- data = Profile.new(); data.SchemaVersion = 2; assert(not Profile.validate(data))
+ data = Profile.new(); data.SchemaVersion = 999; assert(not Profile.validate(data))
  data = Profile.new(); data.Rebirths = 0.5; assert(not Profile.validate(data))
  data = Profile.new(); data.OwnedWorlds = {1,1}; assert(not Profile.validate(data))
 end)
 test("three unique owned pet equip slots", function()
  local data = Profile.new()
  for i = 1, 4 do data.Pets[tostring(i)] = { SpeciesId = i, Variant = "Normal" } end
- data.EquippedPets = {"1", "2", "3"}; assert(Profile.validate(data))
+ data.DiscoveredPets={1,2,3,4}; data.EquippedPets = {"1", "2", "3"}; assert(Profile.validate(data))
  data.EquippedPets = {"1", "2", "3", "4"}; assert(not Profile.validate(data))
  data.EquippedPets = {"1", "1"}; assert(not Profile.validate(data))
  data.EquippedPets = {"missing"}; assert(not Profile.validate(data))
 end)
 test("profile copies do not alias inventory", function()
- local data = Profile.new(); data.Pets.a = {SpeciesId = 1, Variant = "Normal"}
+ local data = Profile.new(); data.Pets.a = {SpeciesId = 1, Variant = "Normal"}; data.DiscoveredPets={1}
  local copy = Profile.copy(data); copy.Pets.a.Variant = "Golden"; copy.OwnedWorlds[1] = 2
  equal(data.Pets.a.Variant, "Normal"); equal(data.OwnedWorlds[1], 1)
 end)
@@ -175,7 +175,7 @@ test("all treadmill strengths and requirement progression", function()
   local t = Catalog.Treadmills[id]
   equal(t.TrainingMultiplier, 2 ^ (id - 1)); equal(t.CashCost, 0)
   if id > 1 then
-   equal(t.EnergyRequirement, 4 ^ (id - 2))
+   equal(t.EnergyRequirement, 84 * (id-1) * 2 ^ (id-2))
    -- Repeated multiplication and exponentiation may differ by an ULP.
    assert(math.abs(t.RebirthRequirement / (3 ^ (id - 2)) - 1) < 1e-14)
   end
@@ -185,7 +185,7 @@ test("treadmill world AND energy OR rebirth; rebirth revokes access", function()
  assert(Rules.canUseTreadmill(1, 0, 0, {1}))
  assert(Rules.canUseTreadmill(6, Catalog.Treadmills[6].EnergyRequirement, 0, {1,2}))
  assert(not Rules.canUseTreadmill(6, 1e100, 1e9, {1}))
- assert(Rules.canUseTreadmill(3, 4, 0, {1}))
+ assert(Rules.canUseTreadmill(3, Catalog.Treadmills[3].EnergyRequirement, 0, {1}))
  assert(Rules.canUseTreadmill(3, 0, 3, {1}))
  assert(not Rules.canUseTreadmill(3, 3, 2, {1}))
  local reborn = Rules.rebirth(1000, 0)
@@ -207,7 +207,7 @@ test("large balances and training are finite and bounded", function()
 end)
 test("catalog metadata stays pending and individual overrides are preserved", function()
  for _, entries in ipairs({Catalog.Vehicles, Catalog.Eggs, Catalog.Pets}) do
-  for _, entry in ipairs(entries) do equal(entry.ContentStatus, "Pending"); equal(entry.Name, false) end
+  for _, entry in ipairs(entries) do equal(entry.ContentStatus, if entry.Playable then "Configured" else "Pending"); if entry.Playable then assert(type(entry.Name)=="string") else equal(entry.Name,false) end end
  end
  local entry = modules.CatalogMetadata.resolve({Name="Reviewed name", Rarity="Rare", Multiplier=2.5, Design={AssetId="rbxassetid://123"}})
  equal(entry.Name, "Reviewed name"); equal(entry.Multiplier, 2.5); equal(entry.Design.AssetId, "rbxassetid://123")

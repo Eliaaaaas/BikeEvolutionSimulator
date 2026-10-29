@@ -1,7 +1,7 @@
 --!strict
 local Protocol = {}
--- Clients may only request their own read-only HUD snapshot. No client currency writes.
-Protocol.Remotes = table.freeze({ GetSnapshot = "RemoteFunction", SnapshotChanged = "RemoteEvent" })
+-- Clients send intents only. Amounts, positions, identity and timing are server-owned.
+Protocol.Remotes = table.freeze({ Drive = "RemoteEvent", DriveState = "RemoteEvent", GetSnapshot = "RemoteFunction", SnapshotChanged = "RemoteEvent", Action = "RemoteEvent", ActionResult = "RemoteEvent", Feedback = "RemoteEvent" })
 function Protocol.validRequest(payload: any): boolean
  if type(payload) ~= "table" or payload.Version ~= 1 then return false end
  local count = 0
@@ -10,6 +10,47 @@ function Protocol.validRequest(payload: any): boolean
   if count > 1 then return false end
  end
  return count == 1
+end
+local function integer(value:any,max:number):boolean
+ return type(value)=="number" and value%1==0 and value>=1 and value<=max
+end
+function Protocol.validAction(payload:any):boolean
+ if type(payload)~="table" or payload.Version~=1 then return false end
+ if payload.Action=="Automation" then
+  local allowed={Version=true,Action=true,Setting=true,Enabled=true,Difficulty=true}
+  for key in pairs(payload) do if not allowed[key] then return false end end
+  return (payload.Setting=="AutoTrain" or payload.Setting=="AutoRace" or payload.Setting=="SlowMode") and type(payload.Enabled)=="boolean" and (payload.Difficulty==nil or payload.Difficulty=="Easy" or payload.Difficulty=="Medium" or payload.Difficulty=="Hard")
+ end
+ if payload.Action=="Premium" then
+  local n=0;for key in pairs(payload) do n+=1;if key~="Version" and key~="Action" and key~="Offer" then return false end end
+  return n==3 and type(payload.Offer)=="string" and #payload.Offer<=32
+ end
+ local specifications:any={Select={TreadmillId=5},BuyVehicle={VehicleId=10},EquipVehicle={VehicleId=10},Hatch={EggId=3},EquipPet={PetId=true},UnequipPet={PetId=true},EquipBest={},UnequipAll={}}
+ local spec=specifications[payload.Action]
+ local economic=payload.Action=="BuyVehicle" or payload.Action=="EquipVehicle" or payload.Action=="Hatch" or payload.Action=="EquipPet" or payload.Action=="UnequipPet" or payload.Action=="EquipBest" or payload.Action=="UnequipAll"
+ local allowed:any={Version=true,Action=true}
+ if spec then for key,max in pairs(spec) do
+  allowed[key]=true
+  if max==true then if type(payload[key])~="string" or #payload[key]<1 or #payload[key]>64 then return false end
+  elseif not integer(payload[key],max :: number) then return false end
+ end end
+ if economic then allowed.RequestId=true;if not integer(payload.RequestId,9007199254740991) then return false end end
+ if payload.Action=="StartRace" then allowed.Difficulty=true;if payload.Difficulty~=nil and payload.Difficulty~="Easy" and payload.Difficulty~="Medium" and payload.Difficulty~="Hard" then return false end end
+ if not spec and payload.Action~="Click" and payload.Action~="Stop" and payload.Action~="Rebirth" and payload.Action~="StartRace" and payload.Action~="AbortRace" then return false end
+ local count=0
+ for key in pairs(payload) do count+=1;if count>4 or not allowed[key] then return false end end
+ return true
+end
+function Protocol.validDrive(payload:any):boolean
+ if type(payload)~="table" or payload.Version~=1 or not integer(payload.Sequence,9007199254740991) or type(payload.Brake)~="boolean" then return false end
+ for _,key in ipairs({"Throttle","Steer"}) do
+  local v=payload[key];if type(v)~="number" or v~=v or math.abs(v)>1 then return false end
+ end
+ if payload.JumpId~=nil and (type(payload.JumpId)~="number" or payload.JumpId%1~=0 or payload.JumpId<0 or payload.JumpId>9007199254740991) then return false end
+ if payload.Epoch~=nil and not integer(payload.Epoch,9007199254740991) then return false end
+ local allowed={Version=true,Sequence=true,Throttle=true,Steer=true,Brake=true,JumpId=true,Epoch=true}
+ for key in pairs(payload) do if not allowed[key] then return false end end
+ return true
 end
 function Protocol.validSnapshot(payload: any): boolean
  if type(payload) ~= "table" then return false end

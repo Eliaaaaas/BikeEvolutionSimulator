@@ -1,0 +1,13 @@
+# World 1: sichere Profilerweiterung (Plan vor Implementierung)
+
+Benötigt werden dauerhaft `ActiveVehicle` und `DiscoveredPets`. Entdeckungen können nach späterer Fusion nicht zuverlässig aus dem verbleibenden Inventar rekonstruiert werden. Deshalb wird Schema v2 eingeführt; der vorhandene Store `BikeEvolution_Player_v1` und alle Schlüssel bleiben erhalten.
+
+Migration ausschließlich im vorhandenen `UpdateAsync`-Load nach Validierung des alten Profils und Prüfung des Session-Locks. Schema v1 wird vollständig validiert, kopiert und um ActiveVehicle=1 sowie die im aktuellen Inventar vorhandenen Species-IDs als DiscoveredPets ergänzt. Energy, Cash, Rebirths, Worlds, Vehicles, Pet-Instanz-IDs und Equip bleiben unverändert. Kein Reset, keine neue Zufallsvergabe, keine rückwirkenden Käufe. Neue Profile beginnen mit v2. Ungültige und unbekannte/höhere Versionen werden abgelehnt, niemals ersetzt. Wiederholte Migration von v2 ist idempotent.
+
+v2 validiert aktives Fahrzeug als vorhanden und Entdeckungen als eindeutige IDs 1–96. Alle im Inventar enthaltenen Species müssen als entdeckt markiert sein. Kauf, Hatch und Race-Auszahlung bleiben validierte Copy/Commit-Transaktionen unter Session-Lock; alle neuen wirtschaftlichen Intents benötigen Request-IDs und werden innerhalb der laufenden Sitzung dedupliziert. Keine Echtgeldzahlungen.
+
+Rollout: alte Spielserver vor Veröffentlichung drainen; bestehende aktive Locks werden nicht übergangen. Alte v1-Server können v2 nicht laden, also keine Felder unbemerkt entfernen. Rückkehr zum alten Code nach erfolgtem v2-Save ist kein sicherer Rollback; dafür einen v2-lesenden Fix veröffentlichen bzw. zuvor gesicherte Roblox-DataStore-Versionen gezielt und separat prüfen. Keine automatischen Downgrades oder Löschungen.
+
+Die Implementierung und Migration werden nur an In-Memory-Fixtures geprüft. Dieser Auftrag liest/schreibt keine produktiven Profile. Eine echte Test-Experience und ein dokumentiertes Backup-/Rollout-Verfahren sind vor Produktivveröffentlichung nötig. Bei Serverabsturz bleiben die bereits dokumentierten Grenzen der Autosave-Architektur bestehen.
+
+Zusätzliche v2-Erweiterung für ausfallsichere Rennabschluss-Deduplizierung: `LastRaceReward` speichert die letzte servergenerierte Renn-UUID (Standard leer). Der Receipt wird atomar mit dem Cash-Gewinn geschrieben. Es gibt höchstens ein aktives Rennen pro Spieler; derselbe Abschluss darf bei Retry nicht erneut auszahlen. v1 erhält einen leeren Receipt. Der Receipt ist keine vom Client einlösbare Forderung. Eine später notwendige Queue mehrerer offener Auszahlungen würde eine eigene Versionierung erfordern.

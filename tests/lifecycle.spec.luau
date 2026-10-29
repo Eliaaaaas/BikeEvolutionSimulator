@@ -40,7 +40,7 @@ local function environment()
  end
  local shared={WaitForChild=function() return {} end}
  local services={Players=players,ReplicatedStorage={WaitForChild=function() return shared end},
-  DataStoreService={GetDataStore=function() return store end},
+  DataStoreService={GetDataStore=function() if store.InitFailure then error("Publish place first") end;return store end},
   HttpService={GenerateGUID=function() serial+=1;return tostring(serial) end,JSONEncode=function() return "log" end}}
  local game={JobId="test-job",GetService=function(_,name) return services[name] end,
   BindToClose=function(_,callback) close=callback end}
@@ -90,5 +90,38 @@ test("shutdown includes a load that completes after BindToClose starts",function
  local p=e.join();assert(e.service.snapshot(p)==nil)
  e.shutdown();e.advance(6)
  assert(e.store.records.Player_7.Lock==nil);assert(e.service.snapshot(p)==nil)
+end)
+test("training and rebirth persist across disconnect/rejoin without changing cash",function()
+ local e=environment();local p=e.join();local now=1000
+ assert(e.service.change(p,function(data) data.Cash=77;return true end))
+ local controller=modules.TrainingController.new(e.service,function() return now end,function() return true end)
+ assert(controller:select(p,1));assert(controller:impulse(p,true));assert(e.service.snapshot(p).Energy==1)
+ now+=1;e.advance(1);controller:tick();assert(e.service.snapshot(p).Energy==2)
+ assert(e.service.change(p,function(data) data.Energy=1000;return true end))
+ assert(controller:rebirth(p));assert(e.service.snapshot(p).Energy==0);assert(e.service.snapshot(p).Rebirths==1)
+ e.leave(p);local fresh=e.join();local snapshot=e.service.snapshot(fresh)
+ assert(snapshot.Energy==0 and snapshot.Rebirths==1 and snapshot.Cash==77)
+ assert(e.service.change(fresh,function(data) data.Energy=3.5;return true end))
+ e.leave(fresh);local third=e.join();assert(e.service.snapshot(third).Energy==3.5)
+end)
+test("transactions during yielding autosave are rejected and retry safely",function()
+ local e=environment();local p=e.join();e.store.delay=2;e.advance(60)
+ local ok,reason=e.service.change(p,function(data) data.Energy=10;return true end)
+ assert(not ok and reason=="Saving");assert(e.service.snapshot(p).Energy==0)
+ e.advance(2);assert(e.service.change(p,function(data) data.Energy=10;return true end))
+ e.leave(p);e.advance(2);local fresh=e.join();e.advance(2);assert(e.service.snapshot(fresh).Energy==10)
+end)
+test("invalid transactions cannot partially overwrite live state",function()
+ local e=environment();local p=e.join()
+ assert(not e.service.change(p,function(data) data.Energy=999;data.Rebirths=-1;return true end))
+ assert(e.service.snapshot(p).Energy==0)
+ assert(not e.service.change(p,function(data) data.Energy=999;error("injected failure") end))
+ assert(e.service.snapshot(p).Energy==0)
+ e.shutdown();assert(not e.service.change(p,function() return true end))
+end)
+test("GetDataStore initialization failure is caught and cannot strand shutdown",function()
+ local e=environment();e.store.InitFailure=true;local p=e.join()
+ assert(p.Kicks==1 and e.service.snapshot(p)==nil and e.service.status(p)=="DataStoreInitializationFailed")
+ e.shutdown();e.advance(1)
 end)
 print(string.format("%d lifecycle tests passed",count))

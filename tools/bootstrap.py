@@ -15,6 +15,7 @@ target.mkdir(exist_ok=True)
 releases = [
     ('https://github.com/luau-lang/luau/releases/download/0.744/luau-ubuntu.zip',
      ['luau', 'luau-compile', 'luau-analyze']),
+    ('https://github.com/JohnnyMorganz/luau-lsp/releases/download/1.70.1/luau-lsp-linux-x86_64.zip', ['luau-lsp']),
     ('https://github.com/rojo-rbx/rojo/releases/download/v7.4.4/rojo-7.4.4-linux-x86_64.zip', ['rojo']),
 ]
 for url, names in releases:
@@ -30,4 +31,8 @@ for url, names in releases:
                 executable = target / name
                 executable.write_bytes(data)
                 executable.chmod(0o755)
-print('Installed Luau 0.744 and Rojo 7.4.4 into .tools/')
+subprocess.run(['curl', '--fail', '--silent', '--show-error', '--location',
+                '--proto', '=https', '--proto-redir', '=https', '--retry', '2',
+                'https://raw.githubusercontent.com/JohnnyMorganz/luau-lsp/1.70.1/scripts/globalTypes.d.luau',
+                '--output', str(target / 'roblox.d.luau')], check=True)
+print('Installed Luau 0.744, Rojo 7.4.4, luau-lsp 1.70.1 and pinned Roblox types into .tools/')

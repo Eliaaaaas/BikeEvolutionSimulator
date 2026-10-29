@@ -8,15 +8,27 @@ local Profile = require(Shared:WaitForChild("Profile"))
 local Persistence = require(script.Parent.Persistence)
 local SavePolicy = require(script.Parent.SavePolicy)
 local shutdownDeadline = math.huge
+local options:any={}
+local started=false
+local statuses: {[Player]:string}={}
+local StudioStore=require(script.Parent.StudioStore)
+local previewStore:any=nil
 local function log(event: any)
  warn("[BikeData] " .. HttpService:JSONEncode(event))
 end
 local function newBackend()
- return Persistence.new(DataStoreService:GetDataStore(Config.Data.Store), Profile, Config.Data,
- game.JobId .. ":" .. HttpService:GenerateGUID(false), os.time, function(attempt: number) task.wait(attempt * 2) end, log)
+ local store=if options.Preview then previewStore else DataStoreService:GetDataStore(options.StoreName or Config.Data.Store)
+ return Persistence.new(store, Profile, Config.Data,
+  game.JobId .. ":" .. HttpService:GenerateGUID(false), os.time, function(attempt: number) task.wait(attempt * 2) end, log)
 end
 local Service = {}
-type Session = { Data: Profile.Data, Expires: number, Saving: boolean, Backend: any }
+function Service.configure(value:any)
+ assert(not started,"Data service already started")
+ options=value
+ if options.Preview then previewStore=StudioStore.new() end
+end
+function Service.status(player:Player):string return statuses[player] or "Loading" end
+type Session = { Data: Profile.Data, Expires: number, Saving: boolean, Backend: any, Closing: boolean, Revision: number, InventoryRevision: number, PendingReceipt: boolean? }
 local sessions: {[Player]: Session} = {}
 local closing = false
 local loading = 0
@@ -24,6 +36,7 @@ local function key(player: Player): string return "Player_" .. player.UserId end
 local function save(player: Player, release: boolean)
  local session = sessions[player]
  if not session then return end
+ if release then session.Closing = true end
  -- Serialize all writes, including leave during an autosave.
  while session.Saving and os.time() < math.min(session.Expires, shutdownDeadline) do task.wait() end
  if session.Saving then return end
@@ -32,6 +45,7 @@ local function save(player: Player, release: boolean)
  local ok, reason = SavePolicy.flush(session, key(player), release, function() return shutdownDeadline end, os.time,
   function() task.wait(2) end, log)
  session.Saving = false
+ if ok then session.PendingReceipt=nil end
  if ok and release or not ok and reason ~= "DataStoreUnavailable" then
   sessions[player] = nil
   if not ok then
@@ -43,17 +57,81 @@ local function save(player: Player, release: boolean)
 end
 function Service.snapshot(player: Player): Profile.Snapshot?
  local session = sessions[player]
- if not session or session.Expires <= os.time() then return nil end
+ if closing or not session or session.Closing or session.Expires <= os.time() then return nil end
  return Profile.snapshot(session.Data)
 end
+-- Trusted server callbacks only; copy/validate/commit forms a single synchronous transaction.
+function Service.change(player: Player, transform: (Profile.Data) -> boolean, inventory: boolean?): (boolean, string?)
+ local session = sessions[player]
+ if closing or not session or session.Closing or player.Parent ~= Players or session.Expires <= os.time() then return false, "NotReady" end
+ if session.Saving or session.PendingReceipt then return false, "Saving" end
+ local revision = session.Revision
+ local candidate = Profile.copy(session.Data)
+ local ok, accepted = pcall(transform, candidate)
+ if not ok then log({ Event = "TransactionError", UserId = player.UserId }); return false, "InternalError" end
+ if not accepted then return false, "Rejected" end
+ if not Profile.validate(candidate) then return false, "InvalidProfile" end
+ if sessions[player] ~= session or closing or session.Closing or session.Saving or session.Revision ~= revision or session.Expires <= os.time() then return false, "NotReady" end
+ session.Data = candidate
+ session.Revision += 1
+ if inventory then session.InventoryRevision+=1 end
+ return true, nil
+end
+-- Durable single-profile receipt transaction; no grant acknowledgement before UpdateAsync succeeds.
+function Service.receipt(player:Player,transform:(Profile.Data)->boolean):boolean
+ local session=sessions[player]
+ if closing or not session or session.Closing or session.Saving or player.Parent~=Players or session.Expires<=os.time() then return false end
+ local candidate=Profile.copy(session.Data)
+ local accepted,result=pcall(transform,candidate)
+ if not accepted or not result or not Profile.validate(candidate) then return false end
+ session.Saving=true
+ -- Keep this identical receipt-marked candidate even if the response is lost. No rollback/re-grant.
+ session.Data=candidate;session.Revision+=1;session.InventoryRevision+=1;session.PendingReceipt=true
+ local ok,reason,expires=session.Backend:save(key(player),candidate,false)
+ if ok then session.Expires=expires;session.PendingReceipt=nil
+ else log({Event="ReceiptSavePending",UserId=player.UserId,Reason=reason}) end
+ session.Saving=false
+ return ok
+end
+function Service.revision(player: Player): number
+ local session=sessions[player];return if session then session.Revision else 0
+end
+function Service.inventoryRevision(player: Player): number
+ local session=sessions[player];return if session then session.InventoryRevision else 0
+end
+function Service.read(player: Player): Profile.Data?
+ local session=sessions[player]
+ if closing or not session or session.Closing or session.Expires<=os.time() then return nil end
+ return Profile.copy(session.Data)
+end
+-- Small server-only view for automation/boost snapshots; never clone 500 pets/2000 receipts at 4–5Hz.
+function Service.context(player:Player):any
+ local session=sessions[player]
+ if closing or not session or session.Closing or session.Expires<=os.time() then return nil end
+ local value=session.Data
+ return {Energy=value.Energy,Rebirths=value.Rebirths,OwnedWorlds=table.clone(value.OwnedWorlds),Boosts=table.clone(value.Boosts)}
+end
+function Service.ownsVehicle(player: Player, id: number): boolean
+ local session=sessions[player]
+ return not closing and session~=nil and not session.Closing and session.Expires>os.time() and table.find(session.Data.OwnedVehicles,id)~=nil
+end
 function Service.start()
+ assert(not started,"Data service started twice");started=true
  local function added(player: Player)
   if closing then return end
   loading += 1
-  local backend = newBackend()
+  statuses[player]="Loading"
+  local created,backend=pcall(newBackend)
+  if not created then
+   loading-=1;statuses[player]="DataStoreInitializationFailed"
+   log({Event="DataStoreInitializationFailed",UserId=player.UserId,Error=tostring(backend)})
+   player:Kick("Datenspeicher konnte nicht initialisiert werden. In Studio: StudioPreviewData aktivieren oder separate Test-Experience konfigurieren.")
+   return
+  end
   local data, reason, expires = backend:load(key(player))
   if not data then
    loading -= 1
+   statuses[player]=reason or "LoadFailed"
    warn("Profile load rejected", player.UserId, reason)
    player:Kick("Spielerdaten sind momentan nicht verfügbar. Bitte später erneut versuchen.")
    return
@@ -64,11 +142,12 @@ function Service.start()
    loading -= 1
    return
   end
-  sessions[player] = { Data = data, Expires = expires, Saving = false, Backend = backend }
+  sessions[player] = { Data = data, Expires = expires, Saving = false, Backend = backend, Closing = false, Revision = 0, InventoryRevision = 0 }
+  statuses[player]=if options.Preview then "StudioPreviewReady" else "Ready"
   loading -= 1
  end
  Players.PlayerAdded:Connect(added)
- Players.PlayerRemoving:Connect(function(player) save(player, true) end)
+ Players.PlayerRemoving:Connect(function(player) save(player, true);statuses[player]=nil end)
  for _, player in ipairs(Players:GetPlayers()) do task.spawn(added, player) end
  task.spawn(function()
   while not closing do

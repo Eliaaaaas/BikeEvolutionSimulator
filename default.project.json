@@ -5,6 +5,84 @@
     "ReplicatedStorage": {
       "Shared": {
         "$path": "src/shared"
+      },
+      "Vehicles": {
+        "$className": "Folder",
+        "Mountainbike": {
+          "$path": "src/models/Mountainbike.rbxmx"
+        },
+        "Vehicle2": {
+          "$path": "src/models/Vehicle2.rbxmx"
+        },
+        "Vehicle3": {
+          "$path": "src/models/Vehicle3.rbxmx"
+        },
+        "Vehicle4": {
+          "$path": "src/models/Vehicle4.rbxmx"
+        },
+        "Vehicle5": {
+          "$path": "src/models/Vehicle5.rbxmx"
+        },
+        "Vehicle6": {
+          "$path": "src/models/Vehicle6.rbxmx"
+        },
+        "Vehicle7": {
+          "$path": "src/models/Vehicle7.rbxmx"
+        },
+        "Vehicle8": {
+          "$path": "src/models/Vehicle8.rbxmx"
+        },
+        "Vehicle9": {
+          "$path": "src/models/Vehicle9.rbxmx"
+        },
+        "Vehicle10": {
+          "$path": "src/models/Vehicle10.rbxmx"
+        }
+      },
+      "PetModels": {
+        "$className": "Folder",
+        "Pet1": {
+          "$path": "src/models/Pet1.rbxmx"
+        },
+        "Pet2": {
+          "$path": "src/models/Pet2.rbxmx"
+        },
+        "Pet3": {
+          "$path": "src/models/Pet3.rbxmx"
+        },
+        "Pet4": {
+          "$path": "src/models/Pet4.rbxmx"
+        },
+        "Pet5": {
+          "$path": "src/models/Pet5.rbxmx"
+        },
+        "Pet6": {
+          "$path": "src/models/Pet6.rbxmx"
+        },
+        "Pet7": {
+          "$path": "src/models/Pet7.rbxmx"
+        },
+        "Pet8": {
+          "$path": "src/models/Pet8.rbxmx"
+        },
+        "Pet9": {
+          "$path": "src/models/Pet9.rbxmx"
+        },
+        "Pet10": {
+          "$path": "src/models/Pet10.rbxmx"
+        },
+        "Pet11": {
+          "$path": "src/models/Pet11.rbxmx"
+        },
+        "Pet12": {
+          "$path": "src/models/Pet12.rbxmx"
+        },
+        "ExclusiveSunfox": {
+          "$path": "src/models/ExclusiveSunfox.rbxmx"
+        },
+        "ExclusivePrismRay": {
+          "$path": "src/models/ExclusivePrismRay.rbxmx"
+        }
       }
     },
     "ServerScriptService": {
@@ -16,6 +94,94 @@
       "StarterPlayerScripts": {
         "Client": {
           "$path": "src/client"
+        }
+      }
+    },
+    "Workspace": {
+      "$className": "Workspace",
+      "World1": {
+        "$path": "src/world/World1.rbxmx",
+        "$properties": {
+          "ModelStreamingMode": "Persistent"
+        }
+      },
+      "$properties": {
+        "FallenPartsDestroyHeight": -80,
+        "StreamingEnabled": true,
+        "StreamingMinRadius": 64,
+        "StreamingTargetRadius": 256
+      },
+      "TestCourse": {
+        "$path": "src/world/TestCourse.rbxmx"
+      },
+      "$attributes": {
+        "StudioPreviewData": true
+      }
+    },
+    "Lighting": {
+      "$className": "Lighting",
+      "$properties": {
+        "ClockTime": 13.3,
+        "Brightness": 2.8,
+        "Ambient": [
+          0.55,
+          0.65,
+          0.65
+        ],
+        "OutdoorAmbient": [
+          0.65,
+          0.75,
+          0.78
+        ],
+        "EnvironmentDiffuseScale": 0.65,
+        "EnvironmentSpecularScale": 0.75,
+        "GlobalShadows": true
+      },
+      "TropicalAtmosphere": {
+        "$className": "Atmosphere",
+        "$properties": {
+          "Density": 0.18,
+          "Offset": 0.1,
+          "Color": [
+            0.76,
+            0.91,
+            1
+          ],
+          "Decay": [
+            0.65,
+            0.79,
+            0.89
+          ],
+          "Glare": 0.2,
+          "Haze": 0.6
+        }
+      },
+      "TropicalBloom": {
+        "$className": "BloomEffect",
+        "$properties": {
+          "Intensity": 0.12,
+          "Size": 18,
+          "Threshold": 1.5
+        }
+      },
+      "TropicalGrade": {
+        "$className": "ColorCorrectionEffect",
+        "$properties": {
+          "Saturation": 0.16,
+          "Contrast": 0.05,
+          "Brightness": 0.01,
+          "TintColor": [
+            1,
+            0.985,
+            0.96
+          ]
+        }
+      },
+      "SunlightRays": {
+        "$className": "SunRaysEffect",
+        "$properties": {
+          "Intensity": 0.035,
+          "Spread": 0.7
         }
       }
     }

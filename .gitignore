@@ -2,3 +2,5 @@ build/
 .tools/
 *.rbxl
 *.rbxlx
+
+__pycache__/

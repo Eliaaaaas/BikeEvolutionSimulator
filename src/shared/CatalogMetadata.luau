@@ -3,7 +3,7 @@
 local Metadata = {}
 export type Entry = { Name: string?, Rarity: string?, Multiplier: number?,
  Design: { AssetId: string?, IconId: string?, Description: string? }? }
-Metadata.Vehicles = {} :: {[number]: Entry}
+Metadata.Vehicles = {[1]={Name="Mountainbike"}} :: {[number]: Entry}
 Metadata.Eggs = {} :: {[number]: Entry}
 Metadata.Pets = {} :: {[number]: Entry}
 function Metadata.resolve(entry: Entry?): any

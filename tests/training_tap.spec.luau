@@ -1,0 +1,27 @@
+local count=0
+local function test(name,cb) local ok,err=pcall(cb);assert(ok,name..": "..tostring(err));count+=1;print("PASS "..name) end
+local snapshot={SelectedTreadmill=1,Race={Phase="Idle"}}
+test("touch and synthetic mouse produce at most one allowed tap",function()
+ local now=100;local tap=modules.TrainingTap.new(function() return now end)
+ assert(tap:accept("Touch",false,snapshot,false))
+ assert(not tap:accept("Mouse",false,snapshot,false))
+ now+=.21;assert(not tap:accept("Mouse",false,snapshot,false))
+ assert(tap:accept("Touch",false,snapshot,false))
+end)
+test("UI, menus, races, unloaded profiles and non-training input cannot send impulses",function()
+ local tap=modules.TrainingTap.new(function() return 100 end)
+ assert(not tap:accept("Mouse",true,snapshot,false))
+ assert(not tap:accept("Mouse",false,snapshot,true))
+ assert(not tap:accept("Mouse",false,nil,false))
+ assert(not tap:accept("Mouse",false,{SelectedTreadmill=0},false))
+ assert(not tap:accept("Mouse",false,{SelectedTreadmill=1,Race={Phase="Riding"}},false))
+ assert(not tap:accept("Keyboard",false,snapshot,false))
+ assert(tap:accept("Mouse",false,snapshot,false))
+end)
+test("mouse tap rate is bounded without affecting independent automatic training",function()
+ local now=100;local tap=modules.TrainingTap.new(function() return now end)
+ assert(tap:accept("Mouse",false,snapshot,false))
+ for _=1,100 do assert(not tap:accept("Mouse",false,snapshot,false)) end
+ now+=.21;assert(tap:accept("Mouse",false,snapshot,false))
+end)
+print(string.format("%d training input tests passed",count))

@@ -1,39 +1,24 @@
 --!strict
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Shared = ReplicatedStorage:WaitForChild("Shared")
-local Config = require(Shared:WaitForChild("Config"))
-local Protocol = require(Shared:WaitForChild("Protocol"))
-local gui = Instance.new("ScreenGui")
-gui.Name = "BikeDebugHUD"
-gui.ResetOnSpawn = false
-local label = Instance.new("TextLabel")
-label.Name = "Stats"
-label.Size = UDim2.fromOffset(290, 130)
-label.Position = UDim2.fromOffset(16, 16)
-label.BackgroundColor3 = Color3.fromRGB(20, 24, 32)
-label.BackgroundTransparency = 0.15
-label.TextColor3 = Color3.new(1, 1, 1)
-label.TextSize = 18
-label.Font = Enum.Font.Code
-label.Text = "Bike Evolution • Debug\nSpielerdaten werden geladen …"
-label.Parent = gui
-gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
-local remotes = ReplicatedStorage:WaitForChild(Config.Network.Folder)
-local function render(snapshot: any): boolean
- if not Protocol.validSnapshot(snapshot) then return false end
- label.Text = string.format("Bike Evolution • Debug\nEnergy: %s\nCash: %s\nRebirths: %s", tostring(snapshot.Energy), tostring(snapshot.Cash), tostring(snapshot.Rebirths))
- return true
+-- This dependency-free ribbon survives an error in any application module.
+local player=game:GetService("Players").LocalPlayer
+local gui=Instance.new("ScreenGui");gui.Name="BikeDiagnostics";gui.ResetOnSpawn=false
+ gui.ScreenInsets=Enum.ScreenInsets.CoreUISafeInsets;gui.DisplayOrder=100;gui.Parent=player:WaitForChild("PlayerGui")
+local label=Instance.new("TextLabel");label.Size=UDim2.new(0.65,0,0,74);label.Position=UDim2.new(0.35,0,0,88)
+label.BackgroundColor3=Color3.fromRGB(21,63,83);label.BackgroundTransparency=0.12
+label.TextColor3=Color3.fromRGB(255,231,147);label.Font=Enum.Font.GothamBold;label.TextSize=12
+label.TextWrapped=true;label.Text="CLIENT STARTET • warte auf Server";label.Parent=gui
+local runtime=game:GetService("ReplicatedStorage"):WaitForChild("BikeRuntime",15)
+local clientStage="Starte Anwendung"
+local failed=false
+local function refresh()
+ if not runtime then label.Text="SERVER FEHLT • BikeRuntime wurde nicht erzeugt. Output und Server-Script prüfen.";return end
+ local state=runtime:GetAttribute("State")
+ label.Visible=failed or runtime:GetAttribute("Diagnostics")==true or state~="Ready" or runtime:GetAttribute("BikeState")=="Failed"
+ label.Text=tostring(runtime:GetAttribute("DataMode")).."\nSERVER "..tostring(state).." / "..tostring(runtime:GetAttribute("Stage")).." • CLIENT "..clientStage.."\n"..tostring(runtime:GetAttribute("BikeError") or runtime:GetAttribute("SignError") or runtime:GetAttribute("Error") or "")
 end
-local ready = false
-(remotes:WaitForChild("SnapshotChanged") :: RemoteEvent).OnClientEvent:Connect(function(snapshot)
- if render(snapshot) then ready = true end
+if runtime then runtime.AttributeChanged:Connect(refresh) end
+refresh()
+local ok,err=pcall(function()
+ require(script.ClientApp).start(function(stage:string) clientStage=stage;refresh() end)
 end)
-task.spawn(function()
- local remote = remotes:WaitForChild("GetSnapshot") :: RemoteFunction
- while not ready do
-  local ok, response = pcall(function() return remote:InvokeServer({ Version = Config.Network.ProtocolVersion }) end)
-  if ok and type(response) == "table" and response.Ok and render(response.Data) then ready = true end
-  if not ready then task.wait(2) end
- end
-end)
+if not ok then failed=true;clientStage="FEHLER: "..tostring(err);warn("[BikeClient]",err);refresh() end
